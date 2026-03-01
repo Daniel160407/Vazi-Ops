@@ -1,12 +1,12 @@
 //router
 export const GROUPS_ROUTE = "/groups";
-export const ADMIN_LOGIN_ROUTE = "/admin";
+export const ADMIN_GROUPS_ROUTE = "/admin/groups";
 
 export const GROUPS_LABEL = "ჯგუფები";
-export const ADMIN_LOGIN_LABEL = "ადმინი";
+export const ADMIN_LABEL = "ადმინი";
 
 export const GROUPS_ICON = "pi pi-home";
-export const ADMIN_LOGIN_ICON = "pi pi-user";
+export const ADMIN_ICON = "pi pi-user";
 
 //firebase
 export const GROUPS_DB = "groups";
