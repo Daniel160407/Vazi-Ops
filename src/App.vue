@@ -2,21 +2,39 @@
 import { ConfirmDialog, Menubar, Toast } from "primevue";
 import { useRouter } from "vue-router";
 import {
+  ADMIN_GROUPS_ROUTE,
+  ADMIN_ICON,
+  ADMIN_LABEL,
   GROUPS_ICON,
   GROUPS_LABEL,
   GROUPS_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
+import { useAuth } from "./composables/useAuth";
 
 const router = useRouter();
 const { setData } = useGlobalStore();
+const { user, signInWithGoogle } = useAuth();
 
 const items = ref([
   {
     label: GROUPS_LABEL,
     icon: GROUPS_ICON,
     command: () => router.push(GROUPS_ROUTE),
+  },
+  {
+    label: ADMIN_LABEL,
+    icon: ADMIN_ICON,
+    command: async () => {
+      if (!user.value) {
+        await signInWithGoogle();
+      }
+
+      if (user.value) {
+        router.push(ADMIN_GROUPS_ROUTE);
+      }
+    },
   },
 ]);
 

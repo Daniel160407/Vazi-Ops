@@ -36,8 +36,8 @@ export const useGlobalStore = defineStore("globalStore", () => {
         console.error("Fetch Error:", err);
         toast.add({
           severity: "error",
-          summary: "Error appeared",
-          detail: "Groups could not be fetched",
+          summary: "მოხდა შეცდომა",
+          detail: "ჯგუფების ინფორმაცია ვერ ჩაიტვირთა",
           life: 3000,
         });
       }

@@ -1,4 +1,5 @@
 export interface Group {
+  id: string;
   name: string;
   leader: string;
   age: string;
