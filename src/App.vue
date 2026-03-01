@@ -3,8 +3,13 @@ import { ConfirmDialog, Menubar, Toast } from "primevue";
 import { useRouter } from "vue-router";
 import {
   ADMIN_GROUPS_ROUTE,
+  ADMIN_CLUBS_ROUTE,
+  ADMIN_CLUB_BOOKINGS_ROUTE,
+  CLUBS_ROUTE,
   ADMIN_ICON,
   ADMIN_LABEL,
+  ADMIN_CLUBS_LABEL,
+  ADMIN_CLUB_BOOKINGS_LABEL,
   GROUPS_ICON,
   GROUPS_LABEL,
   GROUPS_ROUTE,
@@ -24,17 +29,54 @@ const items = ref([
     command: () => router.push(GROUPS_ROUTE),
   },
   {
+    label: "წრეები",
+    icon: "pi pi-users",
+    command: () => router.push(CLUBS_ROUTE),
+  },
+  {
     label: ADMIN_LABEL,
     icon: ADMIN_ICON,
-    command: async () => {
-      if (!user.value) {
-        await signInWithGoogle();
-      }
+    items: [
+      {
+        label: GROUPS_LABEL,
+        icon: GROUPS_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
 
-      if (user.value) {
-        router.push(ADMIN_GROUPS_ROUTE);
-      }
-    },
+          if (user.value) {
+            router.push(ADMIN_GROUPS_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_CLUBS_LABEL,
+        icon: "pi pi-users",
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_CLUBS_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_CLUB_BOOKINGS_LABEL,
+        icon: "pi pi-list",
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_CLUB_BOOKINGS_ROUTE);
+          }
+        },
+      },
+    ],
   },
 ]);
 
