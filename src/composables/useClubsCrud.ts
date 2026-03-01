@@ -14,58 +14,80 @@ import { useToast } from "primevue";
 
 export function useClubsCrud() {
   const toast = useToast();
-
   const loading = ref(false);
 
-  const addClub = async (club: Omit<Club, "id">) => {
+  const showToast = (
+    severity: "success" | "error" | "warn",
+    summary: string,
+    detail?: string
+  ) => {
+    toast.add({
+      severity,
+      summary,
+      detail,
+      life: 3000,
+    });
+  };
+
+  const handleAsyncOperation = async <T>(
+    operation: () => Promise<T>,
+    errorSummary: string,
+    errorDetail: string
+  ): Promise<T | undefined> => {
     loading.value = true;
     try {
-      const docRef = await addDoc(collection(db, CLUBS_DB), club);
-      toast.add({
-        severity: "success",
-        summary: "წრე შენახულია",
-        life: 3000,
-      });
-      return docRef.id;
+      return await operation();
     } catch (err) {
       console.error(err);
-      toast.add({
-        severity: "error",
-        summary: "მოხდა შეცდომა",
-        detail: "წრე ვერ დაემატა",
-        life: 3000,
-      });
+      showToast("error", errorSummary, errorDetail);
+      return undefined;
     } finally {
       loading.value = false;
     }
   };
 
-  // Inside updateClub in useClubsCrud.ts
+  const addClub = async (club: Omit<Club, "id">) => {
+    return await handleAsyncOperation(
+      async () => {
+        const docRef = await addDoc(collection(db, CLUBS_DB), club);
+        showToast("success", "წრე შენახულია");
+        return docRef.id;
+      },
+      "მოხდა შეცდომა",
+      "წრე ვერ დაემატა"
+    );
+  };
+
   const updateClub = async (club: Club) => {
     if (!club.id) return;
-    loading.value = true;
-    try {
-      const clubRef = doc(db, CLUBS_DB, club.id);
-      const { id, ...clubData } = club;
 
-      // Ensure time is stored in a way Firestore likes
-      const dataToUpdate = {
-        ...clubData,
-        time: clubData.time ? new Date(clubData.time) : null, // Converts string/Date to Firestore-friendly format
-      };
+    await handleAsyncOperation(
+      async () => {
+        const clubRef = doc(db, CLUBS_DB, club.id);
+        const { id, ...clubData } = club;
 
-      await updateDoc(clubRef, dataToUpdate);
+        const dataToUpdate = {
+          ...clubData,
+          time: clubData.time ? new Date(clubData.time) : null,
+        };
 
-      toast.add({
-        severity: "success",
-        summary: "წრე განახლებულია",
-        life: 3000,
-      });
-    } catch (err) {
-      // ... error handling
-    } finally {
-      loading.value = false;
-    }
+        await updateDoc(clubRef, dataToUpdate);
+        showToast("success", "წრე განახლებულია");
+      },
+      "მოხდა შეცდომა",
+      "წრე ვერ განახლდა"
+    );
+  };
+
+  const deleteClub = async (clubId: string) => {
+    await handleAsyncOperation(
+      async () => {
+        await deleteDoc(doc(db, CLUBS_DB, clubId));
+        showToast("success", "წრე წაიშალა");
+      },
+      "მოხდა შეცდომა",
+      "წრე ვერ წაიშალა"
+    );
   };
 
   const registerInClub = async (
@@ -83,12 +105,9 @@ export function useClubsCrud() {
         const clubRef = doc(db, CLUBS_DB, club.id);
         const clubSnap = await transaction.get(clubRef);
 
-        if (!clubSnap.exists()) {
-          throw new Error("CLUB_NOT_FOUND");
-        }
+        if (!clubSnap.exists()) throw new Error("CLUB_NOT_FOUND");
 
         const clubData = clubSnap.data() as Club;
-
         if (!clubData.places_quantity || clubData.places_quantity <= 0) {
           throw new Error("NO_PLACES_LEFT");
         }
@@ -99,61 +118,85 @@ export function useClubsCrud() {
 
         const bookingRef = doc(collection(db, CLUB_BOOKINGS_DB));
         transaction.set(bookingRef, {
+          ...data,
           club_id: club.id,
           club_name: club.name,
-          child_first_name: data.child_first_name,
-          child_last_name: data.child_last_name,
-          leader_name: data.leader_name,
-          group_name: data.group_name,
-          created_at: new Date().toISOString(),
+          created_at: new Date(),
         });
       });
 
-      toast.add({
-        severity: "success",
-        summary: "დარეგისტრირდი წრეზე",
-        life: 3000,
-      });
+      showToast("success", "დარეგისტრირდი წრეზე");
     } catch (err: any) {
       console.error(err);
-
       if (err?.message === "NO_PLACES_LEFT") {
-        toast.add({
-          severity: "warn",
-          summary: "ადგილები აღარ არის",
-          detail: "ამ წრეში თავისუფალი ადგილი აღარ დარჩა",
-          life: 3000,
-        });
+        showToast(
+          "warn",
+          "ადგილები აღარ არის",
+          "ამ წრეში თავისუფალი ადგილი აღარ დარჩა"
+        );
       } else {
-        toast.add({
-          severity: "error",
-          summary: "მოხდა შეცდომა",
-          detail: "დარეგისტრირება ვერ მოხერხდა",
-          life: 3000,
-        });
+        showToast("error", "მოხდა შეცდომა", "დარეგისტრირება ვერ მოხერხდა");
       }
     } finally {
       loading.value = false;
     }
   };
 
-  const deleteClub = async (clubId: string) => {
+  const changeClubBooking = async (oldBooking: ClubBooking, newClub: Club) => {
+    if (!oldBooking.id || !oldBooking.club_id || !newClub.id) return;
+
     loading.value = true;
     try {
-      await deleteDoc(doc(db, CLUBS_DB, clubId));
-      toast.add({
-        severity: "success",
-        summary: "წრე წაიშალა",
-        life: 3000,
+      await runTransaction(db, async (transaction) => {
+        const oldClubRef = doc(db, CLUBS_DB, oldBooking.club_id);
+        const newClubRef = doc(db, CLUBS_DB, newClub.id);
+        const bookingRef = doc(db, CLUB_BOOKINGS_DB, oldBooking.id);
+
+        const [oldClubSnap, newClubSnap, bookingSnap] = await Promise.all([
+          transaction.get(oldClubRef),
+          transaction.get(newClubRef),
+          transaction.get(bookingRef),
+        ]);
+
+        if (
+          !oldClubSnap.exists() ||
+          !newClubSnap.exists() ||
+          !bookingSnap.exists()
+        ) {
+          throw new Error("NOT_FOUND");
+        }
+
+        const oldClubData = oldClubSnap.data() as Club;
+        const newClubData = newClubSnap.data() as Club;
+
+        if (!newClubData.places_quantity || newClubData.places_quantity <= 0) {
+          throw new Error("NO_PLACES_LEFT");
+        }
+
+        transaction.update(oldClubRef, {
+          places_quantity: (oldClubData.places_quantity ?? 0) + 1,
+        });
+        transaction.update(newClubRef, {
+          places_quantity: newClubData.places_quantity - 1,
+        });
+        transaction.update(bookingRef, {
+          club_id: newClub.id,
+          club_name: newClub.name,
+        });
       });
-    } catch (err) {
+
+      showToast("success", "წრე წარმატებით შეიცვალა");
+    } catch (err: any) {
       console.error(err);
-      toast.add({
-        severity: "error",
-        summary: "მოხდა შეცდომა",
-        detail: "წრე ვერ წაიშალა",
-        life: 3000,
-      });
+      if (err?.message === "NO_PLACES_LEFT") {
+        showToast(
+          "warn",
+          "ადგილები აღარ არის",
+          "ამ ახალ წრეში თავისუფალი ადგილი აღარ დარჩა"
+        );
+      } else {
+        showToast("error", "მოხდა შეცდომა", "წრის შეცვლა ვერ მოხერხდა");
+      }
     } finally {
       loading.value = false;
     }
@@ -165,78 +208,6 @@ export function useClubsCrud() {
     updateClub,
     deleteClub,
     registerInClub,
-    changeClubBooking: async (oldBooking: ClubBooking, newClub: Club) => {
-      if (!oldBooking.id || !oldBooking.club_id || !newClub.id) return;
-
-      loading.value = true;
-      try {
-        await runTransaction(db, async (transaction) => {
-          const oldClubRef = doc(db, CLUBS_DB, oldBooking.club_id);
-          const newClubRef = doc(db, CLUBS_DB, newClub.id);
-          const bookingRef = doc(db, CLUB_BOOKINGS_DB, oldBooking.id);
-
-          const oldClubSnap = await transaction.get(oldClubRef);
-          const newClubSnap = await transaction.get(newClubRef);
-          const bookingSnap = await transaction.get(bookingRef);
-
-          if (
-            !oldClubSnap.exists() ||
-            !newClubSnap.exists() ||
-            !bookingSnap.exists()
-          ) {
-            throw new Error("NOT_FOUND");
-          }
-
-          const oldClubData = oldClubSnap.data() as Club;
-          const newClubData = newClubSnap.data() as Club;
-
-          if (
-            !newClubData.places_quantity ||
-            newClubData.places_quantity <= 0
-          ) {
-            throw new Error("NO_PLACES_LEFT");
-          }
-
-          transaction.update(oldClubRef, {
-            places_quantity: (oldClubData.places_quantity ?? 0) + 1,
-          });
-
-          transaction.update(newClubRef, {
-            places_quantity: newClubData.places_quantity - 1,
-          });
-
-          transaction.update(bookingRef, {
-            club_id: newClub.id,
-            club_name: newClub.name,
-          });
-        });
-
-        toast.add({
-          severity: "success",
-          summary: "წრე წარმატებით შეიცვალა",
-          life: 3000,
-        });
-      } catch (err: any) {
-        console.error(err);
-
-        if (err?.message === "NO_PLACES_LEFT") {
-          toast.add({
-            severity: "warn",
-            summary: "ადგილები აღარ არის",
-            detail: "ამ ახალ წრეში თავისუფალი ადგილი აღარ დარჩა",
-            life: 3000,
-          });
-        } else {
-          toast.add({
-            severity: "error",
-            summary: "მოხდა შეცდომა",
-            detail: "წრის შეცვლა ვერ მოხერხდა",
-            life: 3000,
-          });
-        }
-      } finally {
-        loading.value = false;
-      }
-    },
+    changeClubBooking,
   };
 }
