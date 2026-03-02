@@ -13,6 +13,10 @@ import {
   GROUPS_ICON,
   GROUPS_LABEL,
   GROUPS_ROUTE,
+  DAY_SCHEDULE_LABEL,
+  CLUBS_ICON,
+  DAY_SCHEDULE_ICON,
+  DAY_SCHEDULE_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -30,8 +34,13 @@ const items = ref([
   },
   {
     label: "წრეები",
-    icon: "pi pi-users",
+    icon: CLUBS_ICON,
     command: () => router.push(CLUBS_ROUTE),
+  },
+  {
+    label: DAY_SCHEDULE_LABEL,
+    icon: DAY_SCHEDULE_ICON,
+    command: () => router.push(DAY_SCHEDULE_ROUTE),
   },
   {
     label: ADMIN_LABEL,
