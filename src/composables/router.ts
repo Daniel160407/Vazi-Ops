@@ -7,6 +7,7 @@ import {
   CLUBS_ROUTE,
   DAY_SCHEDULE_ROUTE,
   ADMIN_DAY_SCHEDULE_ROUTE,
+  EVENING_SCHEDULE_ROUTE,
 } from "./constants";
 import GroupsPage from "../pages/GroupsPage.vue";
 import ClubsPage from "../pages/ClubsPage.vue";
@@ -15,12 +16,14 @@ import ClubsEditPage from "../pages/ClubsEditPage.vue";
 import ClubBookingsPage from "../pages/ClubBookingsPage.vue";
 import DaySchedulePage from "../pages/DaySchedulePage.vue";
 import DayScheduleEditPage from "../pages/DayScheduleEditPage.vue";
+import EveningSchedulePage from "../pages/EveningSchedulePage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
   { path: GROUPS_ROUTE, component: GroupsPage },
   { path: CLUBS_ROUTE, component: ClubsPage },
   { path: DAY_SCHEDULE_ROUTE, component: DaySchedulePage },
+  { path: EVENING_SCHEDULE_ROUTE, component: EveningSchedulePage },
   { path: ADMIN_GROUPS_ROUTE, component: GroupsEditPage },
   { path: ADMIN_CLUBS_ROUTE, component: ClubsEditPage },
   { path: ADMIN_CLUB_BOOKINGS_ROUTE, component: ClubBookingsPage },

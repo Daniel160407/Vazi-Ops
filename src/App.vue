@@ -19,6 +19,9 @@ import {
   DAY_SCHEDULE_ROUTE,
   ADMIN_DAY_SCHEDULE_LABEL,
   ADMIN_DAY_SCHEDULE_ROUTE,
+  EVENING_SCHEDULE_LABEL,
+  EVENING_SCHEDULE_ICON,
+  EVENING_SCHEDULE_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -43,6 +46,11 @@ const items = ref([
     label: DAY_SCHEDULE_LABEL,
     icon: DAY_SCHEDULE_ICON,
     command: () => router.push(DAY_SCHEDULE_ROUTE),
+  },
+  {
+    label: EVENING_SCHEDULE_LABEL,
+    icon: EVENING_SCHEDULE_ICON,
+    command: () => router.push(EVENING_SCHEDULE_ROUTE),
   },
   {
     label: ADMIN_LABEL,

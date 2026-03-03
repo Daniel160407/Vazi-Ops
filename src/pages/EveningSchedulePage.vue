@@ -3,7 +3,7 @@ import { storeToRefs } from "pinia";
 import Image from "primevue/image";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { ref, watch } from "vue";
-import { DAY_SCHEDULE_CATEGORY } from "../composables/constants";
+import { EVENING_SCHEDULE_CATEGORY } from "../composables/constants";
 
 const store = useGlobalStore();
 const { schedules } = storeToRefs(store);
@@ -13,7 +13,7 @@ watch(
   schedules,
   (newSchedules) => {
     const targetSchedule = newSchedules.find(
-      (schedule) => schedule.name === DAY_SCHEDULE_CATEGORY
+      (schedule) => schedule.name === EVENING_SCHEDULE_CATEGORY
     );
     imageUrl.value = targetSchedule?.image_url ?? "";
   },
@@ -30,7 +30,7 @@ watch(
     <div v-if="imageUrl" class="w-full max-w-4xl flex justify-center">
       <Image
         :src="imageUrl"
-        :alt="DAY_SCHEDULE_CATEGORY"
+        :alt="EVENING_SCHEDULE_CATEGORY"
         preview
         imageClass="rounded-xl shadow-lg w-full h-auto"
         class="w-full"
