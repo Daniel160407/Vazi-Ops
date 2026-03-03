@@ -30,10 +30,13 @@ export const useImgBB = () => {
     const formData = new FormData();
     if (base64Image) formData.append("image", base64Image);
 
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-      method: "POST",
-      body: formData
-    });
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${API_KEY}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`);
 
@@ -62,7 +65,7 @@ export const useImgBB = () => {
       toast.add({
         severity: "error",
         summary: `სურათი ძალიან დიდია (მაქს. ${MAX_IMAGE_SIZE_MB}MB)`,
-        life: 3000
+        life: 3000,
       });
       return;
     }
@@ -79,7 +82,11 @@ export const useImgBB = () => {
 
     const totalSize = files.reduce((total, file) => total + file.size, 0);
     if (totalSize > 20 * 1024 * 1024) {
-      toast.add({ severity: "error", summary: "სურათი ძალიან დიდია. მაქსიმუმ 20MB", life: 3000 });
+      toast.add({
+        severity: "error",
+        summary: "სურათი ძალიან დიდია. მაქსიმუმ 20MB",
+        life: 3000,
+      });
       return;
     }
 
@@ -88,12 +95,20 @@ export const useImgBB = () => {
 
     files.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        toast.add({ severity: "error", summary: "სურათი ძალიან დიდია. მაქსიმუმ 5MB", life: 3000 });
+        toast.add({
+          severity: "error",
+          summary: "სურათი ძალიან დიდია. მაქსიმუმ 5MB",
+          life: 3000,
+        });
         return;
       }
 
       if (!file.type.startsWith("image/")) {
-        toast.add({ severity: "error", summary: `ფაილი ${file.name}" არ არის სურათი`, life: 3000 });
+        toast.add({
+          severity: "error",
+          summary: `ფაილი ${file.name}" არ არის სურათი`,
+          life: 3000,
+        });
         return;
       }
 
@@ -150,6 +165,6 @@ export const useImgBB = () => {
     imagePreview,
     imagePreviews,
     existingImageUrls,
-    uploadingImage
+    uploadingImage,
   };
 };

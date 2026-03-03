@@ -1,12 +1,11 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-// Added Schedule to imports
 import type { Group, Club, ClubBooking, Schedule } from "../type/interfaces";
 import {
   GROUPS_DB,
   CLUBS_DB,
   CLUB_BOOKINGS_DB,
-  SCHEDULES_DB, // Assumed constant
+  SCHEDULES_DB,
 } from "../composables/constants";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -18,7 +17,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
-  // Added schedules ref
   const schedules = ref<Schedule[]>([]);
   const loadingCount = ref<number>(0);
 
@@ -138,12 +136,12 @@ export const useGlobalStore = defineStore("globalStore", () => {
     clubs,
     clubBookings,
     schedules,
-    loadingCount,
+
     fetchGroups,
     fetchClubs,
     fetchClubBookings,
     fetchSchedules,
-    withLoading,
+
     setData,
   };
 });

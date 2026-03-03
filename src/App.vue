@@ -17,6 +17,8 @@ import {
   CLUBS_ICON,
   DAY_SCHEDULE_ICON,
   DAY_SCHEDULE_ROUTE,
+  ADMIN_DAY_SCHEDULE_LABEL,
+  ADMIN_DAY_SCHEDULE_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -82,6 +84,19 @@ const items = ref([
 
           if (user.value) {
             router.push(ADMIN_CLUB_BOOKINGS_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_DAY_SCHEDULE_LABEL,
+        icon: DAY_SCHEDULE_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_DAY_SCHEDULE_ROUTE);
           }
         },
       },
