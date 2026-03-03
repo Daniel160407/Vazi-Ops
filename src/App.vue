@@ -28,6 +28,8 @@ import {
   EVENTS_LABEL,
   EVENTS_ICON,
   EVENTS_ROUTE,
+  ADMIN_EVENTS_LABEL,
+  ADMIN_EVENTS_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -129,6 +131,19 @@ const items = ref([
 
           if (user.value) {
             router.push(ADMIN_EVENING_SCHEDULE_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_EVENTS_LABEL,
+        icon: EVENTS_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_EVENTS_ROUTE);
           }
         },
       },
