@@ -7,6 +7,7 @@ export const ADMIN_GROUPS_ROUTE = "/admin/groups";
 export const ADMIN_CLUBS_ROUTE = "/admin/clubs";
 export const ADMIN_CLUB_BOOKINGS_ROUTE = "/admin/club-bookings";
 export const ADMIN_DAY_SCHEDULE_ROUTE = "/admin/day-schedule";
+export const ADMIN_EVENING_SCHEDULE_ROUTE = "/admin/evening-schedule";
 
 export const GROUPS_LABEL = "ჯგუფები";
 export const CLUBS_LABEL = "წრეები";
@@ -15,7 +16,8 @@ export const EVENING_SCHEDULE_LABEL = "საღამოს განრიგ�
 export const ADMIN_LABEL = "ადმინი";
 export const ADMIN_CLUBS_LABEL = "წრეები";
 export const ADMIN_CLUB_BOOKINGS_LABEL = "წრეების რეგისტრაციები";
-export const ADMIN_DAY_SCHEDULE_LABEL = "დრის განრიგი";
+export const ADMIN_DAY_SCHEDULE_LABEL = "დღის განრიგი";
+export const ADMIN_EVENING_SCHEDULE_LABEL = "საღამოს განრიგი";
 
 export const GROUPS_ICON = "pi pi-home";
 export const CLUBS_ICON = "pi pi-users";

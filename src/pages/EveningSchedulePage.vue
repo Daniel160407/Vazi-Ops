@@ -24,7 +24,7 @@ watch(
 <template>
   <div class="flex flex-col items-center p-4 md:p-8">
     <h2 class="text-xl md:text-2xl font-bold text-white-800 mb-6 text-center">
-      დღის განრიგი
+      საღამოს განრიგი
     </h2>
 
     <div v-if="imageUrl" class="w-full max-w-4xl flex justify-center">

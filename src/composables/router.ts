@@ -8,6 +8,7 @@ import {
   DAY_SCHEDULE_ROUTE,
   ADMIN_DAY_SCHEDULE_ROUTE,
   EVENING_SCHEDULE_ROUTE,
+  ADMIN_EVENING_SCHEDULE_ROUTE,
 } from "./constants";
 import GroupsPage from "../pages/GroupsPage.vue";
 import ClubsPage from "../pages/ClubsPage.vue";
@@ -17,6 +18,7 @@ import ClubBookingsPage from "../pages/ClubBookingsPage.vue";
 import DaySchedulePage from "../pages/DaySchedulePage.vue";
 import DayScheduleEditPage from "../pages/DayScheduleEditPage.vue";
 import EveningSchedulePage from "../pages/EveningSchedulePage.vue";
+import EveningScheduleEditPage from "../pages/EveningScheduleEditPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
@@ -28,6 +30,7 @@ const routes = [
   { path: ADMIN_CLUBS_ROUTE, component: ClubsEditPage },
   { path: ADMIN_CLUB_BOOKINGS_ROUTE, component: ClubBookingsPage },
   { path: ADMIN_DAY_SCHEDULE_ROUTE, component: DayScheduleEditPage },
+  { path: ADMIN_EVENING_SCHEDULE_ROUTE, component: EveningScheduleEditPage },
 ];
 
 const router = createRouter({
