@@ -1,13 +1,22 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { Group, Club, ClubBooking, Schedule } from "../type/interfaces";
+import type {
+  Group,
+  Club,
+  ClubBooking,
+  Schedule,
+  Event,
+  Deadline,
+} from "../type/interfaces";
 import {
   GROUPS_DB,
   CLUBS_DB,
   CLUB_BOOKINGS_DB,
   SCHEDULES_DB,
+  EVENTS_DB,
+  DEADLINE_DB,
 } from "../composables/constants";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useToast } from "primevue";
 
@@ -18,6 +27,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
   const schedules = ref<Schedule[]>([]);
+  const events = ref<Event[]>([]);
+  const deadline = ref<Deadline | null>(null);
+
   const loadingCount = ref<number>(0);
 
   const withLoading = async <T>(
@@ -122,12 +134,60 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchEvents = async () => {
+    await withLoading(async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, EVENTS_DB));
+        events.value = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Event, "id">),
+        }));
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        toast.add({
+          severity: "error",
+          summary: "მოხდა შეცდომა",
+          detail: "საღამოს გამოსვლებზე ინფორმაცია ვერ ჩაიტვირთა",
+          life: 3000,
+        });
+      }
+    });
+  };
+
+  const fetchDeadline = async () => {
+    await withLoading(async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, DEADLINE_DB));
+
+        if (!querySnapshot.empty) {
+          const docSnap = querySnapshot.docs[0];
+          const data = docSnap!.data();
+
+          deadline.value = {
+            id: docSnap!.id,
+            time: data.time?.toDate ? data.time.toDate() : new Date(data.time),
+          } as Deadline;
+        }
+      } catch (err) {
+        console.error("Deadline Fetch Error:", err);
+        toast.add({
+          severity: "error",
+          summary: "შეცდომა",
+          detail: "დედლაინი ვერ ჩაიტვირთა",
+          life: 3000,
+        });
+      }
+    });
+  };
+
   const setData = async () => {
     await Promise.all([
       fetchGroups(),
       fetchClubs(),
       fetchClubBookings(),
       fetchSchedules(),
+      fetchEvents(),
+      fetchDeadline(),
     ]);
   };
 
@@ -136,11 +196,15 @@ export const useGlobalStore = defineStore("globalStore", () => {
     clubs,
     clubBookings,
     schedules,
+    events,
+    deadline,
 
     fetchGroups,
     fetchClubs,
     fetchClubBookings,
     fetchSchedules,
+    fetchEvents,
+    fetchDeadline,
 
     setData,
   };
