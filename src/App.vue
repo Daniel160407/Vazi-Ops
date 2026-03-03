@@ -13,6 +13,18 @@ import {
   GROUPS_ICON,
   GROUPS_LABEL,
   GROUPS_ROUTE,
+  DAY_SCHEDULE_LABEL,
+  CLUBS_ICON,
+  DAY_SCHEDULE_ICON,
+  DAY_SCHEDULE_ROUTE,
+  ADMIN_DAY_SCHEDULE_LABEL,
+  ADMIN_DAY_SCHEDULE_ROUTE,
+  EVENING_SCHEDULE_LABEL,
+  EVENING_SCHEDULE_ICON,
+  EVENING_SCHEDULE_ROUTE,
+  ADMIN_EVENING_SCHEDULE_LABEL,
+  ADMIN_EVENING_SCHEDULE_ROUTE,
+  CLUBS_LABEL,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -29,9 +41,19 @@ const items = ref([
     command: () => router.push(GROUPS_ROUTE),
   },
   {
-    label: "წრეები",
-    icon: "pi pi-users",
+    label: CLUBS_LABEL,
+    icon: CLUBS_ICON,
     command: () => router.push(CLUBS_ROUTE),
+  },
+  {
+    label: DAY_SCHEDULE_LABEL,
+    icon: DAY_SCHEDULE_ICON,
+    command: () => router.push(DAY_SCHEDULE_ROUTE),
+  },
+  {
+    label: EVENING_SCHEDULE_LABEL,
+    icon: EVENING_SCHEDULE_ICON,
+    command: () => router.push(EVENING_SCHEDULE_ROUTE),
   },
   {
     label: ADMIN_LABEL,
@@ -52,7 +74,7 @@ const items = ref([
       },
       {
         label: ADMIN_CLUBS_LABEL,
-        icon: "pi pi-users",
+        icon: CLUBS_ICON,
         command: async () => {
           if (!user.value) {
             await signInWithGoogle();
@@ -73,6 +95,32 @@ const items = ref([
 
           if (user.value) {
             router.push(ADMIN_CLUB_BOOKINGS_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_DAY_SCHEDULE_LABEL,
+        icon: DAY_SCHEDULE_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_DAY_SCHEDULE_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_EVENING_SCHEDULE_LABEL,
+        icon: EVENING_SCHEDULE_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_EVENING_SCHEDULE_ROUTE);
           }
         },
       },

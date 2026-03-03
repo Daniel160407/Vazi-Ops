@@ -28,3 +28,9 @@ export interface ClubBooking {
   group_name: string;
   created_at: Date;
 }
+
+export interface Schedule {
+  id: string;
+  name: string;
+  image_url: string;
+}
