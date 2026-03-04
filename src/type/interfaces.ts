@@ -34,3 +34,19 @@ export interface Schedule {
   name: string;
   image_url: string;
 }
+
+export interface Event {
+  scene_name: string;
+  performer_full_name: string;
+  leader_full_name: string;
+  group_name: string;
+  media_url: string;
+  additional_info: string;
+  request_status: string;
+  created_at: Date;
+}
+
+export interface Deadline {
+  id: string;
+  time: Date;
+}
