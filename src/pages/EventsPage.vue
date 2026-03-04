@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { ka } from "date-fns/locale";
 import { format, intervalToDuration, type Duration } from "date-fns";
 import DataTable from "primevue/datatable";
@@ -11,6 +11,7 @@ import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
+import Message from "primevue/message";
 import { useEventsCrud } from "../composables/useEventsCrud";
 import {
   REQUEST_PENDING,
@@ -26,6 +27,7 @@ const { loading, createEvent } = useEventsCrud();
 const showRegisterModal = ref(false);
 const isDeadlinePassed = ref(false);
 const timeLeft = ref<Duration | null>(null);
+const submitted = ref(false);
 
 const getEmptyForm = (): Omit<AppEvent, "id"> => ({
   scene_name: "",
@@ -39,6 +41,12 @@ const getEmptyForm = (): Omit<AppEvent, "id"> => ({
 });
 
 const newEvent = ref(getEmptyForm());
+
+watch(showRegisterModal, (val) => {
+  if (!val) {
+    submitted.value = false;
+  }
+});
 
 const allRequests = computed(() => events.value);
 
@@ -57,10 +65,21 @@ const getStatusLabel = (status: string) => {
 };
 
 const handleRegister = async () => {
-  if (!newEvent.value.performer_full_name || !newEvent.value.scene_name) return;
+  submitted.value = true;
+
+  // Validation: Check all 4 required fields
+  const isValid =
+    newEvent.value.performer_full_name &&
+    newEvent.value.leader_full_name &&
+    newEvent.value.group_name &&
+    newEvent.value.scene_name;
+
+  if (!isValid) return;
+
   await createEvent(newEvent.value);
   showRegisterModal.value = false;
   newEvent.value = getEmptyForm();
+  submitted.value = false;
   await globalstore.fetchEvents();
 };
 
@@ -89,21 +108,15 @@ const countdownText = computed(() => {
 
 const formatDate = (dateValue?: any) => {
   if (!dateValue) return "";
-
   let date: Date;
-
   if (dateValue?.seconds) {
     date = new Date(dateValue.seconds * 1000);
-  }
-  else if (dateValue instanceof Date) {
+  } else if (dateValue instanceof Date) {
     date = dateValue;
-  }
-  else {
+  } else {
     date = new Date(dateValue);
   }
-
   if (isNaN(date.getTime())) return "თარიღი არასწორია";
-
   return format(date, "d MMMM yyyy, HH:mm", { locale: ka });
 };
 
@@ -123,7 +136,6 @@ onUnmounted(() => {
       class="mb-8 text-center p-4 rounded-2xl shadow-2xl border border-slate-200"
     >
       <h2 class="text-3xl font-bold mb-4 text-white">საღამოს გამოსვლები</h2>
-
       <div class="flex flex-col items-center gap-4">
         <div class="bg-slate-900 px-4 py-4 rounded-xl border border-slate-200">
           <div class="text-4xl font-mono text-yellow-400 tracking-wider">
@@ -133,11 +145,9 @@ onUnmounted(() => {
             რეგისტრაციის დასრულებამდე
           </p>
         </div>
-
         <p class="text-slate-500 italic">
           დედლაინი: {{ formatDate(deadline?.time) }}
         </p>
-
         <Button
           v-if="!isDeadlinePassed"
           label="ჩაწერა"
@@ -169,7 +179,6 @@ onUnmounted(() => {
               <span class="text-xl font-semibold"
                 >ნომრების სია და სტატუსები</span
               >
-
               <span class="text-xs text-slate-400 italic"
                 >ცხრილი არ ასახავს გამომსვლელთა თანმიმდევრობას</span
               >
@@ -184,9 +193,9 @@ onUnmounted(() => {
         <Column field="group_name" header="ჯგუფი" sortable />
         <Column field="created_at" header="დრო" sortable>
           <template #body="{ data }">
-            <span v-if="data && data.created_at">
-              {{ formatDate(data.created_at) }}
-            </span>
+            <span v-if="data && data.created_at">{{
+              formatDate(data.created_at)
+            }}</span>
             <span v-else class="text-slate-400">-</span>
           </template>
         </Column>
@@ -200,50 +209,99 @@ onUnmounted(() => {
           </template>
         </Column>
 
-        <template #empty
-          ><div class="text-center p-8 text-slate-500">
-            განაცხადები არ არის.
-          </div></template
-        >
+        <template #empty>
+          <div class="text-center p-8 text-slate-500">განაცხადები არ არის.</div>
+        </template>
       </DataTable>
     </div>
 
     <Dialog
       v-model:visible="showRegisterModal"
       modal
-      header="ახალი გამოსვლის რეგისტრაცია"
+      header="ნომრის რეგისტრაცია"
       :style="{ width: '90vw', maxWidth: '500px' }"
       class="p-fluid"
     >
       <div class="flex flex-col gap-4 py-4">
         <div class="flex flex-col gap-2">
-          <label>ბავშვის სახელი და გვარი *</label>
+          <label
+            >ბავშვის სახელი და გვარი <span class="text-red-500">*</span></label
+          >
           <InputText
             v-model="newEvent.performer_full_name"
-            placeholder="მაგ: ანა გელაშვილი"
+            :class="{ 'p-invalid': submitted && !newEvent.performer_full_name }"
           />
+          <Message
+            v-if="submitted && !newEvent.performer_full_name"
+            severity="error"
+            variant="simple"
+            size="small"
+            >სახელი აუცილებელია</Message
+          >
         </div>
+
         <div class="flex flex-col gap-2">
-          <label>ლიდერის სახელი და გვარი</label>
-          <InputText v-model="newEvent.leader_full_name" />
+          <label
+            >ლიდერის სახელი და გვარი <span class="text-red-500">*</span></label
+          >
+          <InputText
+            v-model="newEvent.leader_full_name"
+            :class="{ 'p-invalid': submitted && !newEvent.leader_full_name }"
+          />
+          <Message
+            v-if="submitted && !newEvent.leader_full_name"
+            severity="error"
+            variant="simple"
+            size="small"
+            >ლიდერის სახელი აუცილებელია</Message
+          >
         </div>
+
         <div class="flex flex-col gap-2">
-          <label>ჯგუფის სახელი</label>
-          <InputText v-model="newEvent.group_name" />
+          <label>ჯგუფის სახელი <span class="text-red-500">*</span></label>
+          <InputText
+            v-model="newEvent.group_name"
+            :class="{ 'p-invalid': submitted && !newEvent.group_name }"
+          />
+          <Message
+            v-if="submitted && !newEvent.group_name"
+            severity="error"
+            variant="simple"
+            size="small"
+            >ჯგუფის დასახელება აუცილებელია</Message
+          >
         </div>
+
         <div class="flex flex-col gap-2">
-          <label>ნომრის სახელი *</label>
-          <InputText v-model="newEvent.scene_name" placeholder="მაგ: სიმღერა" />
+          <label>ნომრის სახელი <span class="text-red-500">*</span></label>
+          <InputText
+            v-model="newEvent.scene_name"
+            placeholder="მაგ: სიმღერა, ცეკვა, დადგმა..."
+            :class="{ 'p-invalid': submitted && !newEvent.scene_name }"
+          />
+          <Message
+            v-if="submitted && !newEvent.scene_name"
+            severity="error"
+            variant="simple"
+            size="small"
+            >ნომრის დასახელება აუცილებელია</Message
+          >
         </div>
+
         <div class="flex flex-col gap-2">
           <label>მედია ლინკი</label>
-          <InputText v-model="newEvent.media_url" />
+          <InputText
+            v-model="newEvent.media_url"
+            placeholder="მაგ: YouTube ან Google Drive ლინკი"
+          />
         </div>
+
         <div class="flex flex-col gap-2">
           <label>დამატებითი კომენტარი</label>
           <Textarea v-model="newEvent.additional_info" rows="3" autoResize />
         </div>
       </div>
+
       <template #footer>
         <Button
           label="გაუქმება"
@@ -258,7 +316,6 @@ onUnmounted(() => {
           severity="success"
           @click="handleRegister"
           :loading="loading"
-          :disabled="!newEvent.performer_full_name || !newEvent.scene_name"
         />
       </template>
     </Dialog>
