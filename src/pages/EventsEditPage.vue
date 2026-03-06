@@ -16,22 +16,17 @@ import {
   REQUEST_REJECTED,
 } from "../composables/constants";
 import { useConfirm } from "primevue";
+import { useSchedulesCrud } from "../composables/useSchedulesCrud";
+import type { EveningScheduleItem, Event } from "../type/interfaces";
 
 const globalstore = useGlobalStore();
 const { deadline, events } = storeToRefs(globalstore);
 const { loading, updateEventStatus, deleteEvent, updateDeadline } =
   useEventsCrud();
+const { addEveningSchedule } = useSchedulesCrud();
 const confirm = useConfirm();
 
 const newDeadlineDate = ref<Date | null>(null);
-
-watch(
-  deadline,
-  (newVal) => {
-    if (newVal?.time) newDeadlineDate.value = new Date(newVal.time);
-  },
-  { immediate: true }
-);
 
 const setStatus = async (eventId: string, status: string) => {
   await updateEventStatus(eventId, status);
@@ -79,6 +74,28 @@ const handleDelete = async (id: string) => {
     },
   });
 };
+
+const handleAddItemToSchedule = async (event: Event) => {
+  const scheduleItem: Omit<EveningScheduleItem, "id"> = {
+    scene_name: event.scene_name,
+    performer_full_name: event.performer_full_name,
+    leader_full_name: event.leader_full_name,
+    group_name: event.group_name,
+    media_url: event.media_url,
+    position: 0,
+    created_at: new Date(),
+  };
+
+  await addEveningSchedule(scheduleItem);
+};
+
+watch(
+  deadline,
+  (newVal) => {
+    if (newVal?.time) newDeadlineDate.value = new Date(newVal.time);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -190,6 +207,15 @@ const handleDelete = async (id: string) => {
                 rounded
                 size="small"
                 @click="setStatus(data.id, REQUEST_REJECTED)"
+                outlined
+              />
+              <Button
+                v-if="data.request_status === REQUEST_ACCEPTED"
+                icon="pi pi-calendar"
+                severity="info"
+                rounded
+                size="small"
+                @click="handleAddItemToSchedule(data)"
                 outlined
               />
               <Button

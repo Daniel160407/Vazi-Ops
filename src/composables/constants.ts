@@ -36,6 +36,7 @@ export const ADMINS_DB = "admins";
 export const CLUBS_DB = "clubs";
 export const CLUB_BOOKINGS_DB = "club_bookings";
 export const SCHEDULES_DB = "schedules";
+export const EVENING_SCHEDULE_DB = "evening_schedule";
 export const EVENTS_DB = "events";
 export const DEADLINE_DB = "deadline";
 
