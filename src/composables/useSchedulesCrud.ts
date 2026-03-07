@@ -43,7 +43,6 @@ export const useSchedulesCrud = () => {
 
       await setDoc(docRef, dataToSave, { merge: true });
 
-      console.log(`Schedule ${isUpdating ? "updated" : "created"}:`, docRef.id);
       return docRef.id;
     } catch (err) {
       console.error(err);
@@ -52,6 +51,7 @@ export const useSchedulesCrud = () => {
       loading.value = false;
     }
   };
+  
   const addEveningSchedule = async (
     scheduleItem: Omit<EveningScheduleItem, "id">
   ) => {

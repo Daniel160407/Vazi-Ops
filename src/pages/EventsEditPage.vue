@@ -8,14 +8,13 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Button from "primevue/button";
-import Calendar from "primevue/calendar";
 import { useEventsCrud } from "../composables/useEventsCrud";
 import {
   REQUEST_PENDING,
   REQUEST_ACCEPTED,
   REQUEST_REJECTED,
 } from "../composables/constants";
-import { useConfirm } from "primevue";
+import { DatePicker, useConfirm } from "primevue";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
 import type { EveningScheduleItem, Event } from "../type/interfaces";
 
@@ -104,7 +103,7 @@ watch(
       <h3 class="text-xl font-bold mb-4 text-white">რეგისტრაციის დედლაინი</h3>
       <div class="flex flex-wrap items-end gap-4">
         <div class="flex flex-col gap-2">
-          <Calendar
+          <DatePicker
             v-model="newDeadlineDate"
             showTime
             hourFormat="24"

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type {
   Group,
   Club,
@@ -34,6 +34,8 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const deadline = ref<Deadline | null>(null);
 
   const loadingCount = ref<number>(0);
+
+  const loading = computed(() => loadingCount.value > 0);
 
   const withLoading = async <T>(
     fn: () => Promise<T>
@@ -225,6 +227,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     eveningScheduleItems,
     events,
     deadline,
+    loading,
 
     fetchGroups,
     fetchClubs,
