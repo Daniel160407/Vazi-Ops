@@ -11,6 +11,9 @@ import { useConfirm } from "primevue";
 import { format } from "date-fns";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
 import type { ClubBooking } from "../type/interfaces";
+import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { storeToRefs } from "pinia";
+import { useGlobalStore } from "../stores/GlobalStore";
 
 const {
   bookings,
@@ -20,6 +23,7 @@ const {
   updateBooking,
   deleteBooking,
 } = useClubBookingsCrud();
+const { loading: loadingStore } = storeToRefs(useGlobalStore());
 
 const confirm = useConfirm();
 
@@ -94,136 +98,140 @@ const confirmDelete = (booking: ClubBooking) => {
 
 <template>
   <div class="p-4">
-    <Toolbar class="mb-4">
-      <template #start>
-        <Button
-          label="დამატება"
-          icon="pi pi-plus"
-          severity="info"
-          @click="openNew"
-        />
-      </template>
-      <template #end>
-        <Button
-          label="განახლება"
-          icon="pi pi-refresh"
-          outlined
-          @click="fetchBookings"
-        />
-      </template>
-    </Toolbar>
+    <LoadingSpinner v-if="loadingStore" />
 
-    <DataTable
-      :value="bookings"
-      :loading="loading"
-      paginator
-      :rows="10"
-      dataKey="id"
-      class="text-sm"
-    >
-      <Column field="club_name" header="წრე" sortable></Column>
-      <Column field="child_first_name" header="სახელი" sortable></Column>
-      <Column field="child_last_name" header="გვარი" sortable></Column>
-      <Column field="leader_name" header="ლიდერი" sortable></Column>
-      <Column field="group_name" header="ჯგუფი" sortable></Column>
-      <Column field="created_at" header="დამატების დრო" sortable>
-        <template #body="{ data }">
-          {{ formatDateTime(data.created_at) }}
+    <div v-else>
+      <Toolbar class="mb-4">
+        <template #start>
+          <Button
+            label="დამატება"
+            icon="pi pi-plus"
+            severity="info"
+            @click="openNew"
+          />
         </template>
-      </Column>
-      <Column header="მოქმედებები" :exportable="false">
-        <template #body="{ data }">
-          <div class="flex gap-2">
-            <Button
-              icon="pi pi-pencil"
-              outlined
-              rounded
-              size="small"
-              @click="openEdit(data)"
-            />
-            <Button
-              icon="pi pi-trash"
-              severity="danger"
-              outlined
-              rounded
-              size="small"
-              @click="confirmDelete(data)"
-            />
-          </div>
+        <template #end>
+          <Button
+            label="განახლება"
+            icon="pi pi-refresh"
+            outlined
+            @click="fetchBookings"
+          />
         </template>
-      </Column>
-    </DataTable>
+      </Toolbar>
 
-    <Dialog
-      v-model:visible="bookingDialogVisible"
-      modal
-      :header="
-        isEdit ? 'რეგისტრაციის რედაქტირება' : 'ახალი რეგისტრაციის დამატება'
-      "
-      :style="{ width: '32rem' }"
-    >
-      <div class="space-y-4 pt-2">
-        <FloatLabel variant="on">
-          <InputText
-            id="clubName"
-            v-model="editableBooking.club_name"
-            class="w-full"
+      <DataTable
+        :value="bookings"
+        :loading="loading"
+        paginator
+        :rows="10"
+        dataKey="id"
+        class="text-sm"
+      >
+        <Column field="club_name" header="წრე" sortable></Column>
+        <Column field="child_first_name" header="სახელი" sortable></Column>
+        <Column field="child_last_name" header="გვარი" sortable></Column>
+        <Column field="leader_name" header="ლიდერი" sortable></Column>
+        <Column field="group_name" header="ჯგუფი" sortable></Column>
+        <Column field="created_at" header="დამატების დრო" sortable>
+          <template #body="{ data }">
+            {{ formatDateTime(data.created_at) }}
+          </template>
+        </Column>
+        <Column header="მოქმედებები" :exportable="false">
+          <template #body="{ data }">
+            <div class="flex gap-2">
+              <Button
+                icon="pi pi-pencil"
+                outlined
+                rounded
+                size="small"
+                @click="openEdit(data)"
+              />
+              <Button
+                icon="pi pi-trash"
+                severity="danger"
+                outlined
+                rounded
+                size="small"
+                @click="confirmDelete(data)"
+              />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+
+      <Dialog
+        v-model:visible="bookingDialogVisible"
+        modal
+        :header="
+          isEdit ? 'რეგისტრაციის რედაქტირება' : 'ახალი რეგისტრაციის დამატება'
+        "
+        :style="{ width: '32rem' }"
+      >
+        <div class="space-y-4 pt-2">
+          <FloatLabel variant="on">
+            <InputText
+              id="clubName"
+              v-model="editableBooking.club_name"
+              class="w-full"
+            />
+            <label for="clubName">წრე</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText
+              id="childFirstName"
+              v-model="editableBooking.child_first_name"
+              class="w-full"
+            />
+            <label for="childFirstName">სახელი</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText
+              id="childLastName"
+              v-model="editableBooking.child_last_name"
+              class="w-full"
+            />
+            <label for="childLastName">გვარი</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText
+              id="leaderName"
+              v-model="editableBooking.leader_name"
+              class="w-full"
+            />
+            <label for="leaderName">ლიდერი</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText
+              id="groupName"
+              v-model="editableBooking.group_name"
+              class="w-full"
+            />
+            <label for="groupName">ჯგუფი</label>
+          </FloatLabel>
+        </div>
+
+        <template #footer>
+          <Button
+            label="გაუქმება"
+            icon="pi pi-times"
+            severity="secondary"
+            outlined
+            @click="hideDialog"
           />
-          <label for="clubName">წრე</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText
-            id="childFirstName"
-            v-model="editableBooking.child_first_name"
-            class="w-full"
+          <Button
+            label="შენახვა"
+            icon="pi pi-check"
+            :loading="loading"
+            @click="saveBooking"
           />
-          <label for="childFirstName">სახელი</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText
-            id="childLastName"
-            v-model="editableBooking.child_last_name"
-            class="w-full"
-          />
-          <label for="childLastName">გვარი</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText
-            id="leaderName"
-            v-model="editableBooking.leader_name"
-            class="w-full"
-          />
-          <label for="leaderName">ლიდერი</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText
-            id="groupName"
-            v-model="editableBooking.group_name"
-            class="w-full"
-          />
-          <label for="groupName">ჯგუფი</label>
-        </FloatLabel>
-      </div>
-
-      <template #footer>
-        <Button
-          label="გაუქმება"
-          icon="pi pi-times"
-          severity="secondary"
-          outlined
-          @click="hideDialog"
-        />
-        <Button
-          label="შენახვა"
-          icon="pi pi-check"
-          :loading="loading"
-          @click="saveBooking"
-        />
-      </template>
-    </Dialog>
+        </template>
+      </Dialog>
+    </div>
   </div>
 </template>

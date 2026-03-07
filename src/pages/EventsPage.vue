@@ -19,9 +19,10 @@ import {
   REQUEST_REJECTED,
 } from "../composables/constants";
 import type { Event as AppEvent } from "../type/interfaces";
+import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
 const globalstore = useGlobalStore();
-const { deadline, events } = storeToRefs(globalstore);
+const { loading: loadingStore, deadline, events } = storeToRefs(globalstore);
 const { loading, createEvent } = useEventsCrud();
 
 const showRegisterModal = ref(false);
@@ -67,7 +68,6 @@ const getStatusLabel = (status: string) => {
 const handleRegister = async () => {
   submitted.value = true;
 
-  // Validation: Check all 4 required fields
   const isValid =
     newEvent.value.performer_full_name &&
     newEvent.value.leader_full_name &&
@@ -132,192 +132,204 @@ onUnmounted(() => {
 
 <template>
   <div class="p-4">
-    <div
-      class="mb-8 text-center p-4 rounded-2xl shadow-2xl border border-slate-200"
-    >
-      <h2 class="text-3xl font-bold mb-4 text-white">საღამოს გამოსვლები</h2>
-      <div class="flex flex-col items-center gap-4">
-        <div class="bg-slate-900 px-4 py-4 rounded-xl border border-slate-200">
-          <div class="text-4xl font-mono text-yellow-400 tracking-wider">
-            {{ countdownText }}
-          </div>
-          <p class="text-slate-400 mt-2 text-sm uppercase tracking-widest">
-            რეგისტრაციის დასრულებამდე
-          </p>
-        </div>
-        <p class="text-slate-500 italic">
-          დედლაინი: {{ formatDate(deadline?.time) }}
-        </p>
-        <Button
-          v-if="!isDeadlinePassed"
-          label="ჩაწერა"
-          icon="pi pi-plus-circle"
-          severity="success"
-          raised
-          size="large"
-          class="px-8"
-          @click="showRegisterModal = true"
-        />
-      </div>
-    </div>
+    <LoadingSpinner v-if="loadingStore" />
 
-    <div
-      class="card shadow-xl rounded-lg overflow-hidden border border-slate-200"
-    >
-      <DataTable
-        :value="allRequests"
-        stripedRows
-        paginator
-        :rows="10"
-        responsiveLayout="stack"
+    <div v-else>
+      <div
+        class="mb-8 text-center p-4 rounded-2xl shadow-2xl border border-slate-200"
       >
-        <template #header>
+        <h2 class="text-3xl font-bold mb-4 text-white">საღამოს გამოსვლები</h2>
+        <div class="flex flex-col items-center gap-4">
           <div
-            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left"
+            class="bg-slate-900 px-4 py-4 rounded-xl border border-slate-200"
           >
-            <div class="flex flex-col text-left">
-              <span class="text-xl font-semibold"
-                >ნომრების სია და სტატუსები</span
-              >
-              <span class="text-xs text-slate-400 italic"
-                >ცხრილი არ ასახავს გამომსვლელთა თანმიმდევრობას</span
-              >
+            <div class="text-4xl font-mono text-yellow-400 tracking-wider">
+              {{ countdownText }}
             </div>
-            <Tag severity="info" :value="`სულ: ${allRequests.length}`" />
+            <p class="text-slate-400 mt-2 text-sm uppercase tracking-widest">
+              რეგისტრაციის დასრულებამდე
+            </p>
           </div>
-        </template>
-
-        <Column field="scene_name" header="ნომერი" sortable />
-        <Column field="performer_full_name" header="შემსრულებელი" sortable />
-        <Column field="leader_full_name" header="ლიდერი" sortable />
-        <Column field="group_name" header="ჯგუფი" sortable />
-        <Column field="created_at" header="დრო" sortable>
-          <template #body="{ data }">
-            <span v-if="data && data.created_at">{{
-              formatDate(data.created_at)
-            }}</span>
-            <span v-else class="text-slate-400">-</span>
-          </template>
-        </Column>
-
-        <Column header="სტატუსი" field="request_status" sortable>
-          <template #body="{ data }">
-            <Tag
-              :severity="getStatusSeverity(data.request_status)"
-              :value="getStatusLabel(data.request_status)"
-            />
-          </template>
-        </Column>
-
-        <template #empty>
-          <div class="text-center p-8 text-slate-500">განაცხადები არ არის.</div>
-        </template>
-      </DataTable>
-    </div>
-
-    <Dialog
-      v-model:visible="showRegisterModal"
-      modal
-      header="ნომრის რეგისტრაცია"
-      :style="{ width: '90vw', maxWidth: '500px' }"
-      class="p-fluid"
-    >
-      <div class="flex flex-col gap-4 py-4">
-        <div class="flex flex-col gap-2">
-          <label
-            >ბავშვის სახელი და გვარი <span class="text-red-500">*</span></label
-          >
-          <InputText
-            v-model="newEvent.performer_full_name"
-            :class="{ 'p-invalid': submitted && !newEvent.performer_full_name }"
+          <p class="text-slate-500 italic">
+            დედლაინი: {{ formatDate(deadline?.time) }}
+          </p>
+          <Button
+            v-if="!isDeadlinePassed"
+            label="ჩაწერა"
+            icon="pi pi-plus-circle"
+            severity="success"
+            raised
+            size="large"
+            class="px-8"
+            @click="showRegisterModal = true"
           />
-          <Message
-            v-if="submitted && !newEvent.performer_full_name"
-            severity="error"
-            variant="simple"
-            size="small"
-            >სახელი აუცილებელია</Message
-          >
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label
-            >ლიდერის სახელი და გვარი <span class="text-red-500">*</span></label
-          >
-          <InputText
-            v-model="newEvent.leader_full_name"
-            :class="{ 'p-invalid': submitted && !newEvent.leader_full_name }"
-          />
-          <Message
-            v-if="submitted && !newEvent.leader_full_name"
-            severity="error"
-            variant="simple"
-            size="small"
-            >ლიდერის სახელი აუცილებელია</Message
-          >
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label>ჯგუფის სახელი <span class="text-red-500">*</span></label>
-          <InputText
-            v-model="newEvent.group_name"
-            :class="{ 'p-invalid': submitted && !newEvent.group_name }"
-          />
-          <Message
-            v-if="submitted && !newEvent.group_name"
-            severity="error"
-            variant="simple"
-            size="small"
-            >ჯგუფის დასახელება აუცილებელია</Message
-          >
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label>ნომრის სახელი <span class="text-red-500">*</span></label>
-          <InputText
-            v-model="newEvent.scene_name"
-            placeholder="მაგ: სიმღერა, ცეკვა, დადგმა..."
-            :class="{ 'p-invalid': submitted && !newEvent.scene_name }"
-          />
-          <Message
-            v-if="submitted && !newEvent.scene_name"
-            severity="error"
-            variant="simple"
-            size="small"
-            >ნომრის დასახელება აუცილებელია</Message
-          >
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label>მედია ლინკი</label>
-          <InputText
-            v-model="newEvent.media_url"
-            placeholder="მაგ: YouTube ან Google Drive ლინკი"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label>დამატებითი კომენტარი</label>
-          <Textarea v-model="newEvent.additional_info" rows="3" autoResize />
         </div>
       </div>
 
-      <template #footer>
-        <Button
-          label="გაუქმება"
-          icon="pi pi-times"
-          text
-          @click="showRegisterModal = false"
-          :disabled="loading"
-        />
-        <Button
-          label="გაგზავნა"
-          icon="pi pi-check"
-          severity="success"
-          @click="handleRegister"
-          :loading="loading"
-        />
-      </template>
-    </Dialog>
+      <div
+        class="card shadow-xl rounded-lg overflow-hidden border border-slate-200"
+      >
+        <DataTable
+          :value="allRequests"
+          stripedRows
+          paginator
+          :rows="10"
+          responsiveLayout="stack"
+        >
+          <template #header>
+            <div
+              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left"
+            >
+              <div class="flex flex-col text-left">
+                <span class="text-xl font-semibold"
+                  >ნომრების სია და სტატუსები</span
+                >
+                <span class="text-xs text-slate-400 italic"
+                  >ცხრილი არ ასახავს გამომსვლელთა თანმიმდევრობას</span
+                >
+              </div>
+              <Tag severity="info" :value="`სულ: ${allRequests.length}`" />
+            </div>
+          </template>
+
+          <Column field="scene_name" header="ნომერი" sortable />
+          <Column field="performer_full_name" header="შემსრულებელი" sortable />
+          <Column field="leader_full_name" header="ლიდერი" sortable />
+          <Column field="group_name" header="ჯგუფი" sortable />
+          <Column field="created_at" header="დრო" sortable>
+            <template #body="{ data }">
+              <span v-if="data && data.created_at">{{
+                formatDate(data.created_at)
+              }}</span>
+              <span v-else class="text-slate-400">-</span>
+            </template>
+          </Column>
+
+          <Column header="სტატუსი" field="request_status" sortable>
+            <template #body="{ data }">
+              <Tag
+                :severity="getStatusSeverity(data.request_status)"
+                :value="getStatusLabel(data.request_status)"
+              />
+            </template>
+          </Column>
+
+          <template #empty>
+            <div class="text-center p-8 text-slate-500">
+              განაცხადები არ არის.
+            </div>
+          </template>
+        </DataTable>
+      </div>
+
+      <Dialog
+        v-model:visible="showRegisterModal"
+        modal
+        header="ნომრის რეგისტრაცია"
+        :style="{ width: '90vw', maxWidth: '500px' }"
+        class="p-fluid"
+      >
+        <div class="flex flex-col gap-4 py-4">
+          <div class="flex flex-col gap-2">
+            <label
+              >ბავშვის სახელი და გვარი
+              <span class="text-red-500">*</span></label
+            >
+            <InputText
+              v-model="newEvent.performer_full_name"
+              :class="{
+                'p-invalid': submitted && !newEvent.performer_full_name,
+              }"
+            />
+            <Message
+              v-if="submitted && !newEvent.performer_full_name"
+              severity="error"
+              variant="simple"
+              size="small"
+              >სახელი აუცილებელია</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label
+              >ლიდერის სახელი და გვარი
+              <span class="text-red-500">*</span></label
+            >
+            <InputText
+              v-model="newEvent.leader_full_name"
+              :class="{ 'p-invalid': submitted && !newEvent.leader_full_name }"
+            />
+            <Message
+              v-if="submitted && !newEvent.leader_full_name"
+              severity="error"
+              variant="simple"
+              size="small"
+              >ლიდერის სახელი აუცილებელია</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label>ჯგუფის სახელი <span class="text-red-500">*</span></label>
+            <InputText
+              v-model="newEvent.group_name"
+              :class="{ 'p-invalid': submitted && !newEvent.group_name }"
+            />
+            <Message
+              v-if="submitted && !newEvent.group_name"
+              severity="error"
+              variant="simple"
+              size="small"
+              >ჯგუფის დასახელება აუცილებელია</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label>ნომრის სახელი <span class="text-red-500">*</span></label>
+            <InputText
+              v-model="newEvent.scene_name"
+              placeholder="მაგ: სიმღერა, ცეკვა, დადგმა..."
+              :class="{ 'p-invalid': submitted && !newEvent.scene_name }"
+            />
+            <Message
+              v-if="submitted && !newEvent.scene_name"
+              severity="error"
+              variant="simple"
+              size="small"
+              >ნომრის დასახელება აუცილებელია</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label>მედია ლინკი</label>
+            <InputText
+              v-model="newEvent.media_url"
+              placeholder="მაგ: YouTube ან Google Drive ლინკი"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label>დამატებითი კომენტარი</label>
+            <Textarea v-model="newEvent.additional_info" rows="3" autoResize />
+          </div>
+        </div>
+
+        <template #footer>
+          <Button
+            label="გაუქმება"
+            icon="pi pi-times"
+            text
+            @click="showRegisterModal = false"
+            :disabled="loading"
+          />
+          <Button
+            label="გაგზავნა"
+            icon="pi pi-check"
+            severity="success"
+            @click="handleRegister"
+            :loading="loading"
+          />
+        </template>
+      </Dialog>
+    </div>
   </div>
 </template>

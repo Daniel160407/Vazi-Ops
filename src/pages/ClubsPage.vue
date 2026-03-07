@@ -14,10 +14,11 @@ import { format } from "date-fns";
 import { useClubsCrud } from "../composables/useClubsCrud";
 import type { Club, ClubBooking } from "../type/interfaces";
 import { CLUB_BOOKINGS_DB } from "../composables/constants";
+import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
 const globalStore = useGlobalStore();
 const toast = useToast();
-const { clubs } = storeToRefs(globalStore);
+const { loading: loadingStore, clubs } = storeToRefs(globalStore);
 const { fetchClubs } = globalStore;
 
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
@@ -110,7 +111,6 @@ const handleConfirmRegister = async () => {
     const existing = await fetchUserBookings();
     userBookings.value = existing;
 
-    // prevent booking different club at the same time
     if (selectedClub.value.time) {
       const hasSameTime = existing.some((booking) => {
         const clubForBooking = clubs.value.find(
@@ -196,7 +196,7 @@ const handleConfirmRegister = async () => {
         severity: "warn",
         summary: "დრო უკვე დაკავებულია",
         detail:
-          "გაქვს სხვა წრე იმავე დროს, ამიტომ ამ წრეზე შეცვლა ვერ მოხერხდა.",
+          "შენ გაქვს სხვა წრე ამ დროს, ამიტომ ამ წრეზე შეცვლა ვერ მოხერხდა.",
         life: 3000,
       });
       return;
@@ -212,117 +212,122 @@ const handleConfirmRegister = async () => {
 </script>
 
 <template>
-  <div
-    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4"
-  >
+  <div>
+    <LoadingSpinner v-if="loadingStore" />
+    
     <div
-      v-for="club in clubs"
-      :key="club.id"
-      class="flex flex-col gap-3 rounded-xl p-4 border border-solid"
+      v-else
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4"
     >
-      <div>
-        <p class="text-xl text-center font-bold mb-3">
-          {{ club.name ?? "წრის სახელი" }}
-        </p>
-        <p>პედაგოგი: {{ club.teacher || "-" }}</p>
-        <p>ადგილმდებარეობა: {{ club.place || "-" }}</p>
-        <p>დრო: {{ formatTime(club.time) }}</p>
-        <p>დარჩენილი ადგილები: {{ club.places_quantity ?? 0 }}</p>
-      </div>
-
       <div
-        v-if="club.additional_info"
-        class="border-t pt-2 text-sm text-gray-700"
+        v-for="club in clubs"
+        :key="club.id"
+        class="flex flex-col gap-3 rounded-xl p-4 border border-solid"
       >
-        {{ club.additional_info }}
-      </div>
-
-      <Button
-        label="დარეგისტრირდი"
-        icon="pi pi-check"
-        class="mt-2 w-full"
-        :disabled="club.places_quantity <= 0 || loading"
-        @click="openRegisterDialog(club)"
-      />
-
-      <p
-        v-if="club.places_quantity <= 0"
-        class="text-red-500 text-xs mt-1 text-center"
-      >
-        ადგილები აღარ არის ამ წრეზე
-      </p>
-    </div>
-
-    <Dialog v-model:visible="showDialog" modal header="დარეგისტრირდი წრეზე">
-      <div class="space-y-4 pt-2">
-        <p v-if="selectedClub" class="font-semibold">
-          წრე: {{ selectedClub?.name }}
-        </p>
-
-        <FloatLabel variant="on">
-          <InputText
-            id="childFirstName"
-            v-model="childFirstName"
-            class="w-full"
-          />
-          <label for="childFirstName">სახელი</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText
-            id="childLastName"
-            v-model="childLastName"
-            class="w-full"
-          />
-          <label for="childLastName">გვარი</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText id="leaderName" v-model="leaderName" class="w-full" />
-          <label for="leaderName">ლიდერის სახელი</label>
-        </FloatLabel>
-
-        <FloatLabel variant="on">
-          <InputText id="groupName" v-model="groupName" class="w-full" />
-          <label for="groupName">ჯგუფის სახელი</label>
-        </FloatLabel>
-
-        <div v-if="selectionMode === 'switch'" class="space-y-2 mt-2">
-          <p class="text-sm text-gray-700">
-            უკვე დარეგისტრირებული ხარ 2 წრეზე. აირჩიე რომელი გინდა შეცვალო ამ
-            წრით.
+        <div>
+          <p class="text-xl text-center font-bold mb-3">
+            {{ club.name ?? "წრის სახელი" }}
           </p>
-          <Dropdown
-            v-model="bookingToReplaceId"
-            :options="userBookings"
-            optionLabel="club_name"
-            optionValue="id"
-            placeholder="აირჩიე წრე შესაცვლელად"
-            class="w-full"
-          />
+          <p>პედაგოგი: {{ club.teacher || "-" }}</p>
+          <p>ადგილმდებარეობა: {{ club.place || "-" }}</p>
+          <p>დრო: {{ formatTime(club.time) }}</p>
+          <p>დარჩენილი ადგილები: {{ club.places_quantity ?? 0 }}</p>
         </div>
+
+        <div
+          v-if="club.additional_info"
+          class="border-t pt-2 text-sm text-gray-700"
+        >
+          {{ club.additional_info }}
+        </div>
+
+        <Button
+          label="დარეგისტრირდი"
+          icon="pi pi-check"
+          class="mt-2 w-full"
+          :disabled="club.places_quantity <= 0 || loading"
+          @click="openRegisterDialog(club)"
+        />
+
+        <p
+          v-if="club.places_quantity <= 0"
+          class="text-red-500 text-xs mt-1 text-center"
+        >
+          ადგილები აღარ არის ამ წრეზე
+        </p>
       </div>
 
-      <template #footer>
-        <Button
-          label="გაუქმება"
-          icon="pi pi-times"
-          severity="secondary"
-          outlined
-          @click="
-            () => {
-              showDialog = false;
-              resetForm();
-            }
-          "
-        />
-        <Button
-          :label="selectionMode === 'switch' ? 'შეცვლა' : 'დარეგისტრირება'"
-          icon="pi pi-check"
-          :loading="loading"
-          @click="handleConfirmRegister"
-        />
-      </template>
-    </Dialog>
+      <Dialog v-model:visible="showDialog" modal header="დარეგისტრირდი წრეზე">
+        <div class="space-y-4 pt-2">
+          <p v-if="selectedClub" class="font-semibold">
+            წრე: {{ selectedClub?.name }}
+          </p>
+
+          <FloatLabel variant="on">
+            <InputText
+              id="childFirstName"
+              v-model="childFirstName"
+              class="w-full"
+            />
+            <label for="childFirstName">სახელი</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText
+              id="childLastName"
+              v-model="childLastName"
+              class="w-full"
+            />
+            <label for="childLastName">გვარი</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText id="leaderName" v-model="leaderName" class="w-full" />
+            <label for="leaderName">ლიდერის სახელი</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <InputText id="groupName" v-model="groupName" class="w-full" />
+            <label for="groupName">ჯგუფის სახელი</label>
+          </FloatLabel>
+
+          <div v-if="selectionMode === 'switch'" class="space-y-2 mt-2">
+            <p class="text-sm text-gray-700">
+              უკვე დარეგისტრირებული ხარ 2 წრეზე. აირჩიე რომელი გინდა შეცვალო ამ
+              წრით.
+            </p>
+            <Dropdown
+              v-model="bookingToReplaceId"
+              :options="userBookings"
+              optionLabel="club_name"
+              optionValue="id"
+              placeholder="აირჩიე წრე შესაცვლელად"
+              class="w-full"
+            />
+          </div>
+        </div>
+
+        <template #footer>
+          <Button
+            label="გაუქმება"
+            icon="pi pi-times"
+            severity="secondary"
+            outlined
+            @click="
+              () => {
+                showDialog = false;
+                resetForm();
+              }
+            "
+          />
+          <Button
+            :label="selectionMode === 'switch' ? 'შეცვლა' : 'დარეგისტრირება'"
+            icon="pi pi-check"
+            :loading="loading"
+            @click="handleConfirmRegister"
+          />
+        </template>
+      </Dialog>
+    </div>
   </div>
 </template>
