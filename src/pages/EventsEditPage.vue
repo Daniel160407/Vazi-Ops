@@ -119,7 +119,7 @@ watch(
             label="განახლება"
             icon="pi pi-clock"
             @click="handleUpdateDeadline"
-            :loading="loading"
+            :loading="loading.value"
             severity="help"
           />
         </div>

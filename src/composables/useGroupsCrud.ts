@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   collection,
   addDoc,
@@ -15,12 +15,15 @@ import { storeToRefs } from "pinia";
 
 export function useGroupsCrud() {
   const toast = useToast();
-  const { groups } = storeToRefs(useGlobalStore());
+  const globalStore = useGlobalStore();
+  const { loading: loadingStore, groups } = storeToRefs(globalStore);
+  const { fetchGroups } = globalStore;
 
-  const loading = ref(false);
+  const saving = ref(false);
+  const loading = computed(() => loadingStore && saving);
 
   const addGroup = async (group: Omit<Group, "id">) => {
-    loading.value = true;
+    saving.value = true;
     try {
       const isCottageOccupied = groups.value.some(
         (g) => g.cottage_num === group.cottage_num
@@ -52,13 +55,13 @@ export function useGroupsCrud() {
         life: 3000,
       });
     } finally {
-      loading.value = false;
+      saving.value = false;
     }
   };
 
   const updateGroup = async (group: Group) => {
     if (!group.id) return;
-    loading.value = true;
+    saving.value = true;
     try {
       const isCottageOccupied = groups.value.some(
         (g) => g.cottage_num === group.cottage_num && g.id !== group.id
@@ -92,12 +95,12 @@ export function useGroupsCrud() {
         life: 3000,
       });
     } finally {
-      loading.value = false;
+      saving.value = false;
     }
   };
 
   const deleteGroup = async (groupId: string) => {
-    loading.value = true;
+    saving.value = true;
     try {
       await deleteDoc(doc(db, GROUPS_DB, groupId));
       toast.add({
@@ -114,12 +117,15 @@ export function useGroupsCrud() {
         life: 3000,
       });
     } finally {
-      loading.value = false;
+      saving.value = false;
     }
   };
 
   return {
+    groups,
     loading,
+
+    fetchGroups,
     addGroup,
     updateGroup,
     deleteGroup,

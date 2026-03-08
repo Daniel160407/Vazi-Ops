@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { ka } from "date-fns/locale";
 import { format, intervalToDuration, type Duration } from "date-fns";
@@ -21,9 +19,7 @@ import {
 import type { Event as AppEvent } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const globalstore = useGlobalStore();
-const { loading: loadingStore, deadline, events } = storeToRefs(globalstore);
-const { loading, createEvent } = useEventsCrud();
+const { loading, deadline, events, createEvent } = useEventsCrud();
 
 const showRegisterModal = ref(false);
 const isDeadlinePassed = ref(false);
@@ -80,7 +76,6 @@ const handleRegister = async () => {
   showRegisterModal.value = false;
   newEvent.value = getEmptyForm();
   submitted.value = false;
-  await globalstore.fetchEvents();
 };
 
 let timer: number | null = null;
@@ -132,7 +127,7 @@ onUnmounted(() => {
 
 <template>
   <div class="p-4">
-    <LoadingSpinner v-if="loadingStore" />
+    <LoadingSpinner v-if="(loading && events.length <= 0) || !deadline" />
 
     <div v-else>
       <div
@@ -319,14 +314,14 @@ onUnmounted(() => {
             icon="pi pi-times"
             text
             @click="showRegisterModal = false"
-            :disabled="loading"
+            :disabled="loading.value"
           />
           <Button
             label="გაგზავნა"
             icon="pi pi-check"
             severity="success"
             @click="handleRegister"
-            :loading="loading"
+            :loading="loading.value"
           />
         </template>
       </Dialog>

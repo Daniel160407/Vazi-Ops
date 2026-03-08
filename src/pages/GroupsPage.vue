@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
 import { GENDER_MALE } from "../composables/constants";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { useGroupsCrud } from "../composables/useGroupsCrud";
 
-const { loading, groups } = storeToRefs(useGlobalStore());
+const { loading, groups } = useGroupsCrud();
 </script>
 <template>
   <div>
-    <LoadingSpinner v-if="loading" />
+    <LoadingSpinner v-if="loading && groups.length <= 0" />
 
     <div
       v-else

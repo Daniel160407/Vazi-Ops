@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
 import { GENDER_MALE, GENDER_FEMALE } from "../composables/constants";
 import { ref, watch } from "vue";
 import type { Group } from "../type/interfaces";
@@ -14,10 +12,8 @@ import { useGroupsCrud } from "../composables/useGroupsCrud";
 import { Textarea, useConfirm } from "primevue";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const globalStore = useGlobalStore();
-const { loading, groups } = storeToRefs(globalStore);
-const { fetchGroups } = globalStore;
-const { addGroup, updateGroup, deleteGroup } = useGroupsCrud();
+const { loading, groups, fetchGroups, addGroup, updateGroup, deleteGroup } =
+  useGroupsCrud();
 const confirm = useConfirm();
 
 const editingGroups = ref<Group[]>([]);
@@ -101,7 +97,7 @@ watch(
 
 <template>
   <div class="p-4">
-    <LoadingSpinner v-if="loading" />
+    <LoadingSpinner v-if="loading && groups.length <= 0" />
 
     <div v-else>
       <div class="mb-4">
