@@ -35,7 +35,19 @@ export interface Schedule {
   image_url: string;
 }
 
+export interface EveningScheduleItem {
+  id: string;
+  scene_name: string;
+  performer_full_name: string;
+  leader_full_name: string;
+  group_name: string;
+  media_url: string;
+  position: number;
+  created_at: Date;
+}
+
 export interface Event {
+  id: string;
   scene_name: string;
   performer_full_name: string;
   leader_full_name: string;

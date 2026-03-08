@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type {
   Group,
   Club,
@@ -7,6 +7,7 @@ import type {
   Schedule,
   Event,
   Deadline,
+  EveningScheduleItem,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -15,6 +16,7 @@ import {
   SCHEDULES_DB,
   EVENTS_DB,
   DEADLINE_DB,
+  EVENING_SCHEDULE_DB,
 } from "../composables/constants";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -27,10 +29,13 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
   const schedules = ref<Schedule[]>([]);
+  const eveningScheduleItems = ref<EveningScheduleItem[]>([]);
   const events = ref<Event[]>([]);
   const deadline = ref<Deadline | null>(null);
 
   const loadingCount = ref<number>(0);
+
+  const loading = computed(() => loadingCount.value > 0);
 
   const withLoading = async <T>(
     fn: () => Promise<T>
@@ -134,6 +139,28 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchEveningSchedule = async () => {
+    await withLoading(async () => {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, EVENING_SCHEDULE_DB)
+        );
+        eveningScheduleItems.value = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<EveningScheduleItem, "id">),
+        }));
+      } catch (err) {
+        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: "შეცდომა",
+          detail: "განრიგი ვერ ჩაიტვირთა",
+          life: 3000,
+        });
+      }
+    });
+  };
+
   const fetchEvents = async () => {
     await withLoading(async () => {
       try {
@@ -186,6 +213,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
       fetchClubs(),
       fetchClubBookings(),
       fetchSchedules(),
+      fetchEveningSchedule(),
       fetchEvents(),
       fetchDeadline(),
     ]);
@@ -196,13 +224,16 @@ export const useGlobalStore = defineStore("globalStore", () => {
     clubs,
     clubBookings,
     schedules,
+    eveningScheduleItems,
     events,
     deadline,
+    loading,
 
     fetchGroups,
     fetchClubs,
     fetchClubBookings,
     fetchSchedules,
+    fetchEveningSchedule,
     fetchEvents,
     fetchDeadline,
 

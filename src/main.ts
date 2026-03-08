@@ -9,7 +9,7 @@ import "./style.css";
 import "primeicons/primeicons.css";
 
 import App from "./App.vue";
-import { ToastService } from "primevue";
+import { ToastService, Tooltip } from "primevue";
 
 const app = createApp(App);
 
@@ -28,5 +28,7 @@ app.use(createPinia());
 app.use(ConfirmationService);
 app.use(router);
 app.use(ToastService);
+
+app.directive("tooltip", Tooltip);
 
 app.mount("#app");
