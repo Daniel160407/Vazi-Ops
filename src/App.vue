@@ -157,7 +157,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="lg:p-4">
+  <div class="p-4">
     <div class="flex justify-center items-center">
       <h1 class="mb-4 flex items-center gap-3 text-3xl font-semibold">
         ბანაკი "ვაზი"
