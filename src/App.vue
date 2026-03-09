@@ -158,10 +158,11 @@ onMounted(() => {
 
 <template>
   <div class="p-4">
-    <div class="flex justify-center items-center">
-      <h1 class="mb-4 flex items-center gap-3 text-3xl font-semibold">
+    <div class="flex gap-3 justify-center items-center mb-3">
+      <h1 class="flex items-center gap-3 text-3xl font-semibold">
         ბანაკი "ვაზი"
       </h1>
+      <img src="./assets/images/logo.png" class="w-14" />
     </div>
 
     <Menubar :model="items" />
