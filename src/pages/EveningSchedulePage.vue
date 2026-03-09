@@ -8,7 +8,7 @@ const { loading, eveningScheduleItems } = storeToRefs(globalStore);
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto p-4 pb-20">
+  <div class="max-w-3xl mx-auto pb-20">
     <LoadingSpinner v-if="loading" />
 
     <div v-else>

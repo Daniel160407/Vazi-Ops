@@ -8,8 +8,7 @@ import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
-import { useToast } from "primevue";
+import { Card, Select, useToast } from "primevue";
 import { format } from "date-fns";
 import { useClubsCrud } from "../composables/useClubsCrud";
 import type { Club, ClubBooking } from "../type/interfaces";
@@ -129,7 +128,7 @@ const handleConfirmRegister = async () => {
           summary: "დრო დაკავებულია",
           detail:
             "უკვე გაქვს სხვა წრე იმავე დროს, ამიტომ ამ წრეზე ვეღარ დარეგისტრირდები.",
-          life: 3000,
+          life: 6000,
         });
         return;
       }
@@ -214,50 +213,50 @@ const handleConfirmRegister = async () => {
 <template>
   <div>
     <LoadingSpinner v-if="loadingStore" />
-    
+
     <div
       v-else
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     >
-      <div
+      <Card
         v-for="club in clubs"
-        :key="club.id"
-        class="flex flex-col gap-3 rounded-xl p-4 border border-solid"
+        :key="club.name"
+        class="border"
+        :style="{
+          borderColor: club.places_quantity <= 0 ? '#EE4B2B' : '',
+        }"
       >
-        <div>
-          <p class="text-xl text-center font-bold mb-3">
+        <template #title>
+          <p class="text-center text-2xl font-bold">
             {{ club.name ?? "წრის სახელი" }}
           </p>
-          <p>პედაგოგი: {{ club.teacher || "-" }}</p>
-          <p>ადგილმდებარეობა: {{ club.place || "-" }}</p>
-          <p>დრო: {{ formatTime(club.time) }}</p>
-          <p>დარჩენილი ადგილები: {{ club.places_quantity ?? 0 }}</p>
-        </div>
+        </template>
+        <template #subtitle>
+          <div>
+            <p>მასწავლებელი: {{ club.teacher ?? "-" }}</p>
+            <p>ადგილი: {{ club.place ?? "-" }}</p>
+            <p>დრო: {{ formatTime(club.time) ?? "-" }}</p>
+            <p>დარჩენილი ადგილები: {{ club.places_quantity ?? "-" }}</p>
+          </div>
+        </template>
+        <template #content>
+          <div>
+            <p class="font-bold">
+              დამატებითი კომენტარი: {{ club.additional_info ?? "-" }}
+            </p>
 
-        <div
-          v-if="club.additional_info"
-          class="border-t pt-2 text-sm text-gray-700"
-        >
-          {{ club.additional_info }}
-        </div>
+            <Button
+              label="ჩაეწერე"
+              icon="pi pi-check"
+              class="mt-4 w-full"
+              :disabled="club.places_quantity <= 0 || loading"
+              @click="openRegisterDialog(club)"
+            />
+          </div>
+        </template>
+      </Card>
 
-        <Button
-          label="დარეგისტრირდი"
-          icon="pi pi-check"
-          class="mt-2 w-full"
-          :disabled="club.places_quantity <= 0 || loading"
-          @click="openRegisterDialog(club)"
-        />
-
-        <p
-          v-if="club.places_quantity <= 0"
-          class="text-red-500 text-xs mt-1 text-center"
-        >
-          ადგილები აღარ არის ამ წრეზე
-        </p>
-      </div>
-
-      <Dialog v-model:visible="showDialog" modal header="დარეგისტრირდი წრეზე">
+      <Dialog v-model:visible="showDialog" modal header="ჩაეწერე წრეზე">
         <div class="space-y-4 pt-2">
           <p v-if="selectedClub" class="font-semibold">
             წრე: {{ selectedClub?.name }}
@@ -296,7 +295,7 @@ const handleConfirmRegister = async () => {
               უკვე დარეგისტრირებული ხარ 2 წრეზე. აირჩიე რომელი გინდა შეცვალო ამ
               წრით.
             </p>
-            <Dropdown
+            <Select
               v-model="bookingToReplaceId"
               :options="userBookings"
               optionLabel="club_name"
@@ -321,7 +320,7 @@ const handleConfirmRegister = async () => {
             "
           />
           <Button
-            :label="selectionMode === 'switch' ? 'შეცვლა' : 'დარეგისტრირება'"
+            :label="selectionMode === 'switch' ? 'შეცვლა' : 'ჩაწერა'"
             icon="pi pi-check"
             :loading="loading"
             @click="handleConfirmRegister"
