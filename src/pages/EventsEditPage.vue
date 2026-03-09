@@ -68,6 +68,11 @@ const handleDelete = async (id: string) => {
     message: "დარწმუნებული ხარ, რომ ნომრის წაშლა გინდა?",
     header: "წაშლა",
     acceptProps: { label: "წაშლა", severity: "danger" },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+      outlined: true,
+    },
     accept: async () => {
       await deleteEvent(id);
       await globalstore.fetchEvents();

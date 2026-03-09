@@ -15,17 +15,28 @@ import Tab from "primevue/tab";
 import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { useConfirm } from "primevue";
 
 const globalStore = useGlobalStore();
 const { fetchEveningSchedule } = globalStore;
 const { loading: loadingStore, eveningScheduleItems } =
   storeToRefs(globalStore);
+const confirm = useConfirm();
 
-const { updateScheduleOrder, addEveningSchedule, loading } = useSchedulesCrud();
+const {
+  updateScheduleOrder,
+  addEveningSchedule,
+  updateEveningSchedule,
+  deleteEveningSchedule,
+  loading,
+} = useSchedulesCrud();
 
 const showRegisterModal = ref(false);
 const submitted = ref(false);
 const activeTab = ref("0");
+
+const isEditing = ref(false);
+const editingId = ref<string | null>(null);
 
 const newEvent = ref({
   performer_full_name: "",
@@ -47,12 +58,30 @@ const resetForm = () => {
   };
   submitted.value = false;
   activeTab.value = "0";
+  isEditing.value = false;
+  editingId.value = null;
+};
+
+const openEditModal = (item: any) => {
+  isEditing.value = true;
+  editingId.value = item.id;
+
+  newEvent.value = {
+    performer_full_name: item.performer_full_name || "",
+    leader_full_name: item.leader_full_name || "",
+    group_name: item.group_name || "",
+    scene_name: item.scene_name || "",
+    media_url: item.media_url || "",
+    additional_info: item.additional_info || "",
+  };
+
+  activeTab.value = item.performer_full_name ? "1" : "0";
+  showRegisterModal.value = true;
 };
 
 const saveNewOrder = async () => {
   await updateScheduleOrder(eveningScheduleItems.value);
   await fetchEveningSchedule();
-  eveningScheduleItems.value.sort((a, b) => a.position - b.position);
 };
 
 const handleRegister = async () => {
@@ -70,19 +99,42 @@ const handleRegister = async () => {
 
   if (!isValid) return;
 
-  const itemToAdd = {
+  const preparedData = {
     ...newEvent.value,
     ...(isKidsForm
       ? {}
       : { performer_full_name: "", leader_full_name: "", group_name: "" }),
-    position: eveningScheduleItems.value.length + 1,
-    created_at: new Date(),
   };
 
-  await addEveningSchedule(itemToAdd);
+  if (isEditing.value && editingId.value) {
+    await updateEveningSchedule(editingId.value, preparedData);
+  } else {
+    const itemToAdd = {
+      ...preparedData,
+      position: eveningScheduleItems.value.length + 1,
+      created_at: new Date(),
+    };
+    await addEveningSchedule(itemToAdd);
+  }
 
   showRegisterModal.value = false;
   resetForm();
+};
+
+const handleDelete = async (id: string) => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ ნომრის წაშლა გინდა?",
+    header: "წაშლა",
+    acceptProps: { label: "წაშლა", severity: "danger" },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+      outlined: true,
+    },
+    accept: async () => {
+      await deleteEveningSchedule(id);
+    },
+  });
 };
 
 watch(
@@ -98,7 +150,7 @@ watch(
 
 <template>
   <div class="p-4">
-    <LoadingSpinner v-if="loadingStore" />
+    <LoadingSpinner v-if="loadingStore && eveningScheduleItems.length <= 0" />
 
     <div v-else>
       <div class="flex justify-start gap-2 mt-4 mb-4">
@@ -112,10 +164,14 @@ watch(
         <Button
           label="დამატება"
           severity="info"
-          @click="showRegisterModal = true"
+          @click="
+            resetForm();
+            showRegisterModal = true;
+          "
           outlined
         />
       </div>
+
       <OrderList
         v-model="eveningScheduleItems"
         dataKey="id"
@@ -124,10 +180,11 @@ watch(
       >
         <template #header> საღამოს პროგრამა </template>
         <template #option="{ option, index }">
-          <div class="flex flex-wrap p-2 items-center gap-3">
-            <span class="font-mono font-bold text-xl text-primary"
-              >{{ index + 1 }}.</span
-            >
+          <div class="flex flex-wrap p-2 items-center gap-3 w-full">
+            <span class="font-mono font-bold text-xl text-primary">
+              {{ index + 1 }}.
+            </span>
+
             <div class="flex-1 flex flex-col gap-1">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-lg">{{ option.scene_name }}</span>
@@ -144,16 +201,30 @@ watch(
               >
                 <i class="pi pi-users text-xs"></i>
                 <span>{{ option.group_name }}</span>
-                <span v-if="option.leader_full_name" class="italic"
-                  >(ლიდერი: {{ option.leader_full_name }})</span
-                >
+                <span v-if="option.leader_full_name" class="italic">
+                  (ლიდერი: {{ option.leader_full_name }})
+                </span>
               </div>
             </div>
-            <div
-              v-if="option.media_url"
-              class="flex items-center justify-center"
-            >
+
+            <div class="flex items-center border rounded-2xl">
+              <Button
+                icon="pi pi-pencil"
+                severity="secondary"
+                variant="text"
+                rounded
+                @click.stop="openEditModal(option)"
+              />
+              <Button
+                icon="pi pi-trash"
+                severity="danger"
+                variant="text"
+                rounded
+                @click.stop="handleDelete(option.id)"
+              />
+
               <a
+                v-if="option.media_url"
                 :href="option.media_url"
                 target="_blank"
                 class="p-button p-button-rounded p-button-text p-button-secondary"
@@ -169,7 +240,7 @@ watch(
       <Dialog
         v-model:visible="showRegisterModal"
         modal
-        header="ნომრის რეგისტრაცია"
+        :header="isEditing ? 'ნომრის რედაქტირება' : 'ნომრის რეგისტრაცია'"
         :style="{ width: '90vw', maxWidth: '500px' }"
         class="p-fluid"
       >
@@ -196,8 +267,9 @@ watch(
                     severity="error"
                     variant="simple"
                     size="small"
-                    >ნომრის დასახელება აუცილებელია</Message
                   >
+                    ნომრის დასახელება აუცილებელია
+                  </Message>
                 </div>
               </div>
             </TabPanel>
@@ -222,7 +294,6 @@ watch(
                     >სახელი აუცილებელია</Message
                   >
                 </div>
-
                 <div class="flex flex-col gap-2">
                   <label
                     >ლიდერის სახელი და გვარი
@@ -242,7 +313,6 @@ watch(
                     >ლიდერის სახელი აუცილებელია</Message
                   >
                 </div>
-
                 <div class="flex flex-col gap-2">
                   <label
                     >ჯგუფის სახელი <span class="text-red-500">*</span></label
@@ -259,7 +329,6 @@ watch(
                     >ჯგუფის დასახელება აუცილებელია</Message
                   >
                 </div>
-
                 <div class="flex flex-col gap-2">
                   <label
                     >ნომრის სახელი <span class="text-red-500">*</span></label
@@ -290,7 +359,6 @@ watch(
               placeholder="YouTube ან Google Drive ლინკი"
             />
           </div>
-
           <div class="flex flex-col gap-2">
             <label>დამატებითი კომენტარი</label>
             <Textarea v-model="newEvent.additional_info" rows="3" autoResize />
@@ -306,7 +374,7 @@ watch(
             :disabled="loading"
           />
           <Button
-            label="გაგზავნა"
+            :label="isEditing ? 'განახლება' : 'გაგზავნა'"
             icon="pi pi-check"
             severity="success"
             @click="handleRegister"
