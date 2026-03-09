@@ -38,13 +38,6 @@ const getEmptyForm = (): Omit<AppEvent, "id"> => ({
 });
 
 const newEvent = ref(getEmptyForm());
-
-watch(showRegisterModal, (val) => {
-  if (!val) {
-    submitted.value = false;
-  }
-});
-
 const allRequests = computed(() => events.value);
 
 const getStatusSeverity = (status: string) => {
@@ -115,6 +108,12 @@ const formatDate = (dateValue?: any) => {
   return format(date, "d MMMM yyyy, HH:mm", { locale: ka });
 };
 
+watch(showRegisterModal, (val) => {
+  if (!val) {
+    submitted.value = false;
+  }
+});
+
 onMounted(() => {
   updateCountdown();
   timer = window.setInterval(updateCountdown, 1000);
@@ -135,7 +134,7 @@ onUnmounted(() => {
       <div
         class="mb-8 text-center p-4 rounded-2xl shadow-2xl border border-slate-200"
       >
-        <h2 class="text-3xl font-bold mb-4 text-white">საღამოს გამოსვლები</h2>
+        <h2 class="text-3xl font-bold mb-4 text-white">საღამოს ნომრები</h2>
         <div class="flex flex-col items-center gap-4">
           <div
             class="bg-slate-900 px-4 py-4 rounded-xl border border-slate-200"
@@ -143,7 +142,10 @@ onUnmounted(() => {
             <div class="text-4xl font-mono text-yellow-400 tracking-wider">
               {{ countdownText }}
             </div>
-            <p class="text-slate-400 mt-2 text-sm uppercase tracking-widest">
+            <p
+              v-if="!isDeadlinePassed"
+              class="text-slate-400 mt-2 text-sm uppercase tracking-widest"
+            >
               რეგისტრაციის დასრულებამდე
             </p>
           </div>
