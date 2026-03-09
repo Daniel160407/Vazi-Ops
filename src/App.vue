@@ -30,6 +30,7 @@ import {
   EVENTS_ROUTE,
   ADMIN_EVENTS_LABEL,
   ADMIN_EVENTS_ROUTE,
+  CLUB_BOOKINGS_ICON,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -97,7 +98,7 @@ const items = ref([
       },
       {
         label: ADMIN_CLUB_BOOKINGS_LABEL,
-        icon: "pi pi-list",
+        icon: CLUB_BOOKINGS_ICON,
         command: async () => {
           if (!user.value) {
             await signInWithGoogle();
@@ -157,20 +158,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-4">
-    <div class="flex gap-3 justify-center items-center mb-3">
-      <h1 class="flex items-center gap-3 text-3xl font-semibold">
-        ბანაკი "ვაზი"
-      </h1>
-      <img src="./assets/images/logo.png" class="w-14" />
+  <div
+    class="font-bpg flex min-h-svh w-full flex-col items-center justify-start bg-black p-4 lg:p-10 text-white"
+  >
+    <div class="flex gap-3 justify-center items-center mb-6">
+      <h1 class="text-3xl font-semibold tracking-tight">ბანაკი "ვაზი"</h1>
+      <img src="./assets/images/logo.png" class="w-12 h-12 object-contain" />
     </div>
 
-    <Menubar :model="items" />
+    <div
+      class="z-20 w-full rounded-xl bg-[#18181B] p-2 lg:min-w-225 lg:p-4 xl:max-w-300 shadow-2xl"
+    >
+      <div>
+        <Menubar
+          :model="items"
+          class="mb-4 rounded-none! border-t-0! border-r-0! border-b! border-l-0! border-surface-700!"
+        />
 
-    <Toast
-      class="right-0 left-0 mx-auto w-full max-w-[100vw] px-2 [&_.p-toast-message]:max-w-full [&_.p-toast-message]:rounded-xl [&_.p-toast-message]:wrap-break-word [&_.p-toast-message]:whitespace-normal"
-    />
+        <div class="p-2 min-h-100">
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
+      </div>
+    </div>
+
+    <Toast class="right-0 left-0 mx-auto w-full px-2" />
     <ConfirmDialog class="mx-2" />
-    <router-view />
   </div>
 </template>

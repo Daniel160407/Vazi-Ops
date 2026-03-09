@@ -23,11 +23,12 @@ export const ADMIN_DAY_SCHEDULE_LABEL = "დღის განრიგი";
 export const ADMIN_EVENING_SCHEDULE_LABEL = "საღამოს პროგრამა";
 export const ADMIN_EVENTS_LABEL = "ნომრები";
 
-export const GROUPS_ICON = "pi pi-home";
-export const CLUBS_ICON = "pi pi-users";
+export const GROUPS_ICON = "pi pi-users";
+export const CLUBS_ICON = "pi pi-sparkles";
 export const DAY_SCHEDULE_ICON = "pi pi-calendar";
-export const EVENING_SCHEDULE_ICON = "pi pi-sun";
-export const EVENTS_ICON = "pi pi-calendar";
+export const EVENING_SCHEDULE_ICON = "pi pi-moon";
+export const EVENTS_ICON = "pi pi-ticket";
+export const CLUB_BOOKINGS_ICON = "pi pi-list-check";
 export const ADMIN_ICON = "pi pi-user";
 
 //firebase

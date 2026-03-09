@@ -97,7 +97,7 @@ const confirmDelete = (booking: ClubBooking) => {
 </script>
 
 <template>
-  <div class="p-4">
+  <div>
     <LoadingSpinner v-if="loadingStore" />
 
     <div v-else>

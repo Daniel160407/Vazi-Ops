@@ -149,7 +149,7 @@ watch(
 </script>
 
 <template>
-  <div class="p-4">
+  <div>
     <LoadingSpinner v-if="loadingStore && eveningScheduleItems.length <= 0" />
 
     <div v-else>

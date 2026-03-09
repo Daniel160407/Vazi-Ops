@@ -126,7 +126,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="p-4">
+  <div>
     <LoadingSpinner
       v-if="(loading && events.length <= 0) || (!isDeadlinePassed && !timeLeft)"
     />
