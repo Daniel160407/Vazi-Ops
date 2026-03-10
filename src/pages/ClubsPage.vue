@@ -291,7 +291,7 @@ const handleConfirmRegister = async () => {
           </FloatLabel>
 
           <div v-if="selectionMode === 'switch'" class="space-y-2 mt-2">
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-white-700">
               უკვე დარეგისტრირებული ხარ 2 წრეზე. აირჩიე რომელი გინდა შეცვალო ამ
               წრით.
             </p>

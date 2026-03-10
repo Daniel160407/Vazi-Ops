@@ -125,7 +125,7 @@ export function useClubsCrud() {
         });
       });
 
-      showToast("success", "დარეგისტრირდი წრეზე");
+      showToast("success", "შენ წარმატებით ჩაეწერე ამ წრეზე");
     } catch (err: any) {
       console.error(err);
       if (err?.message === "NO_PLACES_LEFT") {
