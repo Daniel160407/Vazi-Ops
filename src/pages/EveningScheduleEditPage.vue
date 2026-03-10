@@ -139,6 +139,7 @@ const handleDelete = async (id: string) => {
     },
     accept: async () => {
       await deleteEveningSchedule(id);
+      sortByPosition(eveningScheduleItems.value);
     },
   });
 };
