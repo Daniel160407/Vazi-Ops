@@ -68,6 +68,11 @@ const handleDelete = async (id: string) => {
     message: "დარწმუნებული ხარ, რომ ნომრის წაშლა გინდა?",
     header: "წაშლა",
     acceptProps: { label: "წაშლა", severity: "danger" },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+      outlined: true,
+    },
     accept: async () => {
       await deleteEvent(id);
       await globalstore.fetchEvents();
@@ -102,8 +107,8 @@ watch(
   <div>
     <LoadingSpinner v-if="loadingStore" />
 
-    <div v-else class="p-4 space-y-6">
-      <div class="card p-4 border border-slate-700 rounded-xl shadow-lg">
+    <div v-else class="space-y-6">
+      <div class="card p-4 border rounded-xl shadow-lg">
         <h3 class="text-xl font-bold mb-4 text-white">რეგისტრაციის დედლაინი</h3>
         <div class="flex flex-wrap items-end gap-4">
           <div class="flex flex-col gap-2">
@@ -125,9 +130,7 @@ watch(
         </div>
       </div>
 
-      <div
-        class="card shadow-2xl rounded-lg overflow-hidden border border-slate-700"
-      >
+      <div class="card shadow-2xl rounded-lg overflow-hidden border">
         <DataTable
           :value="events"
           stripedRows

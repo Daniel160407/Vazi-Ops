@@ -8,6 +8,8 @@ import {
   addDoc,
   getDocs,
   writeBatch,
+  updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import type { EveningScheduleItem, Schedule } from "../type/interfaces";
 import { db } from "../../firebase";
@@ -51,7 +53,7 @@ export const useSchedulesCrud = () => {
       loading.value = false;
     }
   };
-  
+
   const addEveningSchedule = async (
     scheduleItem: Omit<EveningScheduleItem, "id">
   ) => {
@@ -141,10 +143,50 @@ export const useSchedulesCrud = () => {
     }
   };
 
+  const updateEveningSchedule = async (
+    id: string,
+    data: Partial<EveningScheduleItem>
+  ) => {
+    loading.value = true;
+    try {
+      const docRef = doc(db, EVENING_SCHEDULE_DB, id);
+      await updateDoc(docRef, data);
+      toast.add({ severity: "success", summary: "განახლებულია", life: 3000 });
+      await fetchEveningSchedule();
+    } catch (err) {
+      toast.add({
+        severity: "error",
+        summary: "შეცდომა განახლებისას",
+        life: 3000,
+      });
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteEveningSchedule = async (id: string) => {
+    loading.value = true;
+    try {
+      await deleteDoc(doc(db, EVENING_SCHEDULE_DB, id));
+      toast.add({ severity: "info", summary: "ნომერი წაიშალა", life: 3000 });
+      await fetchEveningSchedule();
+    } catch (err) {
+      toast.add({
+        severity: "error",
+        summary: "ნომერი ვერ წაიშალა",
+        life: 3000,
+      });
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     saveSchedule,
     addEveningSchedule,
     updateScheduleOrder,
+    updateEveningSchedule,
+    deleteEveningSchedule,
 
     loading,
     error,

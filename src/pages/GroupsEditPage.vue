@@ -96,7 +96,7 @@ watch(
 </script>
 
 <template>
-  <div class="p-4">
+  <div>
     <LoadingSpinner v-if="loading && groups.length <= 0" />
 
     <div v-else>
@@ -161,7 +161,7 @@ watch(
                     name="gender"
                     inputId="male"
                   />
-                  <label for="male">ვაჟი</label>
+                  <label for="male">ბიჭები</label>
                 </div>
                 <div class="flex items-center gap-2">
                   <RadioButton
@@ -170,7 +170,7 @@ watch(
                     name="gender"
                     inputId="female"
                   />
-                  <label for="female">გოგო</label>
+                  <label for="female">გოგოები</label>
                 </div>
               </div>
             </div>
@@ -184,7 +184,7 @@ watch(
                 rows="3"
               ></Textarea>
               <label class="font-bold mb-3">ბავშვები</label>
-              <p class="text-xs text-gray-500">გამოყავით მძიმით</p>
+              <p class="text-xs text-gray-500">გამოყავით მძიმით (მაგ: აკაკი გელაშვილი, დათო...)</p>
             </FloatLabel>
           </div>
 
