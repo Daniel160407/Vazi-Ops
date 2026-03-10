@@ -16,6 +16,7 @@ import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import { useConfirm } from "primevue";
+import type { EveningScheduleItem } from "../type/interfaces";
 
 const globalStore = useGlobalStore();
 const { fetchEveningSchedule } = globalStore;
@@ -82,6 +83,11 @@ const openEditModal = (item: any) => {
 const saveNewOrder = async () => {
   await updateScheduleOrder(eveningScheduleItems.value);
   await fetchEveningSchedule();
+  sortByPosition(eveningScheduleItems.value);
+};
+
+const sortByPosition = (items: EveningScheduleItem[]) => {
+  items.sort((a, b) => a.position - b.position);
 };
 
 const handleRegister = async () => {
@@ -141,7 +147,7 @@ watch(
   eveningScheduleItems,
   (newItems) => {
     if (newItems && newItems.length > 0) {
-      newItems.sort((a, b) => a.position - b.position);
+      sortByPosition(newItems);
     }
   },
   { once: true }
