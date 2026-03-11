@@ -11,6 +11,8 @@ import {
   ADMIN_EVENING_SCHEDULE_ROUTE,
   EVENTS_ROUTE,
   ADMIN_EVENTS_ROUTE,
+  GOLDEN_VERSES_ROUTE,
+  ADMIN_GOLDEN_VERSES_ROUTE,
 } from "./constants";
 import GroupsPage from "../pages/GroupsPage.vue";
 import ClubsPage from "../pages/ClubsPage.vue";
@@ -23,6 +25,8 @@ import EveningSchedulePage from "../pages/EveningSchedulePage.vue";
 import EveningScheduleEditPage from "../pages/EveningScheduleEditPage.vue";
 import EventsPage from "../pages/EventsPage.vue";
 import EventsEditPage from "../pages/EventsEditPage.vue";
+import GoldenVersesPage from "../pages/GoldenVersesPage.vue";
+import GoldenVersesEditPage from "../pages/GoldenVersesEditPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
@@ -31,12 +35,14 @@ const routes = [
   { path: DAY_SCHEDULE_ROUTE, component: DaySchedulePage },
   { path: EVENING_SCHEDULE_ROUTE, component: EveningSchedulePage },
   { path: EVENTS_ROUTE, component: EventsPage },
+  { path: GOLDEN_VERSES_ROUTE, component: GoldenVersesPage },
   { path: ADMIN_GROUPS_ROUTE, component: GroupsEditPage },
   { path: ADMIN_CLUBS_ROUTE, component: ClubsEditPage },
   { path: ADMIN_CLUB_BOOKINGS_ROUTE, component: ClubBookingsPage },
   { path: ADMIN_DAY_SCHEDULE_ROUTE, component: DayScheduleEditPage },
   { path: ADMIN_EVENING_SCHEDULE_ROUTE, component: EveningScheduleEditPage },
   { path: ADMIN_EVENTS_ROUTE, component: EventsEditPage },
+  { path: ADMIN_GOLDEN_VERSES_ROUTE, component: GoldenVersesEditPage },
 ];
 
 const router = createRouter({

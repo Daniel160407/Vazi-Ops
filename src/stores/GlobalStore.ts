@@ -8,6 +8,7 @@ import type {
   Event,
   Deadline,
   EveningScheduleItem,
+  GoldenVerse,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -17,6 +18,7 @@ import {
   EVENTS_DB,
   DEADLINE_DB,
   EVENING_SCHEDULE_DB,
+  GOLDEN_VERSES_DB,
 } from "../composables/constants";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -32,6 +34,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const eveningScheduleItems = ref<EveningScheduleItem[]>([]);
   const events = ref<Event[]>([]);
   const deadline = ref<Deadline | null>(null);
+  const goldenVerses = ref<GoldenVerse[]>([]);
 
   const loadingCount = ref<number>(0);
 
@@ -207,6 +210,27 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchGoldenVerses = async () => {
+    await withLoading(async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, GOLDEN_VERSES_DB));
+        goldenVerses.value = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<GoldenVerse, "id">),
+        }));
+        console.log(goldenVerses.value);
+      } catch (err) {
+        console.error(err);
+        toast.add({
+          severity: "error",
+          summary: "შეცდომა",
+          detail: "ოქროს მუხლების სია ვერ ჩაიტვირთა",
+          life: 3000,
+        });
+      }
+    });
+  };
+
   const setData = async () => {
     await Promise.all([
       fetchGroups(),
@@ -216,6 +240,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
       fetchEveningSchedule(),
       fetchEvents(),
       fetchDeadline(),
+      fetchGoldenVerses(),
     ]);
   };
 
@@ -227,6 +252,8 @@ export const useGlobalStore = defineStore("globalStore", () => {
     eveningScheduleItems,
     events,
     deadline,
+    goldenVerses,
+
     loading,
 
     fetchGroups,
@@ -236,6 +263,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     fetchEveningSchedule,
     fetchEvents,
     fetchDeadline,
+    fetchGoldenVerses,
 
     setData,
   };

@@ -31,6 +31,10 @@ import {
   ADMIN_EVENTS_LABEL,
   ADMIN_EVENTS_ROUTE,
   CLUB_BOOKINGS_ICON,
+  GOLDEN_VERSES_ROUTE,
+  GOLDEN_VERSES_ICON,
+  GOLDEN_VERSES_LABEL,
+  ADMIN_GOLDEN_VERSES_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -65,6 +69,11 @@ const items = ref([
     label: EVENTS_LABEL,
     icon: EVENTS_ICON,
     command: () => router.push(EVENTS_ROUTE),
+  },
+  {
+    label: GOLDEN_VERSES_LABEL,
+    icon: GOLDEN_VERSES_ICON,
+    command: () => router.push(GOLDEN_VERSES_ROUTE),
   },
   {
     label: ADMIN_LABEL,
@@ -145,6 +154,19 @@ const items = ref([
 
           if (user.value) {
             router.push(ADMIN_EVENTS_ROUTE);
+          }
+        },
+      },
+      {
+        label: GOLDEN_VERSES_LABEL,
+        icon: GOLDEN_VERSES_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_GOLDEN_VERSES_ROUTE);
           }
         },
       },
