@@ -102,7 +102,7 @@ const confirmDelete = async (id: string) => {
   <LoadingSpinner v-if="loadingStore && goldenVerses.length <= 0" />
 
   <div v-else>
-    <h2 class="text-3xl text-center font-bold">ოქროს მუხლების მართვა</h2>
+    <h2 class="text-3xl text-center font-bold mb-8">ოქროს მუხლების მართვა</h2>
 
     <Button
       icon="pi pi-plus"
@@ -155,7 +155,7 @@ const confirmDelete = async (id: string) => {
       v-model:visible="displayDialog"
       :header="isEditing ? 'რედაქტირება' : 'ახალი მუხლის დამატება'"
       :modal="true"
-      class="w-full max-w-lg"
+      class="w-full max-w-lg mx-4"
     >
       <div class="flex flex-col gap-4 mt-2">
         <FloatLabel variant="on">

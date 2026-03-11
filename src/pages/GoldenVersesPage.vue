@@ -27,7 +27,7 @@ const formatDate = (value?: any) => {
   <LoadingSpinner v-if="loading && goldenVerses.length <= 0" />
 
   <div v-else>
-    <h2 class="mb-4 text-3xl text-center font-bold">
+    <h2 class="mb-8 text-3xl text-center font-bold">
       ოქროს მუხლები
     </h2>
 

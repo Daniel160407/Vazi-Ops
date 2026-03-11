@@ -226,7 +226,7 @@ onUnmounted(() => {
         modal
         header="ნომრის რეგისტრაცია"
         :style="{ width: '90vw', maxWidth: '500px' }"
-        class="p-fluid"
+        class="p-fluid mx-4"
       >
         <div class="flex flex-col gap-4 py-4">
           <div class="flex flex-col gap-2">

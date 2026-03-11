@@ -184,7 +184,9 @@ watch(
                 rows="3"
               ></Textarea>
               <label class="font-bold mb-3">ბავშვები</label>
-              <p class="text-xs text-gray-500">გამოყავით მძიმით (მაგ: აკაკი გელაშვილი, დათო...)</p>
+              <p class="text-xs text-gray-500">
+                გამოყავით მძიმით (მაგ: აკაკი გელაშვილი, დათო...)
+              </p>
             </FloatLabel>
           </div>
 
@@ -213,6 +215,7 @@ watch(
         v-model:visible="displayAddDialog"
         modal
         header="ახალი ჯგუფის დამატება"
+        class="mx-4"
       >
         <div class="space-y-6 pt-4">
           <FloatLabel variant="on">

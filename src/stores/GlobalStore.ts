@@ -20,7 +20,7 @@ import {
   EVENING_SCHEDULE_DB,
   GOLDEN_VERSES_DB,
 } from "../composables/constants";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useToast } from "primevue";
 
@@ -213,12 +213,16 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const fetchGoldenVerses = async () => {
     await withLoading(async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, GOLDEN_VERSES_DB));
+        const q = query(
+          collection(db, GOLDEN_VERSES_DB),
+          orderBy("day", "asc")
+        );
+        const querySnapshot = await getDocs(q);
+
         goldenVerses.value = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<GoldenVerse, "id">),
         }));
-        console.log(goldenVerses.value);
       } catch (err) {
         console.error(err);
         toast.add({
