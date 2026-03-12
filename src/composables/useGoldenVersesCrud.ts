@@ -20,8 +20,7 @@ export const useGoldenVersesCrud = () => {
     loading.value = true;
 
     try {
-      const { id, ...newVerse } = verse;
-      await addDoc(collection(db, GOLDEN_VERSES_DB), newVerse);
+      await addDoc(collection(db, GOLDEN_VERSES_DB), verse);
       toast.add({
         severity: "success",
         summary: "ოქროს მუხლი დამატებულია",
