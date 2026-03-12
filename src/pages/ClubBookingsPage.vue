@@ -168,6 +168,7 @@ const confirmDelete = (booking: ClubBooking) => {
           isEdit ? 'რეგისტრაციის რედაქტირება' : 'ახალი რეგისტრაციის დამატება'
         "
         :style="{ width: '32rem' }"
+        class="mx-4"
       >
         <div class="space-y-4 pt-2">
           <FloatLabel variant="on">

@@ -62,3 +62,10 @@ export interface Deadline {
   id: string;
   time: Date;
 }
+
+export interface GoldenVerse {
+  id: string;
+  verse: string;
+  reference: string;
+  day: Date;
+}

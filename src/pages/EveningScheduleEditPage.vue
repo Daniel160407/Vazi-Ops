@@ -249,7 +249,7 @@ watch(
         modal
         :header="isEditing ? 'ნომრის რედაქტირება' : 'ნომრის რეგისტრაცია'"
         :style="{ width: '90vw', maxWidth: '500px' }"
-        class="p-fluid"
+        class="p-fluid mx-4"
       >
         <Tabs v-model:value="activeTab">
           <TabList>

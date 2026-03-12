@@ -256,7 +256,12 @@ const handleConfirmRegister = async () => {
         </template>
       </Card>
 
-      <Dialog v-model:visible="showDialog" modal header="ჩაეწერე წრეზე">
+      <Dialog
+        v-model:visible="showDialog"
+        modal
+        header="ჩაეწერე წრეზე"
+        class="mx-4"
+      >
         <div class="space-y-4 pt-2">
           <p v-if="selectedClub" class="font-semibold">
             წრე: {{ selectedClub?.name }}

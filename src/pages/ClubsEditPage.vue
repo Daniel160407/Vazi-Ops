@@ -185,6 +185,7 @@ watch(
         v-model:visible="displayAddDialog"
         modal
         header="ახალი წრის დამატება"
+        class="mx-4"
       >
         <div class="space-y-6 pt-4">
           <FloatLabel variant="on">
