@@ -9,6 +9,7 @@ import type {
   Deadline,
   EveningScheduleItem,
   GoldenVerse,
+  Announcement,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -19,13 +20,24 @@ import {
   DEADLINE_DB,
   EVENING_SCHEDULE_DB,
   GOLDEN_VERSES_DB,
+  ANNOUNCEMENTS_DB,
 } from "../composables/constants";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  limit,
+  startAfter,
+  type DocumentSnapshot,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 import { useToast } from "primevue";
 
 export const useGlobalStore = defineStore("globalStore", () => {
   const toast = useToast();
+
+  // ─── State ───────────────────────────────────────────────────────────────────
 
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
@@ -35,9 +47,17 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const events = ref<Event[]>([]);
   const deadline = ref<Deadline | null>(null);
   const goldenVerses = ref<GoldenVerse[]>([]);
+  const announcements = ref<Announcement[]>([]);
+
+  // ─── Announcements Pagination ─────────────────────────────────────────────
+
+  const announcementsLastDoc = ref<DocumentSnapshot | null>(null);
+  const announcementsHasMore = ref(true);
+  const ANNOUNCEMENTS_PAGE_SIZE = 10;
+
+  // ─── Loading ──────────────────────────────────────────────────────────────
 
   const loadingCount = ref<number>(0);
-
   const loading = computed(() => loadingCount.value > 0);
 
   const withLoading = async <T>(
@@ -50,6 +70,8 @@ export const useGlobalStore = defineStore("globalStore", () => {
       loadingCount.value--;
     }
   };
+
+  // ─── Fetchers ─────────────────────────────────────────────────────────────
 
   const fetchGroups = async () => {
     await withLoading(async () => {
@@ -75,7 +97,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
     await withLoading(async () => {
       try {
         const querySnapshot = await getDocs(collection(db, CLUBS_DB));
-
         clubs.value = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -188,11 +209,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
     await withLoading(async () => {
       try {
         const querySnapshot = await getDocs(collection(db, DEADLINE_DB));
-
         if (!querySnapshot.empty) {
           const docSnap = querySnapshot.docs[0];
           const data = docSnap!.data();
-
           deadline.value = {
             id: docSnap!.id,
             time: data.time?.toDate ? data.time.toDate() : new Date(data.time),
@@ -218,7 +237,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
           orderBy("day", "asc")
         );
         const querySnapshot = await getDocs(q);
-
         goldenVerses.value = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<GoldenVerse, "id">),
@@ -235,6 +253,62 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchAnnouncements = async (loadMore = false) => {
+    await withLoading(async () => {
+      try {
+        let q = query(
+          collection(db, ANNOUNCEMENTS_DB),
+          orderBy("date", "desc"),
+          limit(ANNOUNCEMENTS_PAGE_SIZE)
+        );
+
+        if (loadMore && announcementsLastDoc.value) {
+          q = query(
+            collection(db, ANNOUNCEMENTS_DB),
+            orderBy("date", "desc"),
+            startAfter(announcementsLastDoc.value),
+            limit(ANNOUNCEMENTS_PAGE_SIZE)
+          );
+        }
+
+        const querySnapshot = await getDocs(q);
+        const newItems = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Announcement, "id">),
+        }));
+
+        announcements.value = loadMore
+          ? [...announcements.value, ...newItems]
+          : newItems;
+
+        announcementsLastDoc.value =
+          querySnapshot.docs.length > 0
+            ? querySnapshot.docs[querySnapshot.docs.length - 1] ?? null
+            : null;
+        announcementsHasMore.value =
+          querySnapshot.docs.length === ANNOUNCEMENTS_PAGE_SIZE;
+
+        console.log(announcements.value);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        toast.add({
+          severity: "error",
+          summary: "შეცდომა",
+          detail: "განცხადებები ვერ ჩაიტვირთა",
+          life: 3000,
+        });
+      }
+    });
+  };
+
+  const fetchMoreAnnouncements = () => fetchAnnouncements(true);
+
+  const resetAnnouncements = () => {
+    announcementsLastDoc.value = null;
+    announcementsHasMore.value = true;
+    fetchAnnouncements(false);
+  };
+
   const setData = async () => {
     await Promise.all([
       fetchGroups(),
@@ -245,6 +319,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
       fetchEvents(),
       fetchDeadline(),
       fetchGoldenVerses(),
+      fetchAnnouncements(),
     ]);
   };
 
@@ -257,6 +332,8 @@ export const useGlobalStore = defineStore("globalStore", () => {
     events,
     deadline,
     goldenVerses,
+    announcements,
+    announcementsHasMore,
 
     loading,
 
@@ -268,6 +345,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
     fetchEvents,
     fetchDeadline,
     fetchGoldenVerses,
+    fetchAnnouncements,
+    fetchMoreAnnouncements,
+    resetAnnouncements,
 
     setData,
   };

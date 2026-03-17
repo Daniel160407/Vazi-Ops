@@ -35,6 +35,9 @@ import {
   GOLDEN_VERSES_ICON,
   GOLDEN_VERSES_LABEL,
   ADMIN_GOLDEN_VERSES_ROUTE,
+  ANNOUNCEMENTS_LABEL,
+  ANNOUNCEMENTS_ROUTE,
+  ANNOUNCEMENTS_ICON,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -74,6 +77,11 @@ const items = ref([
     label: GOLDEN_VERSES_LABEL,
     icon: GOLDEN_VERSES_ICON,
     command: () => router.push(GOLDEN_VERSES_ROUTE),
+  },
+  {
+    label: ANNOUNCEMENTS_LABEL,
+    icon: ANNOUNCEMENTS_ICON,
+    command: () => router.push(ANNOUNCEMENTS_ROUTE),
   },
   {
     label: ADMIN_LABEL,
@@ -181,7 +189,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="font-bpg flex min-h-svh w-full flex-col items-center justify-start bg-black p-4 lg:p-10 text-white"
+    class="font-bpg flex min-h-svh w-full flex-col items-center justify-start bg-[black] p-4 lg:p-10 text-white"
   >
     <div class="flex gap-3 justify-center items-center mb-6">
       <h1 class="text-3xl font-semibold tracking-tight">ბანაკი "ვაზი"</h1>

@@ -13,6 +13,7 @@ import {
   ADMIN_EVENTS_ROUTE,
   GOLDEN_VERSES_ROUTE,
   ADMIN_GOLDEN_VERSES_ROUTE,
+  ANNOUNCEMENTS_ROUTE,
 } from "./constants";
 import GroupsPage from "../pages/GroupsPage.vue";
 import ClubsPage from "../pages/ClubsPage.vue";
@@ -27,6 +28,7 @@ import EventsPage from "../pages/EventsPage.vue";
 import EventsEditPage from "../pages/EventsEditPage.vue";
 import GoldenVersesPage from "../pages/GoldenVersesPage.vue";
 import GoldenVersesEditPage from "../pages/GoldenVersesEditPage.vue";
+import AnnouncementsPage from "../pages/AnnouncementsPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
@@ -36,6 +38,7 @@ const routes = [
   { path: EVENING_SCHEDULE_ROUTE, component: EveningSchedulePage },
   { path: EVENTS_ROUTE, component: EventsPage },
   { path: GOLDEN_VERSES_ROUTE, component: GoldenVersesPage },
+  { path: ANNOUNCEMENTS_ROUTE, component: AnnouncementsPage },
   { path: ADMIN_GROUPS_ROUTE, component: GroupsEditPage },
   { path: ADMIN_CLUBS_ROUTE, component: ClubsEditPage },
   { path: ADMIN_CLUB_BOOKINGS_ROUTE, component: ClubBookingsPage },
