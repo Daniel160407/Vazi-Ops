@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
-import { Avatar, Button } from "primevue";
+import { Avatar } from "primevue";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
 import {
