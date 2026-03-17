@@ -61,7 +61,7 @@ const formatDate = (value?: any) => {
 <template>
   <LoadingSpinner v-if="loading && announcements.length <= 0" />
 
-  <div v-else class="max-w-3xl mx-auto py-8 px-4">
+  <div v-else class="max-w-3xl mx-auto py-8">
     <div class="mb-10">
       <h2 class="text-3xl font-bold mb-2 text-white">განცხადებები</h2>
       <p class="text-[#94A3B8]">
@@ -73,7 +73,7 @@ const formatDate = (value?: any) => {
       <article
         v-for="announcement in announcements"
         :key="announcement.id"
-        class="p-6 rounded-2xl bg-[#27272a] border border-white/5 shadow-xl transition-all duration-300"
+        class="p-6 rounded-2xl bg-[#27272a] border border-white/5 transition-all duration-300"
       >
         <div class="flex justify-between items-center mb-3">
           <span
@@ -128,6 +128,9 @@ const formatDate = (value?: any) => {
                 ? announcement.author?.charAt(0)
                 : undefined
             "
+            :pt="{
+              image: { referrerpolicy: 'no-referrer' },
+            }"
             class="bg-indigo-600 text-white font-bold"
             size="normal"
           />

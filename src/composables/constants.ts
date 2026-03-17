@@ -13,6 +13,7 @@ export const ADMIN_DAY_SCHEDULE_ROUTE = "/admin/day-schedule";
 export const ADMIN_EVENING_SCHEDULE_ROUTE = "/admin/evening-schedule";
 export const ADMIN_EVENTS_ROUTE = "/admin/events";
 export const ADMIN_GOLDEN_VERSES_ROUTE = "/admin/verses";
+export const ADMIN_ANNOUNCEMENTS_ROUTE = "/admin/announcements";
 
 export const GROUPS_LABEL = "ჯგუფები";
 export const CLUBS_LABEL = "წრეები";
@@ -27,6 +28,7 @@ export const ADMIN_CLUB_BOOKINGS_LABEL = "წრეების რეგის�
 export const ADMIN_DAY_SCHEDULE_LABEL = "დღის განრიგი";
 export const ADMIN_EVENING_SCHEDULE_LABEL = "საღამოს პროგრამა";
 export const ADMIN_EVENTS_LABEL = "ნომრები";
+export const ADMIN_ANNOUNCEMENTS_LABEL = "განცხადებები";
 
 export const GROUPS_ICON = "pi pi-users";
 export const CLUBS_ICON = "pi pi-sparkles";
@@ -61,13 +63,14 @@ export const REQUEST_PENDING = "pending";
 export const REQUEST_ACCEPTED = "accepted";
 export const REQUEST_REJECTED = "rejected";
 
+//announcement article tags
 export const TAG_URGENT = "სასწრაფო";
 export const TAG_NOTEWORTHY = "გასათვალისწინებელი";
 export const TAG_SCHEDULE = "განრიგი";
 export const TAG_DINING = "კვება";
 export const TAG_GATHERING = "შეკრება";
-export const TAG_ACTIVITY = 'აქტივობა';
-export const TAG_HEALTH = 'ჯანმრთელობა';
+export const TAG_ACTIVITY = "აქტივობა";
+export const TAG_HEALTH = "ჯანმრთელობა";
 
 //imgBB
 export const MAX_IMAGE_SIZE_MB = 5;

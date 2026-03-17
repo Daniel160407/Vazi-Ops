@@ -38,6 +38,8 @@ import {
   ANNOUNCEMENTS_LABEL,
   ANNOUNCEMENTS_ROUTE,
   ANNOUNCEMENTS_ICON,
+  ADMIN_ANNOUNCEMENTS_LABEL,
+  ADMIN_ANNOUNCEMENTS_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -175,6 +177,19 @@ const items = ref([
 
           if (user.value) {
             router.push(ADMIN_GOLDEN_VERSES_ROUTE);
+          }
+        },
+      },
+      {
+        label: ADMIN_ANNOUNCEMENTS_LABEL,
+        icon: ANNOUNCEMENTS_ICON,
+        command: async () => {
+          if (!user.value) {
+            await signInWithGoogle();
+          }
+
+          if (user.value) {
+            router.push(ADMIN_ANNOUNCEMENTS_ROUTE);
           }
         },
       },

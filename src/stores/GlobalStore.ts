@@ -37,8 +37,6 @@ import { useToast } from "primevue";
 export const useGlobalStore = defineStore("globalStore", () => {
   const toast = useToast();
 
-  // ─── State ───────────────────────────────────────────────────────────────────
-
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
@@ -49,13 +47,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const goldenVerses = ref<GoldenVerse[]>([]);
   const announcements = ref<Announcement[]>([]);
 
-  // ─── Announcements Pagination ─────────────────────────────────────────────
-
   const announcementsLastDoc = ref<DocumentSnapshot | null>(null);
   const announcementsHasMore = ref(true);
   const ANNOUNCEMENTS_PAGE_SIZE = 10;
-
-  // ─── Loading ──────────────────────────────────────────────────────────────
 
   const loadingCount = ref<number>(0);
   const loading = computed(() => loadingCount.value > 0);
@@ -70,8 +64,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
       loadingCount.value--;
     }
   };
-
-  // ─── Fetchers ─────────────────────────────────────────────────────────────
 
   const fetchGroups = async () => {
     await withLoading(async () => {
@@ -287,8 +279,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
             : null;
         announcementsHasMore.value =
           querySnapshot.docs.length === ANNOUNCEMENTS_PAGE_SIZE;
-
-        console.log(announcements.value);
       } catch (err) {
         console.error("Fetch Error:", err);
         toast.add({
