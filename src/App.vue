@@ -49,149 +49,118 @@ const router = useRouter();
 const { setData } = useGlobalStore();
 const { user, signInWithGoogle } = useAuth();
 
+const handleAdminNav = async (route: string) => {
+  if (!user.value) {
+    await signInWithGoogle();
+  }
+  if (user.value) {
+    router.push(route);
+  }
+};
+
 const items = ref([
-  {
-    label: GROUPS_LABEL,
-    icon: GROUPS_ICON,
-    command: () => router.push(GROUPS_ROUTE),
-  },
-  {
-    label: CLUBS_LABEL,
-    icon: CLUBS_ICON,
-    command: () => router.push(CLUBS_ROUTE),
-  },
-  {
-    label: DAY_SCHEDULE_LABEL,
-    icon: DAY_SCHEDULE_ICON,
-    command: () => router.push(DAY_SCHEDULE_ROUTE),
-  },
-  {
-    label: EVENING_SCHEDULE_LABEL,
-    icon: EVENING_SCHEDULE_ICON,
-    command: () => router.push(EVENING_SCHEDULE_ROUTE),
-  },
-  {
-    label: EVENTS_LABEL,
-    icon: EVENTS_ICON,
-    command: () => router.push(EVENTS_ROUTE),
-  },
-  {
-    label: GOLDEN_VERSES_LABEL,
-    icon: GOLDEN_VERSES_ICON,
-    command: () => router.push(GOLDEN_VERSES_ROUTE),
-  },
   {
     label: ANNOUNCEMENTS_LABEL,
     icon: ANNOUNCEMENTS_ICON,
     command: () => router.push(ANNOUNCEMENTS_ROUTE),
   },
   {
-    label: ADMIN_LABEL,
-    icon: ADMIN_ICON,
+    label: GROUPS_LABEL,
+    icon: GROUPS_ICON,
+    command: () => router.push(GROUPS_ROUTE),
+  },
+  {
+    label: "განრიგი",
+    icon: "pi pi-calendar",
     items: [
       {
-        label: GROUPS_LABEL,
-        icon: GROUPS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_GROUPS_ROUTE);
-          }
-        },
-      },
-      {
-        label: ADMIN_CLUBS_LABEL,
-        icon: CLUBS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_CLUBS_ROUTE);
-          }
-        },
-      },
-      {
-        label: ADMIN_CLUB_BOOKINGS_LABEL,
-        icon: CLUB_BOOKINGS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_CLUB_BOOKINGS_ROUTE);
-          }
-        },
-      },
-      {
-        label: ADMIN_DAY_SCHEDULE_LABEL,
+        label: DAY_SCHEDULE_LABEL,
         icon: DAY_SCHEDULE_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_DAY_SCHEDULE_ROUTE);
-          }
-        },
+        command: () => router.push(DAY_SCHEDULE_ROUTE),
       },
       {
-        label: ADMIN_EVENING_SCHEDULE_LABEL,
+        label: EVENING_SCHEDULE_LABEL,
         icon: EVENING_SCHEDULE_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_EVENING_SCHEDULE_ROUTE);
-          }
-        },
+        command: () => router.push(EVENING_SCHEDULE_ROUTE),
+      },
+    ],
+  },
+  {
+    label: "აქტივობები",
+    icon: "pi pi-sparkles",
+    items: [
+      {
+        label: CLUBS_LABEL,
+        icon: CLUBS_ICON,
+        command: () => router.push(CLUBS_ROUTE),
       },
       {
-        label: ADMIN_EVENTS_LABEL,
+        label: EVENTS_LABEL,
         icon: EVENTS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_EVENTS_ROUTE);
-          }
-        },
+        command: () => router.push(EVENTS_ROUTE),
       },
       {
         label: GOLDEN_VERSES_LABEL,
         icon: GOLDEN_VERSES_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_GOLDEN_VERSES_ROUTE);
-          }
-        },
+        command: () => router.push(GOLDEN_VERSES_ROUTE),
       },
+    ],
+  },
+  {
+    label: ADMIN_LABEL,
+    icon: ADMIN_ICON,
+    items: [
       {
         label: ADMIN_ANNOUNCEMENTS_LABEL,
         icon: ANNOUNCEMENTS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_ANNOUNCEMENTS_ROUTE);
-          }
-        },
+        command: () => handleAdminNav(ADMIN_ANNOUNCEMENTS_ROUTE),
+      },
+      {
+        label: GROUPS_LABEL,
+        icon: GROUPS_ICON,
+        command: () => handleAdminNav(ADMIN_GROUPS_ROUTE),
+      },
+      {
+        label: "განრიგი",
+        icon: "pi pi-clock",
+        items: [
+          {
+            label: ADMIN_DAY_SCHEDULE_LABEL,
+            icon: DAY_SCHEDULE_ICON,
+            command: () => handleAdminNav(ADMIN_DAY_SCHEDULE_ROUTE),
+          },
+          {
+            label: ADMIN_EVENING_SCHEDULE_LABEL,
+            icon: EVENING_SCHEDULE_ICON,
+            command: () => handleAdminNav(ADMIN_EVENING_SCHEDULE_ROUTE),
+          },
+        ],
+      },
+      {
+        label: "აქტივობები",
+        icon: "pi pi-briefcase",
+        items: [
+          {
+            label: ADMIN_CLUBS_LABEL,
+            icon: CLUBS_ICON,
+            command: () => handleAdminNav(ADMIN_CLUBS_ROUTE),
+          },
+          {
+            label: ADMIN_CLUB_BOOKINGS_LABEL,
+            icon: CLUB_BOOKINGS_ICON,
+            command: () => handleAdminNav(ADMIN_CLUB_BOOKINGS_ROUTE),
+          },
+          {
+            label: ADMIN_EVENTS_LABEL,
+            icon: EVENTS_ICON,
+            command: () => handleAdminNav(ADMIN_EVENTS_ROUTE),
+          },
+          {
+            label: GOLDEN_VERSES_LABEL,
+            icon: GOLDEN_VERSES_ICON,
+            command: () => handleAdminNav(ADMIN_GOLDEN_VERSES_ROUTE),
+          },
+        ],
       },
     ],
   },
@@ -234,3 +203,15 @@ onMounted(() => {
     <ConfirmDialog class="mx-2" />
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
