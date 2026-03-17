@@ -35,6 +35,11 @@ import {
   GOLDEN_VERSES_ICON,
   GOLDEN_VERSES_LABEL,
   ADMIN_GOLDEN_VERSES_ROUTE,
+  ANNOUNCEMENTS_LABEL,
+  ANNOUNCEMENTS_ROUTE,
+  ANNOUNCEMENTS_ICON,
+  ADMIN_ANNOUNCEMENTS_LABEL,
+  ADMIN_ANNOUNCEMENTS_ROUTE,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -44,131 +49,118 @@ const router = useRouter();
 const { setData } = useGlobalStore();
 const { user, signInWithGoogle } = useAuth();
 
+const handleAdminNav = async (route: string) => {
+  if (!user.value) {
+    await signInWithGoogle();
+  }
+  if (user.value) {
+    router.push(route);
+  }
+};
+
 const items = ref([
+  {
+    label: ANNOUNCEMENTS_LABEL,
+    icon: ANNOUNCEMENTS_ICON,
+    command: () => router.push(ANNOUNCEMENTS_ROUTE),
+  },
   {
     label: GROUPS_LABEL,
     icon: GROUPS_ICON,
     command: () => router.push(GROUPS_ROUTE),
   },
   {
-    label: CLUBS_LABEL,
-    icon: CLUBS_ICON,
-    command: () => router.push(CLUBS_ROUTE),
+    label: "განრიგი",
+    icon: "pi pi-calendar",
+    items: [
+      {
+        label: DAY_SCHEDULE_LABEL,
+        icon: DAY_SCHEDULE_ICON,
+        command: () => router.push(DAY_SCHEDULE_ROUTE),
+      },
+      {
+        label: EVENING_SCHEDULE_LABEL,
+        icon: EVENING_SCHEDULE_ICON,
+        command: () => router.push(EVENING_SCHEDULE_ROUTE),
+      },
+    ],
   },
   {
-    label: DAY_SCHEDULE_LABEL,
-    icon: DAY_SCHEDULE_ICON,
-    command: () => router.push(DAY_SCHEDULE_ROUTE),
-  },
-  {
-    label: EVENING_SCHEDULE_LABEL,
-    icon: EVENING_SCHEDULE_ICON,
-    command: () => router.push(EVENING_SCHEDULE_ROUTE),
-  },
-  {
-    label: EVENTS_LABEL,
-    icon: EVENTS_ICON,
-    command: () => router.push(EVENTS_ROUTE),
-  },
-  {
-    label: GOLDEN_VERSES_LABEL,
-    icon: GOLDEN_VERSES_ICON,
-    command: () => router.push(GOLDEN_VERSES_ROUTE),
+    label: "აქტივობები",
+    icon: "pi pi-sparkles",
+    items: [
+      {
+        label: CLUBS_LABEL,
+        icon: CLUBS_ICON,
+        command: () => router.push(CLUBS_ROUTE),
+      },
+      {
+        label: EVENTS_LABEL,
+        icon: EVENTS_ICON,
+        command: () => router.push(EVENTS_ROUTE),
+      },
+      {
+        label: GOLDEN_VERSES_LABEL,
+        icon: GOLDEN_VERSES_ICON,
+        command: () => router.push(GOLDEN_VERSES_ROUTE),
+      },
+    ],
   },
   {
     label: ADMIN_LABEL,
     icon: ADMIN_ICON,
     items: [
       {
+        label: ADMIN_ANNOUNCEMENTS_LABEL,
+        icon: ANNOUNCEMENTS_ICON,
+        command: () => handleAdminNav(ADMIN_ANNOUNCEMENTS_ROUTE),
+      },
+      {
         label: GROUPS_LABEL,
         icon: GROUPS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_GROUPS_ROUTE);
-          }
-        },
+        command: () => handleAdminNav(ADMIN_GROUPS_ROUTE),
       },
       {
-        label: ADMIN_CLUBS_LABEL,
-        icon: CLUBS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_CLUBS_ROUTE);
-          }
-        },
+        label: "განრიგი",
+        icon: "pi pi-clock",
+        items: [
+          {
+            label: ADMIN_DAY_SCHEDULE_LABEL,
+            icon: DAY_SCHEDULE_ICON,
+            command: () => handleAdminNav(ADMIN_DAY_SCHEDULE_ROUTE),
+          },
+          {
+            label: ADMIN_EVENING_SCHEDULE_LABEL,
+            icon: EVENING_SCHEDULE_ICON,
+            command: () => handleAdminNav(ADMIN_EVENING_SCHEDULE_ROUTE),
+          },
+        ],
       },
       {
-        label: ADMIN_CLUB_BOOKINGS_LABEL,
-        icon: CLUB_BOOKINGS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_CLUB_BOOKINGS_ROUTE);
-          }
-        },
-      },
-      {
-        label: ADMIN_DAY_SCHEDULE_LABEL,
-        icon: DAY_SCHEDULE_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_DAY_SCHEDULE_ROUTE);
-          }
-        },
-      },
-      {
-        label: ADMIN_EVENING_SCHEDULE_LABEL,
-        icon: EVENING_SCHEDULE_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_EVENING_SCHEDULE_ROUTE);
-          }
-        },
-      },
-      {
-        label: ADMIN_EVENTS_LABEL,
-        icon: EVENTS_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_EVENTS_ROUTE);
-          }
-        },
-      },
-      {
-        label: GOLDEN_VERSES_LABEL,
-        icon: GOLDEN_VERSES_ICON,
-        command: async () => {
-          if (!user.value) {
-            await signInWithGoogle();
-          }
-
-          if (user.value) {
-            router.push(ADMIN_GOLDEN_VERSES_ROUTE);
-          }
-        },
+        label: "აქტივობები",
+        icon: "pi pi-briefcase",
+        items: [
+          {
+            label: ADMIN_CLUBS_LABEL,
+            icon: CLUBS_ICON,
+            command: () => handleAdminNav(ADMIN_CLUBS_ROUTE),
+          },
+          {
+            label: ADMIN_CLUB_BOOKINGS_LABEL,
+            icon: CLUB_BOOKINGS_ICON,
+            command: () => handleAdminNav(ADMIN_CLUB_BOOKINGS_ROUTE),
+          },
+          {
+            label: ADMIN_EVENTS_LABEL,
+            icon: EVENTS_ICON,
+            command: () => handleAdminNav(ADMIN_EVENTS_ROUTE),
+          },
+          {
+            label: GOLDEN_VERSES_LABEL,
+            icon: GOLDEN_VERSES_ICON,
+            command: () => handleAdminNav(ADMIN_GOLDEN_VERSES_ROUTE),
+          },
+        ],
       },
     ],
   },
@@ -181,7 +173,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="font-bpg flex min-h-svh w-full flex-col items-center justify-start bg-black p-4 lg:p-10 text-white"
+    class="font-bpg flex min-h-svh w-full flex-col items-center justify-start bg-[black] p-4 lg:p-10 text-white"
   >
     <div class="flex gap-3 justify-center items-center mb-6">
       <h1 class="text-3xl font-semibold tracking-tight">ბანაკი "ვაზი"</h1>
@@ -211,3 +203,15 @@ onMounted(() => {
     <ConfirmDialog class="mx-2" />
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

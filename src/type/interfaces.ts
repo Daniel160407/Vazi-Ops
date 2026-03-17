@@ -69,3 +69,13 @@ export interface GoldenVerse {
   reference: string;
   day: Date;
 }
+
+export interface Announcement {
+  id: string;
+  title: string;
+  tag: string;
+  date: Date;
+  content: string;
+  author: string;
+  author_image_url: string;
+}

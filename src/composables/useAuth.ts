@@ -1,28 +1,51 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { auth, db, googleProvider } from "../../firebase";
-import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  type User,
+} from "firebase/auth";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { ADMINS_DB } from "./constants";
 
-const user = ref<any>(null);
+const user = ref<User | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-export function useAuth() {
-  const checkIfUserIsAdmin = async (user: any) => {
+onAuthStateChanged(auth, async (firebaseUser) => {
+  loading.value = true;
+
+  if (firebaseUser) {
+    const isAdmin = await checkIfUserIsAdmin(firebaseUser);
+    if (isAdmin) {
+      user.value = firebaseUser;
+    } else {
+      await signOut(auth);
+      user.value = null;
+      error.value = "წვდომა უარყოფილია: თქვენ არ ხართ ადმინისტრატორი";
+    }
+  } else {
+    user.value = null;
+  }
+
+  loading.value = false;
+});
+
+async function checkIfUserIsAdmin(u: User | null) {
+  if (!u?.email) return false;
+  try {
     const usersRef = collection(db, ADMINS_DB);
-    const snapshot = await getDocs(usersRef);
+    const q = query(usersRef, where("email", "==", u.email));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch (err) {
+    console.error("Admin check failed", err);
+    return false;
+  }
+}
 
-    const users = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    const findedUser = users.find((u: any) => u?.email === user?.email);
-
-    return !!findedUser;
-  };
-
+export function useAuth() {
   const signInWithGoogle = async () => {
     try {
       error.value = null;
@@ -41,19 +64,10 @@ export function useAuth() {
     }
   };
 
-  onAuthStateChanged(auth, async (u) => {
-    const isAdmin = await checkIfUserIsAdmin(u);
-    if (!isAdmin) {
-      logout();
-    } else {
-      user.value = u;
-    }
-
-    loading.value = false;
-  });
-
   return {
     user,
+    fullName: computed(() => user.value?.displayName || "ანონიმი"),
+    profileImg: computed(() => user.value?.photoURL),
     loading,
     error,
     signInWithGoogle,
