@@ -22,15 +22,7 @@ import {
   GOLDEN_VERSES_DB,
   ANNOUNCEMENTS_DB,
 } from "../composables/constants";
-import {
-  collection,
-  getDocs,
-  orderBy,
-  query,
-  limit,
-  startAfter,
-  type DocumentSnapshot,
-} from "firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useToast } from "primevue";
 
@@ -46,10 +38,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const deadline = ref<Deadline | null>(null);
   const goldenVerses = ref<GoldenVerse[]>([]);
   const announcements = ref<Announcement[]>([]);
-
-  const announcementsLastDoc = ref<DocumentSnapshot | null>(null);
-  const announcementsHasMore = ref(true);
-  const ANNOUNCEMENTS_PAGE_SIZE = 10;
 
   const loadingCount = ref<number>(0);
   const loading = computed(() => loadingCount.value > 0);
@@ -245,40 +233,19 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
-  const fetchAnnouncements = async (loadMore = false) => {
+  const fetchAnnouncements = async () => {
     await withLoading(async () => {
       try {
-        let q = query(
+        const q = query(
           collection(db, ANNOUNCEMENTS_DB),
-          orderBy("date", "desc"),
-          limit(ANNOUNCEMENTS_PAGE_SIZE)
+          orderBy("date", "desc")
         );
 
-        if (loadMore && announcementsLastDoc.value) {
-          q = query(
-            collection(db, ANNOUNCEMENTS_DB),
-            orderBy("date", "desc"),
-            startAfter(announcementsLastDoc.value),
-            limit(ANNOUNCEMENTS_PAGE_SIZE)
-          );
-        }
-
         const querySnapshot = await getDocs(q);
-        const newItems = querySnapshot.docs.map((doc) => ({
+        announcements.value = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<Announcement, "id">),
         }));
-
-        announcements.value = loadMore
-          ? [...announcements.value, ...newItems]
-          : newItems;
-
-        announcementsLastDoc.value =
-          querySnapshot.docs.length > 0
-            ? querySnapshot.docs[querySnapshot.docs.length - 1] ?? null
-            : null;
-        announcementsHasMore.value =
-          querySnapshot.docs.length === ANNOUNCEMENTS_PAGE_SIZE;
       } catch (err) {
         console.error("Fetch Error:", err);
         toast.add({
@@ -289,14 +256,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
         });
       }
     });
-  };
-
-  const fetchMoreAnnouncements = () => fetchAnnouncements(true);
-
-  const resetAnnouncements = () => {
-    announcementsLastDoc.value = null;
-    announcementsHasMore.value = true;
-    fetchAnnouncements(false);
   };
 
   const setData = async () => {
@@ -323,7 +282,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
     deadline,
     goldenVerses,
     announcements,
-    announcementsHasMore,
 
     loading,
 
@@ -336,8 +294,6 @@ export const useGlobalStore = defineStore("globalStore", () => {
     fetchDeadline,
     fetchGoldenVerses,
     fetchAnnouncements,
-    fetchMoreAnnouncements,
-    resetAnnouncements,
 
     setData,
   };

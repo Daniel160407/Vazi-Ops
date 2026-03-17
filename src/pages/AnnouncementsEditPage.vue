@@ -27,25 +27,19 @@ import { useAnnouncementsCrud } from "../composables/useAnnouncementsCrud";
 import type { Announcement } from "../type/interfaces";
 import { useAuth } from "../composables/useAuth";
 
-// --- Services & Store ---
 const globalStore = useGlobalStore();
-const {
-  loading: storeLoading,
-  announcements,
-  announcementsHasMore,
-} = storeToRefs(globalStore);
+const { loading: storeLoading, announcements } = storeToRefs(globalStore);
 const { fetchAnnouncements } = globalStore;
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } =
   useAnnouncementsCrud();
 const { fullName, profileImg } = useAuth();
 const confirm = useConfirm();
 
-// --- UI State ---
 const expandedIds = ref(new Set<string>());
 const isDialogVisible = ref(false);
 const isEditing = ref(false);
 const currentId = ref<string | null>(null);
-const isSubmitting = ref(false); // To prevent double-clicks
+const isSubmitting = ref(false);
 
 const tagOptions = [
   TAG_URGENT,
@@ -160,7 +154,7 @@ const formatDate = (value?: any) => {
       <div>
         <h2 class="text-3xl font-bold mb-2 text-white">განცხადებები</h2>
         <p class="text-[#94A3B8]">
-          მართეთ მნიშვნელოვანი ინფორმაცია, განრიგი ან სხვა სიახლეები.
+          დაამატეთ განცხადებები მნიშვნელოვან საკითხებთან დაკავშირებით.
         </p>
       </div>
       <Button
@@ -313,16 +307,5 @@ const formatDate = (value?: any) => {
         />
       </template>
     </Dialog>
-
-    <div v-if="announcementsHasMore" class="mt-12 flex justify-center">
-      <Button
-        label="მეტის ჩვენება"
-        icon="pi pi-refresh"
-        severity="secondary"
-        outlined
-        class="px-8 py-3 rounded-xl border-white/10 text-white hover:bg-white/5"
-        @click="globalStore.fetchMoreAnnouncements()"
-      />
-    </div>
   </div>
 </template>

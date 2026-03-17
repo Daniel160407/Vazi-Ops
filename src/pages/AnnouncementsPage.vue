@@ -17,8 +17,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import { ref } from "vue";
 
 const globalStore = useGlobalStore();
-const { loading, announcements, announcementsHasMore } =
-  storeToRefs(globalStore);
+const { loading, announcements } = storeToRefs(globalStore);
 
 const expandedIds = ref(new Set<string>());
 
@@ -139,17 +138,6 @@ const formatDate = (value?: any) => {
           </span>
         </div>
       </article>
-    </div>
-
-    <div v-if="announcementsHasMore" class="mt-12 flex justify-center">
-      <Button
-        label="მეტის ჩვენება"
-        icon="pi pi-refresh"
-        severity="secondary"
-        outlined
-        class="px-8 py-3 rounded-xl border-white/10 text-white hover:bg-white/5"
-        @click="globalStore.fetchMoreAnnouncements()"
-      />
     </div>
   </div>
 </template>
