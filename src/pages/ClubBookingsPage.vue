@@ -15,14 +15,8 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
 
-const {
-  bookings,
-  loading,
-  fetchBookings,
-  addBooking,
-  updateBooking,
-  deleteBooking,
-} = useClubBookingsCrud();
+const { bookings, loading, addBooking, updateBooking, deleteBooking } =
+  useClubBookingsCrud();
 const { loading: loadingStore } = storeToRefs(useGlobalStore());
 
 const confirm = useConfirm();
@@ -108,14 +102,6 @@ const confirmDelete = (booking: ClubBooking) => {
             icon="pi pi-plus"
             severity="info"
             @click="openNew"
-          />
-        </template>
-        <template #end>
-          <Button
-            label="განახლება"
-            icon="pi pi-refresh"
-            outlined
-            @click="fetchBookings"
           />
         </template>
       </Toolbar>

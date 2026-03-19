@@ -20,9 +20,7 @@ import { useGlobalStore } from "../stores/GlobalStore";
 
 export const useSchedulesCrud = () => {
   const toast = useToast();
-  const globalStore = useGlobalStore();
-  const { fetchEveningSchedule } = globalStore;
-  const { eveningScheduleItems } = storeToRefs(globalStore);
+  const { eveningScheduleItems } = storeToRefs(useGlobalStore());
 
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -89,8 +87,6 @@ export const useSchedulesCrud = () => {
         summary: "ნომერი დაემატა საღამოს პროგრამაში",
         life: 3000,
       });
-
-      fetchEveningSchedule();
     } catch (err) {
       console.error("Error adding evening schedule: ", err);
       toast.add({
@@ -152,7 +148,6 @@ export const useSchedulesCrud = () => {
       const docRef = doc(db, EVENING_SCHEDULE_DB, id);
       await updateDoc(docRef, data);
       toast.add({ severity: "success", summary: "განახლებულია", life: 3000 });
-      await fetchEveningSchedule();
     } catch (err) {
       toast.add({
         severity: "error",
@@ -169,7 +164,6 @@ export const useSchedulesCrud = () => {
     try {
       await deleteDoc(doc(db, EVENING_SCHEDULE_DB, id));
       toast.add({ severity: "info", summary: "ნომერი წაიშალა", life: 3000 });
-      await fetchEveningSchedule();
     } catch (err) {
       toast.add({
         severity: "error",

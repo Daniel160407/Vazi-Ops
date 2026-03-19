@@ -22,7 +22,17 @@ import {
   GOLDEN_VERSES_DB,
   ANNOUNCEMENTS_DB,
 } from "../composables/constants";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  FirestoreError,
+  onSnapshot,
+  orderBy,
+  Query,
+  query,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  type DocumentData,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 import { useToast } from "primevue";
 
@@ -42,234 +52,136 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const loadingCount = ref<number>(0);
   const loading = computed(() => loadingCount.value > 0);
 
-  const withLoading = async <T>(
-    fn: () => Promise<T>
-  ): Promise<T | undefined> => {
+  const subscriptions: Record<string, () => void> = {};
+
+  const subscribe = (
+    key: string,
+    collectionName: string,
+    callback: (data: any[]) => void,
+    queryConstraints?: Query<DocumentData>
+  ) => {
+    if (subscriptions[key]) return;
+
     loadingCount.value++;
-    try {
-      return await fn();
-    } finally {
-      loadingCount.value--;
-    }
-  };
 
-  const fetchGroups = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, GROUPS_DB));
-        groups.value = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Group, "id">),
-        }));
-      } catch (err) {
-        console.error("Fetch Error:", err);
-        toast.add({
-          severity: "error",
-          summary: "მოხდა შეცდომა",
-          detail: "ჯგუფების ინფორმაცია ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
+    const q: Query<DocumentData> =
+      queryConstraints || query(collection(db, collectionName));
 
-  const fetchClubs = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, CLUBS_DB));
-        clubs.value = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
+    subscriptions[key] = onSnapshot(
+      q,
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        const data = snapshot.docs.map(
+          (doc: QueryDocumentSnapshot<DocumentData>) => ({
             id: doc.id,
-            ...(data as Omit<Club, "id" | "time">),
-            time: data.time?.toDate ? data.time.toDate() : new Date(data.time),
-          } as Club;
-        });
-      } catch (err) {
-        console.error("Fetch Error:", err);
-        toast.add({
-          severity: "error",
-          summary: "მოხდა შეცდომა",
-          detail: "წრეების ინფორმაცია ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchClubBookings = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, CLUB_BOOKINGS_DB));
-        clubBookings.value = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ...(data as Omit<ClubBooking, "id" | "created_at">),
-            created_at: data.created_at?.toDate
-              ? data.created_at.toDate()
-              : new Date(data.created_at),
-          } as ClubBooking;
-        });
-      } catch (err) {
-        console.error("Fetch Error:", err);
-        toast.add({
-          severity: "error",
-          summary: "მოხდა შეცდომა",
-          detail: "კლუბების რეგისტრაციები ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchSchedules = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, SCHEDULES_DB));
-        schedules.value = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Schedule, "id">),
-        }));
-      } catch (err) {
-        console.error("Fetch Error:", err);
-        toast.add({
-          severity: "error",
-          summary: "მოხდა შეცდომა",
-          detail: "განრიგის ინფორმაცია ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchEveningSchedule = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(
-          collection(db, EVENING_SCHEDULE_DB)
-        );
-        eveningScheduleItems.value = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<EveningScheduleItem, "id">),
-        }));
-      } catch (err) {
-        console.error(err);
-        toast.add({
-          severity: "error",
-          summary: "შეცდომა",
-          detail: "განრიგი ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchEvents = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, EVENTS_DB));
-        events.value = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Event, "id">),
-        }));
-      } catch (err) {
-        console.error("Fetch Error:", err);
-        toast.add({
-          severity: "error",
-          summary: "მოხდა შეცდომა",
-          detail: "საღამოს გამოსვლებზე ინფორმაცია ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchDeadline = async () => {
-    await withLoading(async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, DEADLINE_DB));
-        if (!querySnapshot.empty) {
-          const docSnap = querySnapshot.docs[0];
-          const data = docSnap!.data();
-          deadline.value = {
-            id: docSnap!.id,
-            time: data.time?.toDate ? data.time.toDate() : new Date(data.time),
-          } as Deadline;
-        }
-      } catch (err) {
-        console.error("Deadline Fetch Error:", err);
-        toast.add({
-          severity: "error",
-          summary: "შეცდომა",
-          detail: "დედლაინი ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchGoldenVerses = async () => {
-    await withLoading(async () => {
-      try {
-        const q = query(
-          collection(db, GOLDEN_VERSES_DB),
-          orderBy("day", "asc")
-        );
-        const querySnapshot = await getDocs(q);
-        goldenVerses.value = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<GoldenVerse, "id">),
-        }));
-      } catch (err) {
-        console.error(err);
-        toast.add({
-          severity: "error",
-          summary: "შეცდომა",
-          detail: "ოქროს მუხლების სია ვერ ჩაიტვირთა",
-          life: 3000,
-        });
-      }
-    });
-  };
-
-  const fetchAnnouncements = async () => {
-    await withLoading(async () => {
-      try {
-        const q = query(
-          collection(db, ANNOUNCEMENTS_DB),
-          orderBy("date", "desc")
+            ...doc.data(),
+          })
         );
 
-        const querySnapshot = await getDocs(q);
-        announcements.value = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Announcement, "id">),
-        }));
-      } catch (err) {
-        console.error("Fetch Error:", err);
+        callback(data);
+
+        if (loadingCount.value > 0) loadingCount.value--;
+      },
+      (err: FirestoreError) => {
+        console.error(`Listener Error (${key}):`, err);
+        if (loadingCount.value > 0) loadingCount.value--;
         toast.add({
           severity: "error",
           summary: "შეცდომა",
-          detail: "განცხადებები ვერ ჩაიტვირთა",
-          life: 3000,
+          detail: "მონაცემების სინქრონიზაცია ვერ მოხერხდა",
         });
+      }
+    );
+  };
+
+  const fetchClubs = () => {
+    subscribe("clubs", CLUBS_DB, (data) => {
+      clubs.value = data.map((d) => ({
+        ...d,
+        time: d.time?.toDate ? d.time.toDate() : new Date(d.time),
+      })) as Club[];
+    });
+  };
+
+  const fetchAnnouncements = () => {
+    const q = query(collection(db, ANNOUNCEMENTS_DB), orderBy("date", "desc"));
+    subscribe(
+      "announcements",
+      ANNOUNCEMENTS_DB,
+      (data) => {
+        announcements.value = data as Announcement[];
+      },
+      q
+    );
+  };
+
+  const fetchClubBookings = () => {
+    subscribe("bookings", CLUB_BOOKINGS_DB, (data) => {
+      clubBookings.value = data.map((d) => ({
+        ...d,
+        created_at: d.created_at?.toDate
+          ? d.created_at.toDate()
+          : new Date(d.created_at),
+      })) as ClubBooking[];
+    });
+  };
+
+  const fetchGroups = () =>
+    subscribe("groups", GROUPS_DB, (data) => (groups.value = data as Group[]));
+  const fetchSchedules = () =>
+    subscribe(
+      "schedules",
+      SCHEDULES_DB,
+      (data) => (schedules.value = data as Schedule[])
+    );
+  const fetchEveningSchedule = () => {
+    const q = query(
+      collection(db, EVENING_SCHEDULE_DB),
+      orderBy("position", "asc")
+    );
+
+    subscribe(
+      "evening",
+      EVENING_SCHEDULE_DB,
+      (data) => (eveningScheduleItems.value = data as EveningScheduleItem[]),
+      q
+    );
+  };
+  const fetchEvents = () =>
+    subscribe("events", EVENTS_DB, (data) => (events.value = data as Event[]));
+
+  const fetchDeadline = () => {
+    if (subscriptions["deadline"]) return;
+    onSnapshot(collection(db, DEADLINE_DB), (snap) => {
+      if (!snap.empty) {
+        const d = snap.docs[0]!.data();
+        deadline.value = {
+          id: snap.docs[0]!.id,
+          time: d.time?.toDate ? d.time.toDate() : new Date(d.time),
+        } as Deadline;
       }
     });
   };
 
-  const setData = async () => {
-    await Promise.all([
-      fetchGroups(),
-      fetchClubs(),
-      fetchClubBookings(),
-      fetchSchedules(),
-      fetchEveningSchedule(),
-      fetchEvents(),
-      fetchDeadline(),
-      fetchGoldenVerses(),
-      fetchAnnouncements(),
-    ]);
+  const fetchGoldenVerses = () => {
+    const q = query(collection(db, GOLDEN_VERSES_DB), orderBy("day", "asc"));
+    subscribe(
+      "verses",
+      GOLDEN_VERSES_DB,
+      (data) => (goldenVerses.value = data as GoldenVerse[]),
+      q
+    );
+  };
+
+  const setData = () => {
+    fetchGroups();
+    fetchClubs();
+    fetchClubBookings();
+    fetchSchedules();
+    fetchEveningSchedule();
+    fetchEvents();
+    fetchDeadline();
+    fetchGoldenVerses();
+    fetchAnnouncements();
   };
 
   return {
@@ -282,19 +194,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     deadline,
     goldenVerses,
     announcements,
-
     loading,
-
-    fetchGroups,
-    fetchClubs,
-    fetchClubBookings,
-    fetchSchedules,
-    fetchEveningSchedule,
-    fetchEvents,
-    fetchDeadline,
-    fetchGoldenVerses,
-    fetchAnnouncements,
-
     setData,
   };
 });

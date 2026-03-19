@@ -5,6 +5,9 @@ import {
   updateDoc,
   doc,
   runTransaction,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { CLUB_BOOKINGS_DB, CLUBS_DB } from "../composables/constants";
@@ -16,11 +19,34 @@ import { storeToRefs } from "pinia";
 export function useClubBookingsCrud() {
   const toast = useToast();
 
-  const globalStore = useGlobalStore();
-  const { clubBookings } = storeToRefs(globalStore);
-  const { fetchClubBookings } = globalStore;
+  const { clubBookings } = storeToRefs(useGlobalStore());
 
   const loading = ref(false);
+
+  const fetchUserBookings = async (
+    childFirstName: string,
+    childLastName: string,
+    leaderName: string,
+    groupName: string
+  ) => {
+    const bookingsRef = collection(db, CLUB_BOOKINGS_DB);
+    const q = query(
+      bookingsRef,
+      where("child_first_name", "==", childFirstName),
+      where("child_last_name", "==", childLastName),
+      where("leader_name", "==", leaderName),
+      where("group_name", "==", groupName)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(
+      (d) =>
+        ({
+          id: d.id,
+          ...(d.data() as Omit<ClubBooking, "id">),
+        } as ClubBooking)
+    );
+  };
 
   const addBooking = async (
     booking: Omit<ClubBooking, "id" | "created_at">
@@ -36,7 +62,6 @@ export function useClubBookingsCrud() {
         summary: "რეგისტრაცია დამატებულია",
         life: 3000,
       });
-      await fetchClubBookings();
     } catch (err) {
       console.error(err);
       toast.add({
@@ -62,7 +87,6 @@ export function useClubBookingsCrud() {
         summary: "რეგისტრაცია განახლებულია",
         life: 3000,
       });
-      await fetchClubBookings();
     } catch (err) {
       console.error(err);
       toast.add({
@@ -109,7 +133,6 @@ export function useClubBookingsCrud() {
         summary: "რეგისტრაცია წაიშალა",
         life: 3000,
       });
-      await fetchClubBookings();
     } catch (err) {
       console.error(err);
       toast.add({
@@ -126,10 +149,9 @@ export function useClubBookingsCrud() {
   return {
     bookings: clubBookings,
     loading,
-    fetchBookings: fetchClubBookings,
+    fetchUserBookings,
     addBooking,
     updateBooking,
     deleteBooking,
   };
 }
-

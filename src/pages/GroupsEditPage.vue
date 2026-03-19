@@ -12,8 +12,7 @@ import { useGroupsCrud } from "../composables/useGroupsCrud";
 import { Textarea, useConfirm } from "primevue";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const { loading, groups, fetchGroups, addGroup, updateGroup, deleteGroup } =
-  useGroupsCrud();
+const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
 const confirm = useConfirm();
 
 const editingGroups = ref<Group[]>([]);
@@ -41,7 +40,6 @@ const handleAddGroup = async () => {
     .filter((s) => s !== "");
 
   await addGroup(newGroup.value);
-  await fetchGroups();
 
   displayAddDialog.value = false;
   newGroup.value = {
@@ -64,7 +62,6 @@ const handleSaveGroup = async (group: Group, index: number) => {
   }
 
   await updateGroup(group);
-  await fetchGroups();
 };
 
 const handleDeleteGroup = (id: string) => {
@@ -75,9 +72,12 @@ const handleDeleteGroup = (id: string) => {
       label: "წაშლა",
       severity: "danger",
     },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+    },
     accept: async () => {
       await deleteGroup(id);
-      await fetchGroups();
     },
   });
 };
@@ -130,18 +130,18 @@ watch(
                   color: group.gender === GENDER_MALE ? '#305CDE' : '#EE4B2B',
                 }"
               />
-              <label for="name">ჯგუფის სახელი</label>
+              <label>ჯგუფის სახელი</label>
             </FloatLabel>
 
             <div class="space-y-6 mt-6">
               <FloatLabel variant="on">
                 <InputText id="leader" v-model="group.leader" class="w-full" />
-                <label for="leader">ლიდერი</label>
+                <label>ლიდერი</label>
               </FloatLabel>
 
               <FloatLabel variant="on">
                 <InputText id="age" v-model="group.age" class="w-full" />
-                <label for="age">ასაკი</label>
+                <label>ასაკი</label>
               </FloatLabel>
 
               <FloatLabel variant="on">
@@ -150,7 +150,7 @@ watch(
                   v-model="group.cottage_num"
                   class="w-full"
                 />
-                <label for="cottage">კოტეჯი</label>
+                <label>კოტეჯი</label>
               </FloatLabel>
 
               <div class="flex gap-4">
@@ -161,7 +161,7 @@ watch(
                     name="gender"
                     inputId="male"
                   />
-                  <label for="male">ბიჭები</label>
+                  <label>ბიჭები</label>
                 </div>
                 <div class="flex items-center gap-2">
                   <RadioButton
@@ -170,7 +170,7 @@ watch(
                     name="gender"
                     inputId="female"
                   />
-                  <label for="female">გოგოები</label>
+                  <label>გოგოები</label>
                 </div>
               </div>
             </div>
