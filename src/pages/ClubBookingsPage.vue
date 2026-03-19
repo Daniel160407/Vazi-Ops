@@ -83,6 +83,10 @@ const confirmDelete = (booking: ClubBooking) => {
       label: "წაშლა",
       severity: "danger",
     },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+    },
     accept: async () => {
       await deleteBooking(booking.id);
     },
