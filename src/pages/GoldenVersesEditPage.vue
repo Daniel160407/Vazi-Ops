@@ -168,7 +168,7 @@ const confirmDelete = async (id: string) => {
 
         <FloatLabel variant="on">
           <label class="text-sm text-gray-400"
-            >მითითება (მაგ: იოანე 3:16)</label
+            >ადგილი (მაგ: იოანე 3:16)</label
           >
 
           <InputText v-model="currentVerse.reference" fluid />

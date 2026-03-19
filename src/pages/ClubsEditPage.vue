@@ -115,7 +115,7 @@ watch(
 
             <FloatLabel variant="on">
               <InputText id="teacher" v-model="club.teacher" class="w-full" />
-              <label for="teacher">პედაგოგი</label>
+              <label for="teacher">მასწავლებელი</label>
             </FloatLabel>
 
             <FloatLabel variant="on">
@@ -198,7 +198,7 @@ watch(
               v-model="newClub.teacher"
               class="w-full"
             />
-            <label for="newTeacher">პედაგოგი</label>
+            <label for="newTeacher">მასწავლებელი</label>
           </FloatLabel>
 
           <FloatLabel variant="on">

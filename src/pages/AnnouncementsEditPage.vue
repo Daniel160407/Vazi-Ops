@@ -9,6 +9,7 @@ import {
   Textarea,
   Select,
   useConfirm,
+  FloatLabel,
 } from "primevue";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
@@ -257,33 +258,35 @@ const formatDate = (value?: any) => {
     >
       <div class="flex flex-col gap-4 py-4">
         <div class="flex flex-col gap-2">
-          <label for="title" class="text-sm font-medium">სათაური</label>
-          <InputText
-            id="title"
-            v-model="form.title"
-            placeholder="შეიყვანეთ სათაური"
-          />
+          <FloatLabel variant="on">
+            <label for="title" class="text-sm font-medium">სათაური</label>
+            <InputText id="title" v-model="form.title" class="w-full" />
+          </FloatLabel>
         </div>
 
         <div class="flex flex-col gap-2">
-          <label for="tag" class="text-sm font-medium">თეგი</label>
-          <Select
-            id="tag"
-            v-model="form.tag"
-            :options="tagOptions"
-            placeholder="აირჩიეთ თეგი"
-          />
+          <FloatLabel variant="on">
+            <Select
+              inputId="tag"
+              v-model="form.tag"
+              :options="tagOptions"
+              class="w-full"
+            />
+            <label for="tag">თეგი</label>
+          </FloatLabel>
         </div>
 
         <div class="flex flex-col gap-2">
-          <label for="content" class="text-sm font-medium">შინაარსი</label>
-          <Textarea
-            id="content"
-            v-model="form.content"
-            rows="5"
-            autoResize
-            placeholder="დაწერეთ ტექსტი..."
-          />
+          <FloatLabel variant="on">
+            <label for="content" class="text-sm font-medium">განცხადება</label>
+            <Textarea
+              id="content"
+              v-model="form.content"
+              rows="5"
+              autoResize
+              class="w-full"
+            />
+          </FloatLabel>
         </div>
       </div>
 

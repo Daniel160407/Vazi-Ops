@@ -15,7 +15,7 @@ import Tab from "primevue/tab";
 import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import { useConfirm } from "primevue";
+import { FloatLabel, useConfirm } from "primevue";
 
 const { loading: loadingStore, eveningScheduleItems } = storeToRefs(
   useGlobalStore()
@@ -240,117 +240,158 @@ const handleDelete = async (id: string) => {
 
           <TabPanels>
             <TabPanel value="0">
-              <div class="flex flex-col gap-4 pt-4">
-                <div class="flex flex-col gap-2">
-                  <label
-                    >ნომრის სახელი <span class="text-red-500">*</span></label
-                  >
-                  <InputText
-                    v-model="newEvent.scene_name"
-                    placeholder="მაგ: შესვენება, სადილი, თამაში..."
-                    :class="{ 'p-invalid': submitted && !newEvent.scene_name }"
-                  />
+              <div class="flex flex-col gap-6 pt-6">
+                <div>
+                  <FloatLabel variant="on">
+                    <InputText
+                      id="scene_name_gen"
+                      v-model="newEvent.scene_name"
+                      :class="{
+                        'p-invalid': submitted && !newEvent.scene_name,
+                      }"
+                      class="w-full"
+                    />
+                    <label for="scene_name_gen"
+                      >ნომრის სახელი <span class="text-red-500">*</span></label
+                    >
+                  </FloatLabel>
                   <Message
                     v-if="submitted && !newEvent.scene_name"
                     severity="error"
                     variant="simple"
                     size="small"
+                    class="mt-1"
                   >
                     ნომრის დასახელება აუცილებელია
                   </Message>
                 </div>
               </div>
             </TabPanel>
+
             <TabPanel value="1">
-              <div class="flex flex-col gap-4 pt-4">
-                <div class="flex flex-col gap-2">
-                  <label
-                    >ბავშვის სახელი და გვარი
-                    <span class="text-red-500">*</span></label
-                  >
-                  <InputText
-                    v-model="newEvent.performer_full_name"
-                    :class="{
-                      'p-invalid': submitted && !newEvent.performer_full_name,
-                    }"
-                  />
+              <div class="flex flex-col gap-7 pt-6">
+                <div>
+                  <FloatLabel variant="on">
+                    <InputText
+                      id="performer"
+                      v-model="newEvent.performer_full_name"
+                      :class="{
+                        'p-invalid': submitted && !newEvent.performer_full_name,
+                      }"
+                      class="w-full"
+                    />
+                    <label for="performer"
+                      >ბავშვის სახელი და გვარი
+                      <span class="text-red-500">*</span></label
+                    >
+                  </FloatLabel>
                   <Message
                     v-if="submitted && !newEvent.performer_full_name"
                     severity="error"
                     variant="simple"
                     size="small"
-                    >სახელი აუცილებელია</Message
+                    class="mt-1"
                   >
+                    სახელი აუცილებელია
+                  </Message>
                 </div>
-                <div class="flex flex-col gap-2">
-                  <label
-                    >ლიდერის სახელი და გვარი
-                    <span class="text-red-500">*</span></label
-                  >
-                  <InputText
-                    v-model="newEvent.leader_full_name"
-                    :class="{
-                      'p-invalid': submitted && !newEvent.leader_full_name,
-                    }"
-                  />
+
+                <div>
+                  <FloatLabel variant="on">
+                    <InputText
+                      id="leader"
+                      v-model="newEvent.leader_full_name"
+                      :class="{
+                        'p-invalid': submitted && !newEvent.leader_full_name,
+                      }"
+                      class="w-full"
+                    />
+                    <label for="leader"
+                      >ლიდერის სახელი და გვარი
+                      <span class="text-red-500">*</span></label
+                    >
+                  </FloatLabel>
                   <Message
                     v-if="submitted && !newEvent.leader_full_name"
                     severity="error"
                     variant="simple"
                     size="small"
-                    >ლიდერის სახელი აუცილებელია</Message
+                    class="mt-1"
                   >
+                    ლიდერის სახელი აუცილებელია
+                  </Message>
                 </div>
-                <div class="flex flex-col gap-2">
-                  <label
-                    >ჯგუფის სახელი <span class="text-red-500">*</span></label
-                  >
-                  <InputText
-                    v-model="newEvent.group_name"
-                    :class="{ 'p-invalid': submitted && !newEvent.group_name }"
-                  />
+
+                <div>
+                  <FloatLabel variant="on">
+                    <InputText
+                      id="group"
+                      v-model="newEvent.group_name"
+                      :class="{
+                        'p-invalid': submitted && !newEvent.group_name,
+                      }"
+                      class="w-full"
+                    />
+                    <label for="group"
+                      >ჯგუფის სახელი <span class="text-red-500">*</span></label
+                    >
+                  </FloatLabel>
                   <Message
                     v-if="submitted && !newEvent.group_name"
                     severity="error"
                     variant="simple"
                     size="small"
-                    >ჯგუფის დასახელება აუცილებელია</Message
+                    class="mt-1"
                   >
+                    ჯგუფის დასახელება აუცილებელია
+                  </Message>
                 </div>
-                <div class="flex flex-col gap-2">
-                  <label
-                    >ნომრის სახელი <span class="text-red-500">*</span></label
-                  >
-                  <InputText
-                    v-model="newEvent.scene_name"
-                    placeholder="მაგ: სიმღერა, ცეკვა..."
-                    :class="{ 'p-invalid': submitted && !newEvent.scene_name }"
-                  />
+
+                <div>
+                  <FloatLabel variant="on">
+                    <InputText
+                      id="scene_name_child"
+                      v-model="newEvent.scene_name"
+                      :class="{
+                        'p-invalid': submitted && !newEvent.scene_name,
+                      }"
+                      class="w-full"
+                    />
+                    <label for="scene_name_child"
+                      >ნომრის სახელი <span class="text-red-500">*</span></label
+                    >
+                  </FloatLabel>
                   <Message
                     v-if="submitted && !newEvent.scene_name"
                     severity="error"
                     variant="simple"
                     size="small"
-                    >ნომრის დასახელება აუცილებელია</Message
+                    class="mt-1"
                   >
+                    ნომრის დასახელება აუცილებელია
+                  </Message>
                 </div>
               </div>
             </TabPanel>
           </TabPanels>
         </Tabs>
 
-        <div class="flex flex-col gap-4 px-3 py-2">
-          <div class="flex flex-col gap-2">
-            <label>მედია ლინკი</label>
-            <InputText
-              v-model="newEvent.media_url"
-              placeholder="YouTube ან Google Drive ლინკი"
+        <div class="flex flex-col gap-7 px-4.5 py-6">
+          <FloatLabel variant="on">
+            <InputText id="media" v-model="newEvent.media_url" class="w-full" />
+            <label for="media">მედია ლინკი (YouTube/Drive)</label>
+          </FloatLabel>
+
+          <FloatLabel variant="on">
+            <Textarea
+              id="comments"
+              v-model="newEvent.additional_info"
+              rows="3"
+              autoResize
+              class="w-full"
             />
-          </div>
-          <div class="flex flex-col gap-2">
-            <label>დამატებითი კომენტარი</label>
-            <Textarea v-model="newEvent.additional_info" rows="3" autoResize />
-          </div>
+            <label for="comments">დამატებითი კომენტარი</label>
+          </FloatLabel>
         </div>
 
         <template #footer>
