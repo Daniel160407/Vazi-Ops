@@ -13,9 +13,11 @@ import { useGlobalStore } from "../stores/GlobalStore";
 import { storeToRefs } from "pinia";
 
 export const useEventsCrud = () => {
-  const globalstore = useGlobalStore();
-  const { loading: loadingStore, deadline, events } = storeToRefs(globalstore);
-  const { fetchEvents } = globalstore;
+  const {
+    loading: loadingStore,
+    deadline,
+    events,
+  } = storeToRefs(useGlobalStore());
 
   const saving = ref(false);
 
@@ -25,7 +27,6 @@ export const useEventsCrud = () => {
     saving.value = true;
     try {
       await addDoc(collection(db, EVENTS_DB), event);
-      await fetchEvents();
     } catch (err) {
       console.error("Create Event Error:", err);
     } finally {

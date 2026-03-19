@@ -30,13 +30,11 @@ const newDeadlineDate = ref<Date | null>(null);
 
 const setStatus = async (eventId: string, status: string) => {
   await updateEventStatus(eventId, status);
-  await globalstore.fetchEvents();
 };
 
 const handleUpdateDeadline = async () => {
   if (!newDeadlineDate.value) return;
   await updateDeadline(deadline.value?.id, newDeadlineDate.value);
-  await globalstore.fetchDeadline();
 };
 
 const getStatusSeverity = (status: string) => {
@@ -75,7 +73,6 @@ const handleDelete = async (id: string) => {
     },
     accept: async () => {
       await deleteEvent(id);
-      await globalstore.fetchEvents();
     },
   });
 };
@@ -144,12 +141,6 @@ watch(
           <template #header>
             <div class="flex justify-between items-center">
               <span class="text-xl font-bold text-white">ნომრების მართვა</span>
-              <Button
-                icon="pi pi-refresh"
-                rounded
-                text
-                @click="globalstore.fetchEvents()"
-              />
             </div>
           </template>
 

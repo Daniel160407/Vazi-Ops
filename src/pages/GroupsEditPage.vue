@@ -12,8 +12,7 @@ import { useGroupsCrud } from "../composables/useGroupsCrud";
 import { Textarea, useConfirm } from "primevue";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const { loading, groups, fetchGroups, addGroup, updateGroup, deleteGroup } =
-  useGroupsCrud();
+const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
 const confirm = useConfirm();
 
 const editingGroups = ref<Group[]>([]);
@@ -41,7 +40,6 @@ const handleAddGroup = async () => {
     .filter((s) => s !== "");
 
   await addGroup(newGroup.value);
-  await fetchGroups();
 
   displayAddDialog.value = false;
   newGroup.value = {
@@ -64,7 +62,6 @@ const handleSaveGroup = async (group: Group, index: number) => {
   }
 
   await updateGroup(group);
-  await fetchGroups();
 };
 
 const handleDeleteGroup = (id: string) => {
@@ -75,9 +72,12 @@ const handleDeleteGroup = (id: string) => {
       label: "წაშლა",
       severity: "danger",
     },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+    },
     accept: async () => {
       await deleteGroup(id);
-      await fetchGroups();
     },
   });
 };

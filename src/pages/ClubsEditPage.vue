@@ -13,9 +13,7 @@ import { Textarea, useConfirm } from "primevue";
 import { useClubsCrud } from "../composables/useClubsCrud";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const globalStore = useGlobalStore();
-const { loading, clubs } = storeToRefs(globalStore);
-const { fetchClubs } = globalStore;
+const { loading, clubs } = storeToRefs(useGlobalStore());
 const { addClub, updateClub, deleteClub } = useClubsCrud();
 const confirm = useConfirm();
 
@@ -37,7 +35,6 @@ const openAddDialog = () => {
 
 const handleAddClub = async () => {
   await addClub(newClub.value);
-  await fetchClubs();
 
   displayAddDialog.value = false;
   newClub.value = {
@@ -52,7 +49,6 @@ const handleAddClub = async () => {
 
 const handleSaveClub = async (club: Club) => {
   await updateClub(club);
-  await fetchClubs();
 };
 
 const handleDeleteClub = (id: string) => {
@@ -63,9 +59,12 @@ const handleDeleteClub = (id: string) => {
       label: "წაშლა",
       severity: "danger",
     },
+    rejectProps: {
+      label: "გამოსვლა",
+      severity: "secondary",
+    },
     accept: async () => {
       await deleteClub(id);
-      await fetchClubs();
     },
   });
 };

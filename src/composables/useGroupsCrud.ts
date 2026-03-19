@@ -15,9 +15,7 @@ import { storeToRefs } from "pinia";
 
 export function useGroupsCrud() {
   const toast = useToast();
-  const globalStore = useGlobalStore();
-  const { loading: loadingStore, groups } = storeToRefs(globalStore);
-  const { fetchGroups } = globalStore;
+  const { loading: loadingStore, groups } = storeToRefs(useGlobalStore());
 
   const saving = ref(false);
   const loading = computed(() => loadingStore && saving);
@@ -125,7 +123,6 @@ export function useGroupsCrud() {
     groups,
     loading,
 
-    fetchGroups,
     addGroup,
     updateGroup,
     deleteGroup,

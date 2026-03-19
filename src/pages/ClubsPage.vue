@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../firebase";
 import { useGlobalStore } from "../stores/GlobalStore";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
@@ -12,15 +10,15 @@ import { Card, Select, useToast } from "primevue";
 import { format } from "date-fns";
 import { useClubsCrud } from "../composables/useClubsCrud";
 import type { Club, ClubBooking } from "../type/interfaces";
-import { CLUB_BOOKINGS_DB } from "../composables/constants";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
 
 const globalStore = useGlobalStore();
 const toast = useToast();
 const { loading: loadingStore, clubs } = storeToRefs(globalStore);
-const { fetchClubs } = globalStore;
 
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
+const { fetchUserBookings } = useClubBookingsCrud();
 
 const selectedClub = ref<Club | null>(null);
 const showDialog = ref(false);
@@ -60,32 +58,12 @@ const resetForm = () => {
   bookingToReplaceId.value = null;
 };
 
-const fetchUserBookings = async () => {
-  const bookingsRef = collection(db, CLUB_BOOKINGS_DB);
-  const q = query(
-    bookingsRef,
-    where("child_first_name", "==", childFirstName.value),
-    where("child_last_name", "==", childLastName.value),
-    where("leader_name", "==", leaderName.value),
-    where("group_name", "==", groupName.value)
-  );
-
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(
-    (d) =>
-      ({
-        id: d.id,
-        ...(d.data() as Omit<ClubBooking, "id">),
-      } as ClubBooking)
-  );
-};
-
 const handleConfirmRegister = async () => {
   if (!selectedClub.value) {
     toast.add({
       severity: "warn",
       summary: "აირჩიე წრე",
-      detail: "გთხოვ, თავიდან აირჩიე წრე, სადაც გინდა დარეგისტრირება.",
+      detail: "გთხოვ, თავიდან აირჩიე წრე.",
       life: 3000,
     });
     return;
@@ -100,14 +78,19 @@ const handleConfirmRegister = async () => {
     toast.add({
       severity: "warn",
       summary: "შეავსე ყველა ველი",
-      detail: "სახელი, გვარი, ლიდერი და ჯგუფი სავალდებულოა.",
+      detail: "ყველა ველი სავალდებულოა.",
       life: 3000,
     });
     return;
   }
 
   if (selectionMode.value === "register") {
-    const existing = await fetchUserBookings();
+    const existing = await fetchUserBookings(
+      childFirstName.value,
+      childLastName.value,
+      leaderName.value,
+      groupName.value
+    );
     userBookings.value = existing;
 
     if (selectedClub.value.time) {
@@ -115,19 +98,14 @@ const handleConfirmRegister = async () => {
         const clubForBooking = clubs.value.find(
           (c) => c.id === booking.club_id
         );
-        return (
-          clubForBooking &&
-          clubForBooking.time &&
-          clubForBooking.time === selectedClub.value!.time
-        );
+        return clubForBooking?.time === selectedClub.value!.time;
       });
 
       if (hasSameTime) {
         toast.add({
           severity: "warn",
           summary: "დრო დაკავებულია",
-          detail:
-            "უკვე გაქვს სხვა წრე იმავე დროს, ამიტომ ამ წრეზე ვეღარ დარეგისტრირდები.",
+          detail: "უკვე გაქვს სხვა წრე ამ დროს.",
           life: 6000,
         });
         return;
@@ -142,7 +120,6 @@ const handleConfirmRegister = async () => {
         group_name: groupName.value,
       });
 
-      await fetchClubs();
       showDialog.value = false;
       resetForm();
       return;
@@ -153,7 +130,7 @@ const handleConfirmRegister = async () => {
     toast.add({
       severity: "info",
       summary: "უკვე დაჯავშნილია 2 წრე",
-      detail: "აირჩიე რომელი წრე გინდა შეცვალო ახალით.",
+      detail: "აირჩიე რომელი გინდა შეცვალო.",
       life: 3000,
     });
     return;
@@ -163,47 +140,18 @@ const handleConfirmRegister = async () => {
     toast.add({
       severity: "warn",
       summary: "აირჩიე შესაცვლელი წრე",
-      detail: "აირჩიე წრე სიიდან, რომლის შეცვლაც გინდა.",
+      detail: "აირჩიე წრე სიიდან.",
       life: 3000,
     });
     return;
   }
+
   const oldBooking = userBookings.value.find(
     (b) => b.id === bookingToReplaceId.value
   );
-  if (!oldBooking) {
-    toast.add({
-      severity: "error",
-      summary: "რეგისტრაცია ვერ მოიძებნა",
-      detail: "გთხოვ, ცადე თავიდან და აირჩიე შესაცვლელი წრე.",
-      life: 3000,
-    });
-    return;
-  }
-
-  const otherBooking = userBookings.value.find(
-    (b) => b.id !== bookingToReplaceId.value
-  );
-  if (otherBooking && selectedClub.value.time) {
-    const otherClub = clubs.value.find((c) => c.id === otherBooking.club_id);
-    if (
-      otherClub &&
-      otherClub.time &&
-      otherClub.time === selectedClub.value.time
-    ) {
-      toast.add({
-        severity: "warn",
-        summary: "დრო უკვე დაკავებულია",
-        detail:
-          "შენ გაქვს სხვა წრე ამ დროს, ამიტომ ამ წრეზე შეცვლა ვერ მოხერხდა.",
-        life: 3000,
-      });
-      return;
-    }
-  }
+  if (!oldBooking) return;
 
   await changeClubBooking(oldBooking, selectedClub.value);
-  await fetchClubs();
 
   showDialog.value = false;
   resetForm();
@@ -220,11 +168,9 @@ const handleConfirmRegister = async () => {
     >
       <Card
         v-for="club in clubs"
-        :key="club.name"
+        :key="club.id"
         class="border"
-        :style="{
-          borderColor: club.places_quantity <= 0 ? '#EE4B2B' : '',
-        }"
+        :style="{ borderColor: club.places_quantity <= 0 ? '#EE4B2B' : '' }"
       >
         <template #title>
           <p class="text-center text-2xl font-bold">
@@ -236,15 +182,19 @@ const handleConfirmRegister = async () => {
             <p>მასწავლებელი: {{ club.teacher ?? "-" }}</p>
             <p>ადგილი: {{ club.place ?? "-" }}</p>
             <p>დრო: {{ formatTime(club.time) ?? "-" }}</p>
-            <p>დარჩენილი ადგილები: {{ club.places_quantity ?? "-" }}</p>
+            <p
+              class="font-bold"
+              :class="club.places_quantity <= 3 ? 'text-red-500' : ''"
+            >
+              დარჩენილი ადგილები: {{ club.places_quantity ?? "0" }}
+            </p>
           </div>
         </template>
         <template #content>
           <div>
-            <p class="font-bold">
-              დამატებითი კომენტარი: {{ club.additional_info ?? "-" }}
+            <p class="text-sm opacity-80">
+              კომენტარი: {{ club.additional_info ?? "-" }}
             </p>
-
             <Button
               label="ჩაეწერე"
               icon="pi pi-check"
@@ -260,13 +210,12 @@ const handleConfirmRegister = async () => {
         v-model:visible="showDialog"
         modal
         header="ჩაეწერე წრეზე"
-        class="mx-4"
+        class="mx-4 w-full max-w-md"
       >
         <div class="space-y-4 pt-2">
-          <p v-if="selectedClub" class="font-semibold">
+          <p v-if="selectedClub" class="font-semibold text-primary">
             წრე: {{ selectedClub?.name }}
           </p>
-
           <FloatLabel variant="on">
             <InputText
               id="childFirstName"
@@ -275,7 +224,6 @@ const handleConfirmRegister = async () => {
             />
             <label for="childFirstName">სახელი</label>
           </FloatLabel>
-
           <FloatLabel variant="on">
             <InputText
               id="childLastName"
@@ -284,44 +232,41 @@ const handleConfirmRegister = async () => {
             />
             <label for="childLastName">გვარი</label>
           </FloatLabel>
-
           <FloatLabel variant="on">
             <InputText id="leaderName" v-model="leaderName" class="w-full" />
             <label for="leaderName">ლიდერის სახელი</label>
           </FloatLabel>
-
           <FloatLabel variant="on">
             <InputText id="groupName" v-model="groupName" class="w-full" />
             <label for="groupName">ჯგუფის სახელი</label>
           </FloatLabel>
 
-          <div v-if="selectionMode === 'switch'" class="space-y-2 mt-2">
-            <p class="text-sm text-white-700">
-              უკვე დარეგისტრირებული ხარ 2 წრეზე. აირჩიე რომელი გინდა შეცვალო ამ
-              წრით.
+          <div
+            v-if="selectionMode === 'switch'"
+            class="p-3 bg-blue-50 border-round"
+          >
+            <p class="text-sm mb-2">
+              უკვე გაქვს 2 წრე. აირჩიე რომელი ჩაანაცვლო:
             </p>
             <Select
               v-model="bookingToReplaceId"
               :options="userBookings"
               optionLabel="club_name"
               optionValue="id"
-              placeholder="აირჩიე წრე შესაცვლელად"
+              placeholder="აირჩიე წრე"
               class="w-full"
             />
           </div>
         </div>
-
         <template #footer>
           <Button
             label="გაუქმება"
             icon="pi pi-times"
             severity="secondary"
-            outlined
+            text
             @click="
-              () => {
-                showDialog = false;
-                resetForm();
-              }
+              showDialog = false;
+              resetForm();
             "
           />
           <Button

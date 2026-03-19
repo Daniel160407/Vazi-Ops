@@ -27,9 +27,7 @@ import { useAnnouncementsCrud } from "../composables/useAnnouncementsCrud";
 import type { Announcement } from "../type/interfaces";
 import { useAuth } from "../composables/useAuth";
 
-const globalStore = useGlobalStore();
-const { loading: storeLoading, announcements } = storeToRefs(globalStore);
-const { fetchAnnouncements } = globalStore;
+const { loading: storeLoading, announcements } = storeToRefs(useGlobalStore());
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } =
   useAnnouncementsCrud();
 const { fullName, profileImg } = useAuth();
@@ -94,7 +92,6 @@ const saveAnnouncement = async () => {
       await addAnnouncement({ ...form });
     }
     isDialogVisible.value = false;
-    await fetchAnnouncements();
   } finally {
     isSubmitting.value = false;
   }
@@ -108,11 +105,9 @@ const handleDelete = async (id: string) => {
     rejectProps: {
       label: "გამოსვლა",
       severity: "secondary",
-      outlined: true,
     },
     accept: async () => {
       await deleteAnnouncement(id);
-      await fetchAnnouncements();
     },
   });
 };

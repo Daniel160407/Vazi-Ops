@@ -18,9 +18,7 @@ import { useGoldenVersesCrud } from "../composables/useGoldenVersesCrud";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import type { GoldenVerse } from "../type/interfaces";
 
-const globalStore = useGlobalStore();
-const { loading: loadingStore, goldenVerses } = storeToRefs(globalStore);
-const { fetchGoldenVerses } = globalStore;
+const { loading: loadingStore, goldenVerses } = storeToRefs(useGlobalStore());
 
 const { loading, addGoldenVerse, updateGoldenVerse, deleteGoldenVerse } =
   useGoldenVersesCrud();
@@ -77,7 +75,6 @@ const saveVerse = async () => {
     await addGoldenVerse(currentVerse.value);
   }
 
-  await fetchGoldenVerses();
   displayDialog.value = false;
 };
 
@@ -93,7 +90,6 @@ const confirmDelete = async (id: string) => {
     },
     accept: async () => {
       await deleteGoldenVerse(id);
-      await fetchGoldenVerses();
     },
   });
 };

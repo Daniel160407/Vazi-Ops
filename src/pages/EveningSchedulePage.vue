@@ -3,8 +3,7 @@ import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const globalStore = useGlobalStore();
-const { loading, eveningScheduleItems } = storeToRefs(globalStore);
+const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
 </script>
 
 <template>

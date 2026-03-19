@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
@@ -16,12 +16,10 @@ import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import { useConfirm } from "primevue";
-import type { EveningScheduleItem } from "../type/interfaces";
 
-const globalStore = useGlobalStore();
-const { fetchEveningSchedule } = globalStore;
-const { loading: loadingStore, eveningScheduleItems } =
-  storeToRefs(globalStore);
+const { loading: loadingStore, eveningScheduleItems } = storeToRefs(
+  useGlobalStore()
+);
 const confirm = useConfirm();
 
 const {
@@ -82,12 +80,6 @@ const openEditModal = (item: any) => {
 
 const saveNewOrder = async () => {
   await updateScheduleOrder(eveningScheduleItems.value);
-  await fetchEveningSchedule();
-  sortByPosition(eveningScheduleItems.value);
-};
-
-const sortByPosition = (items: EveningScheduleItem[]) => {
-  items.sort((a, b) => a.position - b.position);
 };
 
 const handleRegister = async () => {
@@ -139,20 +131,9 @@ const handleDelete = async (id: string) => {
     },
     accept: async () => {
       await deleteEveningSchedule(id);
-      sortByPosition(eveningScheduleItems.value);
     },
   });
 };
-
-watch(
-  eveningScheduleItems,
-  (newItems) => {
-    if (newItems && newItems.length > 0) {
-      sortByPosition(newItems);
-    }
-  },
-  { once: true }
-);
 </script>
 
 <template>
