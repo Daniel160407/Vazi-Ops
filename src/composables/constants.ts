@@ -29,6 +29,8 @@ export const ADMIN_DAY_SCHEDULE_LABEL = "დღის განრიგი";
 export const ADMIN_EVENING_SCHEDULE_LABEL = "საღამოს პროგრამა";
 export const ADMIN_EVENTS_LABEL = "ნომრები";
 export const ADMIN_ANNOUNCEMENTS_LABEL = "განცხადებები";
+export const SCHEDULE_LABEL = "განრიგი";
+export const ACTIVITIES_LABEL = "აქტივობები";
 
 export const GROUPS_ICON = "pi pi-users";
 export const CLUBS_ICON = "pi pi-sparkles";
@@ -39,6 +41,10 @@ export const CLUB_BOOKINGS_ICON = "pi pi-list-check";
 export const GOLDEN_VERSES_ICON = "pi pi-lightbulb";
 export const ANNOUNCEMENTS_ICON = "pi pi-megaphone";
 export const ADMIN_ICON = "pi pi-user";
+export const SCHEDULE_ICON = "pi pi-calendar";
+export const ADMIN_SCHEDULE_ICON = "pi pi-clock";
+export const ACTIVITIES_ICON = "pi pi-sparkles";
+export const ADMIN_ACTIVITIES_ICON = "pi pi-briefcase";
 
 //firebase
 export const GROUPS_DB = "groups";

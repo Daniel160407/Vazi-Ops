@@ -11,6 +11,7 @@ import { computed, ref } from "vue";
 import type { Event as AppEvent } from "../type/interfaces";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { storeToRefs } from "pinia";
+import { useToast } from "primevue";
 
 export const useEventsCrud = () => {
   const {
@@ -18,6 +19,7 @@ export const useEventsCrud = () => {
     deadline,
     events,
   } = storeToRefs(useGlobalStore());
+  const toast = useToast();
 
   const saving = ref(false);
 
@@ -29,6 +31,12 @@ export const useEventsCrud = () => {
       await addDoc(collection(db, EVENTS_DB), event);
     } catch (err) {
       console.error("Create Event Error:", err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "ნომერი ვერ დაემატა",
+        life: 3000,
+      });
     } finally {
       saving.value = false;
     }
@@ -41,6 +49,12 @@ export const useEventsCrud = () => {
       await updateDoc(eventRef, { request_status: status });
     } catch (err) {
       console.error("Update Status Error:", err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "მოხდა შეცდომა ნომრის სტატუსის შეცვლისას",
+        life: 3000,
+      });
     } finally {
       saving.value = false;
     }
@@ -52,6 +66,12 @@ export const useEventsCrud = () => {
       await deleteDoc(doc(db, EVENTS_DB, eventId));
     } catch (err) {
       console.error("Delete Event Error:", err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "ნომერი ვერ წაიშალა",
+        life: 3000,
+      });
     } finally {
       saving.value = false;
     }
@@ -69,8 +89,19 @@ export const useEventsCrud = () => {
       } else {
         await addDoc(collection(db, DEADLINE_DB), { time: newTime });
       }
+      toast.add({
+        severity: "success",
+        summary: "დედლაინი განახლებულია",
+        life: 3000,
+      });
     } catch (err) {
       console.error("Update Deadline Error:", err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "დედლაინი ვერ განახლდა",
+        life: 3000,
+      });
     } finally {
       saving.value = false;
     }

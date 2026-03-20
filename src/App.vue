@@ -40,6 +40,12 @@ import {
   ANNOUNCEMENTS_ICON,
   ADMIN_ANNOUNCEMENTS_LABEL,
   ADMIN_ANNOUNCEMENTS_ROUTE,
+  SCHEDULE_LABEL,
+  ACTIVITIES_LABEL,
+  SCHEDULE_ICON,
+  ADMIN_SCHEDULE_ICON,
+  ACTIVITIES_ICON,
+  ADMIN_ACTIVITIES_ICON,
 } from "./composables/constants";
 import { onMounted, ref } from "vue";
 import { useGlobalStore } from "./stores/GlobalStore";
@@ -70,8 +76,8 @@ const items = ref([
     command: () => router.push(GROUPS_ROUTE),
   },
   {
-    label: "განრიგი",
-    icon: "pi pi-calendar",
+    label: SCHEDULE_LABEL,
+    icon: SCHEDULE_ICON,
     items: [
       {
         label: DAY_SCHEDULE_LABEL,
@@ -86,8 +92,8 @@ const items = ref([
     ],
   },
   {
-    label: "აქტივობები",
-    icon: "pi pi-sparkles",
+    label: ACTIVITIES_LABEL,
+    icon: ACTIVITIES_ICON,
     items: [
       {
         label: CLUBS_LABEL,
@@ -121,8 +127,8 @@ const items = ref([
         command: () => handleAdminNav(ADMIN_GROUPS_ROUTE),
       },
       {
-        label: "განრიგი",
-        icon: "pi pi-clock",
+        label: SCHEDULE_LABEL,
+        icon: ADMIN_SCHEDULE_ICON,
         items: [
           {
             label: ADMIN_DAY_SCHEDULE_LABEL,
@@ -137,8 +143,8 @@ const items = ref([
         ],
       },
       {
-        label: "აქტივობები",
-        icon: "pi pi-briefcase",
+        label: ACTIVITIES_LABEL,
+        icon: ADMIN_ACTIVITIES_ICON,
         items: [
           {
             label: ADMIN_CLUBS_LABEL,
@@ -199,7 +205,9 @@ onMounted(() => {
       </div>
     </div>
 
-    <Toast class="right-0 left-0 mx-auto w-full px-2" />
+    <Toast
+      class="right-0 left-0 mx-auto w-full max-w-[100vw] px-2 [&_.p-toast-message]:max-w-full [&_.p-toast-message]:rounded-xl [&_.p-toast-message]:wrap-break-word [&_.p-toast-message]:whitespace-normal"
+    />
     <ConfirmDialog class="mx-2" />
   </div>
 </template>
