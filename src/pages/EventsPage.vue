@@ -127,7 +127,7 @@ onUnmounted(() => {
 <template>
   <div>
     <LoadingSpinner
-      v-if="(loading.value && events.length <= 0) || (!isDeadlinePassed && !timeLeft)"
+      v-if="(loading && events.length <= 0) || (!isDeadlinePassed && !timeLeft)"
     />
 
     <div v-else>
@@ -318,14 +318,14 @@ onUnmounted(() => {
             icon="pi pi-times"
             text
             @click="showRegisterModal = false"
-            :disabled="loading.value"
+            :disabled="loading"
           />
           <Button
             label="გაგზავნა"
             icon="pi pi-check"
             severity="success"
             @click="handleRegister"
-            :loading="loading.value"
+            :loading="loading"
           />
         </template>
       </Dialog>
