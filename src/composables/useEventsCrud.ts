@@ -23,7 +23,7 @@ export const useEventsCrud = () => {
 
   const saving = ref(false);
 
-  const loading = computed(() => saving && loadingStore);
+  const loading = computed(() => saving.value || loadingStore.value);
 
   const createEvent = async (event: Omit<AppEvent, "id">) => {
     saving.value = true;
