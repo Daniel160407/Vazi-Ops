@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { ka } from "date-fns/locale";
 import { format, intervalToDuration, type Duration } from "date-fns";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
-import Tag from "primevue/tag";
-import Button from "primevue/button";
-import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
-import Textarea from "primevue/textarea";
-import Message from "primevue/message";
 import { useEventsCrud } from "../composables/useEventsCrud";
+import { useToast } from "primevue";
 import {
   REQUEST_PENDING,
   REQUEST_ACCEPTED,
@@ -20,10 +13,95 @@ import type { Event as AppEvent } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
+const toast = useToast();
 
-const showRegisterModal = ref(false);
 const isDeadlinePassed = ref(false);
 const timeLeft = ref<Duration | null>(null);
+
+let timer: number | null = null;
+
+const updateCountdown = () => {
+  if (!deadline.value?.time) return;
+  const now = new Date();
+  const end = new Date(deadline.value.time);
+  if (now >= end) {
+    isDeadlinePassed.value = true;
+    timeLeft.value = null;
+    return;
+  }
+  isDeadlinePassed.value = false;
+  timeLeft.value = intervalToDuration({ start: now, end });
+};
+
+onMounted(() => {
+  updateCountdown();
+  timer = window.setInterval(updateCountdown, 1000);
+});
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+
+const pad = (n?: number) => String(n ?? 0).padStart(2, "0");
+
+const countdownUnits = computed(() => {
+  if (!timeLeft.value) return null;
+  const { hours, minutes, seconds } = timeLeft.value;
+  return [
+    { value: pad(hours), label: "სთ" },
+    { value: pad(minutes), label: "წთ" },
+    { value: pad(seconds), label: "წმ" },
+  ];
+});
+
+const formatDate = (dateValue?: any) => {
+  if (!dateValue) return "";
+  const date = dateValue?.seconds
+    ? new Date(dateValue.seconds * 1000)
+    : new Date(dateValue);
+  if (isNaN(date.getTime())) return "თარიღი არასწორია";
+  return format(date, "d MMMM yyyy, HH:mm", { locale: ka });
+};
+
+const statusMeta = (status: string) => {
+  if (status === REQUEST_ACCEPTED)
+    return {
+      label: "დადასტურებული",
+      cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+    };
+  if (status === REQUEST_REJECTED)
+    return {
+      label: "უარყოფილი",
+      cls: "bg-red-500/15 text-red-400 border-red-500/25",
+    };
+  return {
+    label: "მოლოდინში",
+    cls: "bg-amber-500/15 text-amber-400 border-amber-500/25",
+  };
+};
+
+const activeFilter = ref<"all" | "pending" | "accepted" | "rejected">("all");
+
+const filters = [
+  { key: "all", label: "ყველა" },
+  { key: "pending", label: "მოლოდინი" },
+  { key: "accepted", label: "დადასტურ." },
+  { key: "rejected", label: "უარყოფილი" },
+] as const;
+
+const statusMap: Record<string, string> = {
+  pending: REQUEST_PENDING,
+  accepted: REQUEST_ACCEPTED,
+  rejected: REQUEST_REJECTED,
+};
+
+const filteredEvents = computed(() => {
+  if (activeFilter.value === "all") return events.value;
+  return events.value.filter(
+    (e) => e.request_status === statusMap[activeFilter.value],
+  );
+});
+
+const sheetVisible = ref(false);
 const submitted = ref(false);
 
 const getEmptyForm = (): Omit<AppEvent, "id"> => ({
@@ -37,298 +115,437 @@ const getEmptyForm = (): Omit<AppEvent, "id"> => ({
   created_at: new Date(),
 });
 
-const newEvent = ref(getEmptyForm());
-const allRequests = computed(() => events.value);
+const form = ref(getEmptyForm());
 
-const getStatusSeverity = (status: string) => {
-  if (status === REQUEST_ACCEPTED) return "success";
-  if (status === REQUEST_PENDING) return "warn";
-  if (status === REQUEST_REJECTED) return "danger";
-  return "info";
+const openSheet = () => {
+  form.value = getEmptyForm();
+  submitted.value = false;
+  sheetVisible.value = true;
 };
 
-const getStatusLabel = (status: string) => {
-  if (status === REQUEST_ACCEPTED) return "დადასტურებული";
-  if (status === REQUEST_PENDING) return "მოლოდინში";
-  if (status === REQUEST_REJECTED) return "უარყოფილი";
-  return status;
-};
-
-const handleRegister = async () => {
-  submitted.value = true;
-
-  const isValid =
-    newEvent.value.performer_full_name &&
-    newEvent.value.leader_full_name &&
-    newEvent.value.group_name &&
-    newEvent.value.scene_name;
-
-  if (!isValid) return;
-
-  await createEvent(newEvent.value);
-  showRegisterModal.value = false;
-  newEvent.value = getEmptyForm();
+const closeSheet = () => {
+  sheetVisible.value = false;
   submitted.value = false;
 };
 
-let timer: number | null = null;
-const updateCountdown = () => {
-  if (!deadline.value?.time) return;
-  const now = new Date();
-  const end = new Date(deadline.value.time);
-  if (now >= end) {
-    timeLeft.value = null;
-    isDeadlinePassed.value = true;
+watch(sheetVisible, (v) => {
+  if (!v) submitted.value = false;
+});
+
+const handleRegister = async () => {
+  submitted.value = true;
+  if (
+    !form.value.performer_full_name ||
+    !form.value.leader_full_name ||
+    !form.value.group_name ||
+    !form.value.scene_name
+  ) {
+    toast.add({
+      severity: "warn",
+      summary: "შეავსე ყველა სავალდებულო ველი",
+      life: 3000,
+    });
     return;
   }
-  isDeadlinePassed.value = false;
-  timeLeft.value = intervalToDuration({ start: now, end: end });
+  await createEvent(form.value);
+  closeSheet();
 };
-
-const countdownText = computed(() => {
-  if (isDeadlinePassed.value) return "რეგისტრაცია დასრულდა";
-  if (!timeLeft.value) return "ითვლება...";
-  const { days, hours, minutes, seconds } = timeLeft.value;
-  return `${days ? days + " დღე " : ""}${hours ?? 0}სთ ${minutes ?? 0}წთ ${
-    seconds ?? 0
-  }წმ`;
-});
-
-const formatDate = (dateValue?: any) => {
-  if (!dateValue) return "";
-  let date: Date;
-  if (dateValue?.seconds) {
-    date = new Date(dateValue.seconds * 1000);
-  } else if (dateValue instanceof Date) {
-    date = dateValue;
-  } else {
-    date = new Date(dateValue);
-  }
-  if (isNaN(date.getTime())) return "თარიღი არასწორია";
-  return format(date, "d MMMM yyyy, HH:mm", { locale: ka });
-};
-
-watch(showRegisterModal, (val) => {
-  if (!val) {
-    submitted.value = false;
-  }
-});
-
-onMounted(() => {
-  updateCountdown();
-  timer = window.setInterval(updateCountdown, 1000);
-});
-
-onUnmounted(() => {
-  if (timer) clearInterval(timer);
-});
 </script>
 
 <template>
-  <div>
-    <LoadingSpinner
-      v-if="(loading && events.length <= 0) || (!isDeadlinePassed && !timeLeft)"
-    />
+  <div class="pb-4">
+    <LoadingSpinner v-if="loading && events.length === 0 && !deadline" />
 
     <div v-else>
       <div
-        class="mb-8 text-center p-4 rounded-2xl shadow-2xl border border-slate-200"
+        class="mb-5 overflow-hidden rounded-3xl border border-blue-900/30 bg-[#0d1829]"
       >
-        <h2 class="text-3xl font-bold mb-4 text-white">საღამოს ნომრები</h2>
-        <div class="flex flex-col items-center gap-4">
-          <div
-            class="bg-slate-900 px-4 py-4 rounded-xl border border-slate-200"
+        <div class="p-5">
+          <p
+            class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500"
           >
-            <div class="text-4xl font-mono text-yellow-400 tracking-wider">
-              {{ countdownText }}
-            </div>
-            <p
-              v-if="!isDeadlinePassed"
-              class="text-slate-400 mt-2 text-sm uppercase tracking-widest"
-            >
-              რეგისტრაციის დასრულებამდე
-            </p>
-          </div>
-          <p class="text-slate-500 italic">
-            დედლაინი: {{ formatDate(deadline?.time) }}
+            საღამოს ნომრები
           </p>
-          <Button
-            v-if="!isDeadlinePassed"
-            label="ჩაწერა"
-            icon="pi pi-plus-circle"
-            severity="success"
-            raised
-            size="large"
-            class="px-8"
-            @click="showRegisterModal = true"
-          />
-        </div>
-      </div>
 
-      <div
-        class="card shadow-xl rounded-lg overflow-hidden border border-slate-200"
-      >
-        <DataTable
-          :value="allRequests"
-          stripedRows
-          paginator
-          :rows="10"
-          responsiveLayout="stack"
-        >
-          <template #header>
+          <div
+            v-if="!isDeadlinePassed && countdownUnits"
+            class="mb-4 flex gap-2"
+          >
             <div
-              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left"
+              v-for="unit in countdownUnits"
+              :key="unit.label"
+              class="flex flex-1 flex-col items-center rounded-2xl bg-[#07101e] py-4 border border-yellow-900/30"
             >
-              <div class="flex flex-col text-left">
-                <span class="text-xl font-semibold"
-                  >ნომრების სია და სტატუსები</span
-                >
-                <span class="text-xs text-slate-400 italic"
-                  >ცხრილი არ ასახავს გამომსვლელთა თანმიმდევრობას</span
-                >
-              </div>
-              <Tag severity="info" :value="`სულ: ${allRequests.length}`" />
+              <span
+                class="font-mono text-4xl font-bold text-yellow-400 tabular-nums tracking-wider"
+                >{{ unit.value }}</span
+              >
+              <span
+                class="mt-1 text-[10px] font-bold uppercase tracking-widest text-yellow-900"
+                >{{ unit.label }}</span
+              >
             </div>
-          </template>
+          </div>
 
-          <Column field="scene_name" header="ნომერი" sortable />
-          <Column field="performer_full_name" header="შემსრულებელი" sortable />
-          <Column field="leader_full_name" header="ლიდერი" sortable />
-          <Column field="group_name" header="ჯგუფი" sortable />
-          <Column field="created_at" header="დრო" sortable>
-            <template #body="{ data }">
-              <span v-if="data && data.created_at">{{
-                formatDate(data.created_at)
-              }}</span>
-              <span v-else class="text-slate-400">-</span>
-            </template>
-          </Column>
+          <div
+            v-else-if="isDeadlinePassed"
+            class="mb-4 flex items-center gap-3 rounded-2xl bg-red-500/10 px-4 py-3 border border-red-500/20"
+          >
+            <i class="pi pi-lock text-red-400" />
+            <span class="text-sm font-semibold text-red-400"
+              >რეგისტრაცია დასრულდა</span
+            >
+          </div>
 
-          <Column header="სტატუსი" field="request_status" sortable>
-            <template #body="{ data }">
-              <Tag
-                :severity="getStatusSeverity(data.request_status)"
-                :value="getStatusLabel(data.request_status)"
-              />
-            </template>
-          </Column>
+          <div v-else class="mb-4 h-16 flex items-center justify-center">
+            <i class="pi pi-spin pi-spinner text-slate-500" />
+          </div>
 
-          <template #empty>
-            <div class="text-center p-8 text-slate-500">
-              განაცხადები არ არის.
-            </div>
-          </template>
-        </DataTable>
+          <div class="mb-4 flex items-center gap-2 text-xs text-slate-600">
+            <i class="pi pi-calendar" />
+            <span>დედლაინი: {{ formatDate(deadline?.time) || "—" }}</span>
+          </div>
+
+          <button
+            v-if="!isDeadlinePassed"
+            @click="openSheet"
+            class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 active:scale-95"
+          >
+            <i class="pi pi-plus-circle" />
+            ნომრის ჩაწერა
+          </button>
+        </div>
       </div>
 
-      <Dialog
-        v-model:visible="showRegisterModal"
-        modal
-        header="ნომრის რეგისტრაცია"
-        :style="{ width: '90vw', maxWidth: '500px' }"
-        class="p-fluid mx-4"
+      <div class="mb-4 grid grid-cols-3 gap-2">
+        <div
+          class="rounded-xl border border-blue-900/20 bg-[#0d1829] p-3 text-center"
+        >
+          <p class="text-xl font-bold text-white">{{ events.length }}</p>
+          <p class="text-[10px] text-slate-600">სულ</p>
+        </div>
+        <div
+          class="rounded-xl border border-amber-900/20 bg-[#0d1829] p-3 text-center"
+        >
+          <p class="text-xl font-bold text-amber-400">
+            {{
+              events.filter((e) => e.request_status === REQUEST_PENDING).length
+            }}
+          </p>
+          <p class="text-[10px] text-slate-600">მოლოდინი</p>
+        </div>
+        <div
+          class="rounded-xl border border-emerald-900/20 bg-[#0d1829] p-3 text-center"
+        >
+          <p class="text-xl font-bold text-emerald-400">
+            {{
+              events.filter((e) => e.request_status === REQUEST_ACCEPTED).length
+            }}
+          </p>
+          <p class="text-[10px] text-slate-600">დადასტურ.</p>
+        </div>
+      </div>
+
+      <div class="mb-4 flex gap-2 overflow-x-auto pb-1">
+        <button
+          v-for="f in filters"
+          :key="f.key"
+          @click="activeFilter = f.key"
+          class="shrink-0 cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+          :class="
+            activeFilter === f.key
+              ? 'bg-blue-600 text-white'
+              : 'bg-[#0d1829] text-slate-500 hover:text-slate-300 border border-blue-900/20'
+          "
+        >
+          {{ f.label }}
+        </button>
+      </div>
+
+      <p
+        v-if="filteredEvents.length === 0"
+        class="py-10 text-center text-sm text-slate-600"
       >
-        <div class="flex flex-col gap-4 py-4">
-          <div class="flex flex-col gap-2">
-            <label
-              >ბავშვის სახელი და გვარი
-              <span class="text-red-500">*</span></label
+        ნომრები არ მოიძებნა
+      </p>
+
+      <div class="flex flex-col gap-3">
+        <div
+          v-for="event in filteredEvents"
+          :key="event.id"
+          class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4"
+        >
+          <div class="mb-3 flex items-start justify-between gap-2">
+            <h3 class="font-bold text-white">{{ event.scene_name }}</h3>
+            <span
+              class="shrink-0 rounded-lg border px-2 py-0.5 text-xs font-semibold"
+              :class="statusMeta(event.request_status).cls"
             >
-            <InputText
-              v-model="newEvent.performer_full_name"
-              :class="{
-                'p-invalid': submitted && !newEvent.performer_full_name,
-              }"
-            />
-            <Message
-              v-if="submitted && !newEvent.performer_full_name"
-              severity="error"
-              variant="simple"
-              size="small"
-              >სახელი აუცილებელია</Message
-            >
+              {{ statusMeta(event.request_status).label }}
+            </span>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <label
-              >ლიდერის სახელი და გვარი
-              <span class="text-red-500">*</span></label
-            >
-            <InputText
-              v-model="newEvent.leader_full_name"
-              :class="{ 'p-invalid': submitted && !newEvent.leader_full_name }"
-            />
-            <Message
-              v-if="submitted && !newEvent.leader_full_name"
-              severity="error"
-              variant="simple"
-              size="small"
-              >ლიდერის სახელი აუცილებელია</Message
-            >
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label>ჯგუფის სახელი <span class="text-red-500">*</span></label>
-            <InputText
-              v-model="newEvent.group_name"
-              :class="{ 'p-invalid': submitted && !newEvent.group_name }"
-            />
-            <Message
-              v-if="submitted && !newEvent.group_name"
-              severity="error"
-              variant="simple"
-              size="small"
-              >ჯგუფის დასახელება აუცილებელია</Message
-            >
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label>ნომრის სახელი <span class="text-red-500">*</span></label>
-            <InputText
-              v-model="newEvent.scene_name"
-              placeholder="მაგ: სიმღერა, ცეკვა, დადგმა..."
-              :class="{ 'p-invalid': submitted && !newEvent.scene_name }"
-            />
-            <Message
-              v-if="submitted && !newEvent.scene_name"
-              severity="error"
-              variant="simple"
-              size="small"
-              >ნომრის დასახელება აუცილებელია</Message
-            >
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label>მედია ლინკი</label>
-            <InputText
-              v-model="newEvent.media_url"
-              placeholder="მაგ: YouTube ან Google Drive ლინკი"
-            />
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label>დამატებითი კომენტარი</label>
-            <Textarea v-model="newEvent.additional_info" rows="3" autoResize />
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center gap-2.5">
+              <div
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30"
+              >
+                <i class="pi pi-user text-[10px] text-blue-400" />
+              </div>
+              <span class="text-sm text-slate-400">{{
+                event.performer_full_name
+              }}</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30"
+              >
+                <i class="pi pi-users text-[10px] text-blue-400" />
+              </div>
+              <span class="text-sm text-slate-400"
+                >{{ event.leader_full_name }} · {{ event.group_name }}</span
+              >
+            </div>
+            <div v-if="event.media_url" class="flex items-center gap-2.5">
+              <div
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30"
+              >
+                <i class="pi pi-link text-[10px] text-blue-400" />
+              </div>
+              <a
+                :href="event.media_url"
+                target="_blank"
+                class="text-sm text-blue-400 underline underline-offset-2 hover:text-blue-300"
+              >
+                მედია ლინკი
+              </a>
+            </div>
+            <div v-if="event.additional_info" class="flex items-start gap-2.5">
+              <div
+                class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30"
+              >
+                <i class="pi pi-comment text-[10px] text-blue-400" />
+              </div>
+              <span class="text-sm leading-relaxed text-slate-500">{{
+                event.additional_info
+              }}</span>
+            </div>
           </div>
         </div>
-
-        <template #footer>
-          <Button
-            label="გაუქმება"
-            icon="pi pi-times"
-            text
-            @click="showRegisterModal = false"
-            :disabled="loading"
-          />
-          <Button
-            label="გაგზავნა"
-            icon="pi pi-check"
-            severity="success"
-            @click="handleRegister"
-            :loading="loading"
-          />
-        </template>
-      </Dialog>
+      </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="backdrop">
+        <div
+          v-if="sheetVisible"
+          class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+          @click="closeSheet"
+        />
+      </Transition>
+
+      <Transition name="sheet">
+        <div
+          v-if="sheetVisible"
+          class="fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-blue-900/40 bg-[#07101e] p-5"
+          style="box-shadow: 0 -8px 40px 0 rgba(0, 10, 40, 0.8)"
+          @click.stop
+        >
+          <div class="mx-auto mb-4 h-1 w-10 rounded-full bg-blue-900/60" />
+
+          <div class="mb-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="h-4 w-[3px] rounded-full bg-blue-500" />
+              <span class="text-sm font-bold text-slate-200"
+                >ნომრის ჩაწერა</span
+              >
+            </div>
+            <button
+              @click="closeSheet"
+              class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-blue-900/30 text-slate-400 hover:bg-blue-900/60 hover:text-white"
+            >
+              <i class="pi pi-times text-xs" />
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div>
+              <label
+                class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                ბავშვის სახელი და გვარი <span class="text-red-400">*</span>
+              </label>
+              <input
+                v-model="form.performer_full_name"
+                type="text"
+                placeholder="მაგ: ნიკა გელაშვილი"
+                class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                :class="
+                  submitted && !form.performer_full_name
+                    ? 'border-red-600/60 bg-red-500/5'
+                    : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
+                "
+              />
+              <p
+                v-if="submitted && !form.performer_full_name"
+                class="mt-1 text-xs text-red-400"
+              >
+                სავალდებულოა
+              </p>
+            </div>
+
+            <div>
+              <label
+                class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                ლიდერის სახელი და გვარი <span class="text-red-400">*</span>
+              </label>
+              <input
+                v-model="form.leader_full_name"
+                type="text"
+                class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                :class="
+                  submitted && !form.leader_full_name
+                    ? 'border-red-600/60 bg-red-500/5'
+                    : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
+                "
+              />
+              <p
+                v-if="submitted && !form.leader_full_name"
+                class="mt-1 text-xs text-red-400"
+              >
+                სავალდებულოა
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+                >
+                  ჯგუფი <span class="text-red-400">*</span>
+                </label>
+                <input
+                  v-model="form.group_name"
+                  type="text"
+                  class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
+                  :class="
+                    submitted && !form.group_name
+                      ? 'border-red-600/60 bg-red-500/5'
+                      : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
+                  "
+                />
+                <p
+                  v-if="submitted && !form.group_name"
+                  class="mt-1 text-xs text-red-400"
+                >
+                  სავალდებულოა
+                </p>
+              </div>
+              <div>
+                <label
+                  class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+                >
+                  ნომრის სახელი <span class="text-red-400">*</span>
+                </label>
+                <input
+                  v-model="form.scene_name"
+                  type="text"
+                  placeholder="სიმღერა, ცეკვა..."
+                  class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                  :class="
+                    submitted && !form.scene_name
+                      ? 'border-red-600/60 bg-red-500/5'
+                      : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
+                  "
+                />
+                <p
+                  v-if="submitted && !form.scene_name"
+                  class="mt-1 text-xs text-red-400"
+                >
+                  სავალდებულოა
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                მედია ლინკი
+                <span class="text-slate-600 normal-case font-normal"
+                  >(სურვილისამებრ)</span
+                >
+              </label>
+              <input
+                v-model="form.media_url"
+                type="url"
+                placeholder="YouTube, Google Drive..."
+                class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
+              />
+            </div>
+
+            <div>
+              <label
+                class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                კომენტარი
+                <span class="text-slate-600 normal-case font-normal"
+                  >(სურვილისამებრ)</span
+                >
+              </label>
+              <textarea
+                v-model="form.additional_info"
+                rows="3"
+                class="w-full resize-none rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
+              />
+            </div>
+          </div>
+
+          <div class="mt-5 flex gap-3">
+            <button
+              @click="closeSheet"
+              class="cursor-pointer rounded-xl border border-blue-900/30 bg-[#0d1829] px-5 py-3 text-sm font-semibold text-slate-400 transition-all hover:text-slate-200"
+            >
+              გაუქმება
+            </button>
+            <button
+              @click="handleRegister"
+              :disabled="loading"
+              class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
+            >
+              <i class="pi pi-check" />
+              გაგზავნა
+            </button>
+          </div>
+
+          <div class="h-6" />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
+
+<style scoped>
+.backdrop-enter-active {
+  transition: opacity 0.25s ease;
+}
+.backdrop-leave-active {
+  transition: opacity 0.2s ease;
+}
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+.sheet-enter-active {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.sheet-leave-active {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1);
+}
+.sheet-enter-from,
+.sheet-leave-to {
+  transform: translateY(100%);
+}
+</style>
