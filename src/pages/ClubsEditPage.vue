@@ -1,26 +1,23 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
-import { ref, watch } from "vue";
-import type { Club } from "../type/interfaces";
-import InputText from "primevue/inputtext";
-import InputNumber from "primevue/inputnumber";
-import Button from "primevue/button";
-import FloatLabel from "primevue/floatlabel";
-import Dialog from "primevue/dialog";
+import { format } from "date-fns";
+import { useConfirm } from "primevue";
 import DatePicker from "primevue/datepicker";
-import { Textarea, useConfirm } from "primevue";
+import { useGlobalStore } from "../stores/GlobalStore";
 import { useClubsCrud } from "../composables/useClubsCrud";
+import type { Club } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 
-const { loading, clubs } = storeToRefs(useGlobalStore());
-const { addClub, updateClub, deleteClub } = useClubsCrud();
+const { loading: loadingStore, clubs } = storeToRefs(useGlobalStore());
+const { addClub, updateClub, deleteClub, loading } = useClubsCrud();
 const confirm = useConfirm();
 
-const editingClubs = ref<Club[]>([]);
+// ── sheet state ──────────────────────────────────────────
+const sheetVisible = ref(false);
+const isAdding = ref(false);
 
-const displayAddDialog = ref(false);
-const newClub = ref<Omit<Club, "id">>({
+const blankClub = (): Omit<Club, "id"> => ({
   name: "",
   teacher: "",
   places_quantity: 0,
@@ -29,236 +26,310 @@ const newClub = ref<Omit<Club, "id">>({
   additional_info: "",
 });
 
-const openAddDialog = () => {
-  displayAddDialog.value = true;
+const form = ref<Club | Omit<Club, "id">>(blankClub());
+
+const openAdd = () => {
+  isAdding.value = true;
+  form.value = blankClub();
+  sheetVisible.value = true;
 };
 
-const handleAddClub = async () => {
-  await addClub(newClub.value);
-
-  displayAddDialog.value = false;
-  newClub.value = {
-    name: "",
-    teacher: "",
-    places_quantity: 0,
-    place: "",
-    time: new Date(),
-    additional_info: "",
-  };
+const openEdit = (club: Club) => {
+  isAdding.value = false;
+  form.value = { ...club, time: new Date(club.time) };
+  sheetVisible.value = true;
 };
 
-const handleSaveClub = async (club: Club) => {
-  await updateClub(club);
+const handleSave = async () => {
+  if (isAdding.value) {
+    await addClub(form.value as Omit<Club, "id">);
+  } else {
+    await updateClub(form.value as Club);
+  }
+  sheetVisible.value = false;
 };
 
-const handleDeleteClub = (id: string) => {
+const handleDelete = () => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ წრის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: {
-      label: "წაშლა",
-      severity: "danger",
-    },
-    rejectProps: {
-      label: "გამოსვლა",
-      severity: "secondary",
-    },
+    acceptProps: { label: "წაშლა", severity: "danger" },
+    rejectProps: { label: "გაუქმება", severity: "secondary" },
     accept: async () => {
-      await deleteClub(id);
+      await deleteClub((form.value as Club).id);
+      sheetVisible.value = false;
     },
   });
 };
 
-watch(
-  clubs,
-  (newClubs) => {
-    editingClubs.value = newClubs.map((club) => ({
-      ...club,
-      time: new Date(club.time),
-    }));
-  },
-  { deep: true, immediate: true }
+// ── search + stats ───────────────────────────────────────
+const search = ref("");
+
+const filtered = computed(() => {
+  const q = search.value.toLowerCase().trim();
+  if (!q) return clubs.value;
+  return clubs.value.filter(
+    (c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.teacher.toLowerCase().includes(q) ||
+      c.place.toLowerCase().includes(q)
+  );
+});
+
+const totalPlaces = computed(() =>
+  clubs.value.reduce((acc, c) => acc + (c.places_quantity ?? 0), 0)
 );
+
+// ── helpers ──────────────────────────────────────────────
+const formatTime = (value?: string | Date | null) => {
+  if (!value) return "—";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return format(date, "HH:mm");
+};
+
+const placesBg = (n: number) => {
+  if (n <= 0) return "bg-red-500/15 text-red-400 border-red-500/20";
+  if (n <= 3) return "bg-amber-500/15 text-amber-400 border-amber-500/20";
+  return "bg-emerald-500/15 text-emerald-400 border-emerald-500/20";
+};
+
+const accentBorder = (n: number) => {
+  if (n <= 0) return "border-l-red-500/60";
+  if (n <= 3) return "border-l-amber-500/60";
+  return "border-l-blue-500/40";
+};
 </script>
 
 <template>
-  <div>
-    <LoadingSpinner v-if="loading" />
+  <div class="relative pb-4">
+    <LoadingSpinner v-if="loadingStore && clubs.length === 0" />
 
     <div v-else>
-      <div class="mb-4">
-        <Button
-          label="დამატება"
-          icon="pi pi-plus"
-          @click="openAddDialog"
-          severity="info"
+      <!-- Search -->
+      <div class="relative mb-4">
+        <i class="pi pi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-500" />
+        <input
+          v-model="search"
+          type="text"
+          placeholder="მოძებნე წრე, მასწავლებელი..."
+          class="w-full rounded-2xl border border-blue-900/30 bg-[#0d1829] py-3 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
         />
       </div>
 
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-      >
-        <div
-          v-for="club in editingClubs"
-          :key="club.id"
-          class="flex flex-col gap-5 rounded-xl p-4 border border-solid"
-        >
-          <div class="space-y-6">
-            <FloatLabel variant="on">
-              <InputText
-                id="name"
-                v-model="club.name"
-                class="w-full text-center font-bold"
-              />
-              <label for="name">წრის სახელი</label>
-            </FloatLabel>
-
-            <FloatLabel variant="on">
-              <InputText id="teacher" v-model="club.teacher" class="w-full" />
-              <label for="teacher">მასწავლებელი</label>
-            </FloatLabel>
-
-            <FloatLabel variant="on">
-              <InputNumber
-                id="places_quantity"
-                v-model="club.places_quantity"
-                class="w-full"
-              />
-              <label for="places_quantity">ადგილების რაოდენობა</label>
-            </FloatLabel>
-
-            <FloatLabel variant="on">
-              <InputText id="place" v-model="club.place" class="w-full" />
-              <label for="place">ადგილმდებარეობა</label>
-            </FloatLabel>
-
-            <FloatLabel variant="on">
-              <DatePicker
-                v-model="club.time"
-                showIcon
-                fluid
-                iconDisplay="input"
-                timeOnly
-                inputId="time"
-                class="w-full"
-              >
-                <template #inputicon="slotProps">
-                  <i class="pi pi-clock" @click="slotProps.clickCallback" />
-                </template>
-              </DatePicker>
-              <label for="time">დრო</label>
-            </FloatLabel>
-
-            <FloatLabel variant="on">
-              <Textarea
-                v-model="club.additional_info"
-                class="w-full"
-                rows="3"
-              ></Textarea>
-              <label>დამატებითი ინფორმაცია</label>
-            </FloatLabel>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3">
-            <Button
-              label="წაშლა"
-              icon="pi pi-trash"
-              severity="danger"
-              @click="handleDeleteClub(club.id)"
-              class="flex-1"
-              outlined
-            />
-            <Button
-              label="შენახვა"
-              icon="pi pi-save"
-              severity="success"
-              @click="handleSaveClub(club)"
-              class="mt-auto flex-1"
-              outlined
-            />
-          </div>
+      <!-- Stats -->
+      <div class="mb-5 grid grid-cols-2 gap-3">
+        <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ წრე</p>
+          <p class="text-3xl font-bold text-white">{{ clubs.length }}</p>
+        </div>
+        <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">თავისუფალი ადგილი</p>
+          <p class="text-3xl font-bold text-blue-400">{{ totalPlaces }}</p>
         </div>
       </div>
 
-      <Dialog
-        v-model:visible="displayAddDialog"
-        modal
-        header="ახალი წრის დამატება"
-        class="mx-4"
-      >
-        <div class="space-y-6 pt-4">
-          <FloatLabel variant="on">
-            <InputText id="newName" v-model="newClub.name" class="w-full" />
-            <label for="newName">წრის სახელი</label>
-          </FloatLabel>
+      <!-- Section title -->
+      <h2 class="mb-3 text-base font-bold text-slate-200">წრეები</h2>
 
-          <FloatLabel variant="on">
-            <InputText
-              id="newTeacher"
-              v-model="newClub.teacher"
-              class="w-full"
-            />
-            <label for="newTeacher">მასწავლებელი</label>
-          </FloatLabel>
+      <p v-if="filtered.length === 0" class="py-10 text-center text-sm text-slate-600">
+        წრე ვერ მოიძებნა
+      </p>
 
-          <FloatLabel variant="on">
-            <InputNumber
-              id="newPlacesQuantity"
-              v-model="newClub.places_quantity"
-              class="w-full"
-            />
-            <label for="newPlacesQuantity">ადგილების რაოდენობა</label>
-          </FloatLabel>
-
-          <FloatLabel variant="on">
-            <InputText id="newPlace" v-model="newClub.place" class="w-full" />
-            <label for="newPlace">ადგილმდებარეობა</label>
-          </FloatLabel>
-
-          <FloatLabel variant="on">
-            <DatePicker
-              v-model="newClub.time"
-              showIcon
-              fluid
-              iconDisplay="input"
-              timeOnly
-              inputId="newTime"
-              class="w-full"
+      <!-- Club cards -->
+      <div class="flex flex-col gap-3">
+        <button
+          v-for="club in filtered"
+          :key="club.id"
+          class="w-full overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/30 hover:bg-[#0f1f36]"
+          :class="accentBorder(club.places_quantity)"
+          @click="openEdit(club)"
+        >
+          <!-- Header -->
+          <div class="mb-3 flex items-start justify-between gap-2">
+            <h3 class="text-base font-bold leading-tight text-white">{{ club.name }}</h3>
+            <span
+              class="shrink-0 rounded-lg border px-2.5 py-1 text-xs font-bold"
+              :class="placesBg(club.places_quantity)"
             >
-              <template #inputicon="slotProps">
-                <i class="pi pi-clock" @click="slotProps.clickCallback" />
-              </template>
-            </DatePicker>
-            <label for="newTime">დრო</label>
-          </FloatLabel>
+              {{ club.places_quantity <= 0 ? "სავსეა" : `${club.places_quantity} ადგილი` }}
+            </span>
+          </div>
 
-          <FloatLabel variant="on">
-            <Textarea
-              v-model="newClub.additional_info"
-              class="w-full"
-              rows="4"
-            ></Textarea>
-            <label>დამატებითი ინფორმაცია</label>
-          </FloatLabel>
-        </div>
+          <!-- Info rows -->
+          <div class="mb-3 flex flex-col gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30">
+                <i class="pi pi-user text-[10px] text-blue-400" />
+              </div>
+              <span class="text-sm text-slate-400">{{ club.teacher || "—" }}</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30">
+                <i class="pi pi-map-marker text-[10px] text-blue-400" />
+              </div>
+              <span class="text-sm text-slate-400">{{ club.place || "—" }}</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-900/30">
+                <i class="pi pi-clock text-[10px] text-blue-400" />
+              </div>
+              <span class="text-sm text-slate-400">{{ formatTime(club.time) }}</span>
+            </div>
+          </div>
 
-        <template #footer>
-          <Button
-            label="გაუქმება"
-            icon="pi pi-times"
-            @click="displayAddDialog = false"
-            severity="secondary"
-            outlined
-          />
-          <Button
-            label="დამატება"
-            icon="pi pi-check"
-            @click="handleAddClub"
-            severity="success"
-            autofocus
-          />
-        </template>
-      </Dialog>
+          <div class="flex items-center justify-end border-t border-blue-900/20 pt-2.5">
+            <i class="pi pi-pencil text-xs text-slate-600" />
+          </div>
+        </button>
+      </div>
     </div>
+
+    <!-- FAB -->
+    <button
+      @click="openAdd"
+      class="fixed bottom-24 right-5 z-30 flex h-13 w-13 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:bg-blue-500 hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8"
+    >
+      <i class="pi pi-plus text-lg" />
+    </button>
+
+    <!-- Edit / Add sheet -->
+    <Teleport to="body">
+      <Transition name="backdrop">
+        <div
+          v-if="sheetVisible"
+          class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+          @click="sheetVisible = false"
+        />
+      </Transition>
+
+      <Transition name="sheet">
+        <div
+          v-if="sheetVisible"
+          class="fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-blue-900/40 bg-[#07101e] p-5"
+          style="box-shadow: 0 -8px 40px 0 rgba(0,10,40,0.8)"
+          @click.stop
+        >
+          <div class="mx-auto mb-4 h-1 w-10 rounded-full bg-blue-900/60" />
+
+          <!-- Header -->
+          <div class="mb-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="h-4 w-[3px] rounded-full bg-blue-500" />
+              <span class="text-sm font-bold text-slate-200">
+                {{ isAdding ? "ახალი წრე" : "წრის რედაქტირება" }}
+              </span>
+            </div>
+            <button
+              @click="sheetVisible = false"
+              class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-900/30 text-slate-400 hover:bg-blue-900/60 hover:text-white"
+            >
+              <i class="pi pi-times text-xs" />
+            </button>
+          </div>
+
+          <!-- Form -->
+          <div class="flex flex-col gap-4">
+            <!-- Name -->
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">წრის სახელი</label>
+              <input
+                v-model="form.name"
+                type="text"
+                class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+              />
+            </div>
+
+            <!-- Teacher + Place -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">მასწავლებელი</label>
+                <input
+                  v-model="form.teacher"
+                  type="text"
+                  class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+                />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">ადგილი</label>
+                <input
+                  v-model="form.place"
+                  type="text"
+                  class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+                />
+              </div>
+            </div>
+
+            <!-- Places + Time -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">ადგილების რ-ბა</label>
+                <input
+                  v-model.number="form.places_quantity"
+                  type="number"
+                  min="0"
+                  class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+                />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">დრო</label>
+                <DatePicker
+                  v-model="(form as Club).time"
+                  timeOnly
+                  fluid
+                  inputId="clubTime"
+                  class="w-full"
+                  :pt="{
+                    input: { class: 'rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 w-full outline-none' }
+                  }"
+                />
+              </div>
+            </div>
+
+            <!-- Additional info -->
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">დამატებითი ინფო</label>
+              <textarea
+                v-model="form.additional_info"
+                rows="3"
+                class="w-full resize-none rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
+              />
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-5 flex gap-3">
+            <button
+              v-if="!isAdding"
+              @click="handleDelete"
+              class="flex items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/20"
+            >
+              <i class="pi pi-trash text-sm" />
+              წაშლა
+            </button>
+            <button
+              @click="handleSave"
+              :disabled="loading"
+              class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
+            >
+              <i class="pi pi-check text-sm" />
+              {{ isAdding ? "დამატება" : "შენახვა" }}
+            </button>
+          </div>
+
+          <div class="h-6" />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
+
+<style scoped>
+.backdrop-enter-active { transition: opacity 0.25s ease; }
+.backdrop-leave-active { transition: opacity 0.2s ease; }
+.backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
+
+.sheet-enter-active { transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
+.sheet-leave-active { transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
+.sheet-enter-from, .sheet-leave-to { transform: translateY(100%); }
+</style>
