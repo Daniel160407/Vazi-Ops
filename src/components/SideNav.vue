@@ -1,0 +1,155 @@
+<script setup lang="ts">
+import { useRouter, useRoute } from "vue-router";
+import { useAuth } from "../composables/useAuth";
+import {
+  GROUPS_ROUTE,
+  CLUBS_ROUTE,
+  EVENTS_ROUTE,
+  EVENING_SCHEDULE_ROUTE,
+  ANNOUNCEMENTS_ROUTE,
+  DAY_SCHEDULE_ROUTE,
+  GOLDEN_VERSES_ROUTE,
+  ADMIN_GROUPS_ROUTE,
+  ADMIN_CLUBS_ROUTE,
+  ADMIN_CLUB_BOOKINGS_ROUTE,
+  ADMIN_DAY_SCHEDULE_ROUTE,
+  ADMIN_EVENING_SCHEDULE_ROUTE,
+  ADMIN_EVENTS_ROUTE,
+  ADMIN_GOLDEN_VERSES_ROUTE,
+  ADMIN_ANNOUNCEMENTS_ROUTE,
+} from "../composables/constants";
+
+const router = useRouter();
+const route = useRoute();
+const { user, signInWithGoogle, logout } = useAuth();
+
+const isActive = (path: string) => route.path === path;
+const navigate = (path: string) => router.push(path);
+
+const handleAdminNav = async (path: string) => {
+  if (!user.value) await signInWithGoogle();
+  if (user.value) router.push(path);
+};
+
+const mainItems = [
+  { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE },
+  { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE },
+  { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE },
+  { label: "ნომრები", icon: "pi pi-ticket", path: EVENTS_ROUTE },
+  { label: "საღამოს განრიგი", icon: "pi pi-moon", path: EVENING_SCHEDULE_ROUTE },
+  { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE },
+  { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE },
+];
+
+const adminItems = [
+  { label: "განცხადებები", icon: "pi pi-megaphone", path: ADMIN_ANNOUNCEMENTS_ROUTE },
+  { label: "ჯგუფები", icon: "pi pi-users", path: ADMIN_GROUPS_ROUTE },
+  { label: "წრეები", icon: "pi pi-sparkles", path: ADMIN_CLUBS_ROUTE },
+  { label: "წრეების რეგ.", icon: "pi pi-list-check", path: ADMIN_CLUB_BOOKINGS_ROUTE },
+  { label: "დღის განრიგი", icon: "pi pi-calendar", path: ADMIN_DAY_SCHEDULE_ROUTE },
+  { label: "საღამოს პრ.", icon: "pi pi-moon", path: ADMIN_EVENING_SCHEDULE_ROUTE },
+  { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
+  { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
+];
+</script>
+
+<template>
+  <aside
+    class="fixed top-0 left-0 z-30 flex h-svh w-56 flex-col border-r border-blue-900/30 bg-[#05080f]"
+    style="box-shadow: 4px 0 24px 0 rgba(0,10,40,0.5)"
+  >
+    <!-- Logo -->
+    <div class="flex items-center gap-3 px-5 py-6 border-b border-blue-900/20">
+      <img src="../assets/images/logo.png" class="h-8 w-8 object-contain" />
+      <span class="text-base font-semibold tracking-tight text-white">ბანაკი "ვაზი"</span>
+    </div>
+
+    <!-- Nav items -->
+    <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+      <button
+        v-for="item in mainItems"
+        :key="item.path"
+        @click="navigate(item.path)"
+        class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
+        :class="
+          isActive(item.path)
+            ? 'bg-blue-500/10 text-blue-400'
+            : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+        "
+      >
+        <!-- active left bar -->
+        <span
+          v-if="isActive(item.path)"
+          class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-blue-400"
+        />
+        <i :class="item.icon" class="w-4 text-center text-sm" />
+        <span class="text-sm font-medium">{{ item.label }}</span>
+      </button>
+
+      <!-- Admin section -->
+      <div class="mt-4 mb-2 flex items-center gap-2 px-3">
+        <i class="pi pi-lock text-[10px] text-blue-500/50" />
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+          ადმინი
+        </span>
+        <div class="h-px flex-1 bg-blue-900/20" />
+      </div>
+
+      <template v-if="user">
+        <button
+          v-for="item in adminItems"
+          :key="item.path"
+          @click="handleAdminNav(item.path)"
+          class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
+          :class="
+            isActive(item.path)
+              ? 'bg-blue-500/10 text-blue-400'
+              : 'text-slate-600 hover:bg-white/5 hover:text-slate-400'
+          "
+        >
+          <span
+            v-if="isActive(item.path)"
+            class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-blue-400"
+          />
+          <i :class="item.icon" class="w-4 text-center text-sm" />
+          <span class="text-sm font-medium">{{ item.label }}</span>
+        </button>
+      </template>
+
+      <template v-else>
+        <button
+          @click="signInWithGoogle"
+          class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-600 transition-all hover:bg-white/5 hover:text-slate-400"
+        >
+          <i class="pi pi-sign-in w-4 text-center text-sm" />
+          <span class="text-sm font-medium">შესვლა</span>
+        </button>
+      </template>
+    </nav>
+
+    <!-- User footer -->
+    <div v-if="user" class="border-t border-blue-900/20 px-4 py-4">
+      <div class="flex items-center gap-3">
+        <img
+          v-if="user.photoURL"
+          :src="user.photoURL"
+          class="h-8 w-8 rounded-full object-cover ring-1 ring-blue-900/60"
+        />
+        <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-900/40">
+          <i class="pi pi-user text-xs text-blue-400" />
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-xs font-medium text-slate-300">{{ user.displayName }}</p>
+          <p class="text-[10px] text-slate-600">ადმინი</p>
+        </div>
+        <button
+          @click="logout"
+          class="text-slate-600 transition-colors hover:text-slate-400"
+          title="გასვლა"
+        >
+          <i class="pi pi-sign-out text-sm" />
+        </button>
+      </div>
+    </div>
+  </aside>
+</template>
