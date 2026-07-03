@@ -60,8 +60,8 @@ const activeFilter = ref<"all" | "pending" | "accepted" | "rejected">("all");
 
 const filters = [
   { key: "all", label: "ყველა" },
-  { key: "pending", label: "მოლოდინი" },
-  { key: "accepted", label: "დადასტური." },
+  { key: "pending", label: "მოლოდინში" },
+  { key: "accepted", label: "დადასტურებული" },
   { key: "rejected", label: "უარყოფილი" },
 ] as const;
 
@@ -130,7 +130,7 @@ const formatDate = (dateValue?: any) => {
         </div>
       </div>
 
-      <div class="mb-4 grid grid-cols-4 gap-2">
+      <div class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
         <div class="rounded-xl border border-blue-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-lg font-bold text-white">{{ events.length }}</p>
           <p class="text-[10px] text-slate-600">სულ</p>
@@ -141,7 +141,7 @@ const formatDate = (dateValue?: any) => {
         </div>
         <div class="rounded-xl border border-emerald-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-lg font-bold text-emerald-400">{{ events.filter((e) => e.request_status === REQUEST_ACCEPTED).length }}</p>
-          <p class="text-[10px] text-slate-600">დადასტურებ.</p>
+          <p class="text-[10px] text-slate-600">დადასტურებული</p>
         </div>
         <div class="rounded-xl border border-red-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-lg font-bold text-red-400">{{ events.filter((e) => e.request_status === REQUEST_REJECTED).length }}</p>
@@ -149,7 +149,7 @@ const formatDate = (dateValue?: any) => {
         </div>
       </div>
 
-      <div class="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 overflow-x-auto pb-1">
         <button
           v-for="f in filters"
           :key="f.key"

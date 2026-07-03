@@ -68,8 +68,8 @@ const activeFilter = ref<"all" | "pending" | "accepted" | "rejected">("all");
 
 const filters = [
   { key: "all", label: "ყველა" },
-  { key: "pending", label: "მოლოდინი" },
-  { key: "accepted", label: "დადასტურ." },
+  { key: "pending", label: "მოლოდინში" },
+  { key: "accepted", label: "დადასტურებული" },
   { key: "rejected", label: "უარყოფილი" },
 ] as const;
 
@@ -158,7 +158,7 @@ const handleRegister = async () => {
             @click="openSheet"
           >
             <i class="pi pi-plus-circle" />
-            ნომრის ჩაწერა
+            რეგისტრაცია
           </button>
         </div>
       </div>
