@@ -14,6 +14,7 @@ import type { Announcement } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, announcements } = storeToRefs(useGlobalStore());
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } = useAnnouncementsCrud();
@@ -159,18 +160,8 @@ const handleDelete = (id: string) => {
               </span>
               <div class="flex items-center gap-1.5">
                 <span class="text-[11px] text-slate-600">{{ formatDate(a.date) }}</span>
-                <button
-                  class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-blue-900/20 bg-blue-900/20 text-slate-500 hover:text-slate-300"
-                  @click="openEdit(a)"
-                >
-                  <i class="pi pi-pencil text-[10px]" />
-                </button>
-                <button
-                  class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-red-900/20 bg-red-500/5 text-red-500/60 hover:bg-red-500/15 hover:text-red-400"
-                  @click="handleDelete(a.id)"
-                >
-                  <i class="pi pi-trash text-[10px]" />
-                </button>
+                <AppButton variant="icon-edit" icon="pi-pencil" @click="openEdit(a)" />
+                <AppButton variant="icon-delete" icon="pi-trash" @click="handleDelete(a.id)" />
               </div>
             </div>
 
@@ -179,14 +170,15 @@ const handleDelete = (id: string) => {
             <p class="text-sm leading-relaxed text-slate-400" :class="{ 'line-clamp-3': !isExpanded(a.id) }">
               {{ a.content }}
             </p>
-            <button
+            <AppButton
               v-if="a.content && a.content.length > 150"
-              class="mt-2 flex cursor-pointer items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300"
+              variant="link"
+              class="mt-2"
               @click="toggle(a.id)"
             >
               {{ isExpanded(a.id) ? "ნაკლები" : "სრულად" }}
               <i class="pi text-[9px]" :class="isExpanded(a.id) ? 'pi-chevron-up' : 'pi-chevron-down'" />
-            </button>
+            </AppButton>
 
             <div class="mt-4 flex items-center gap-2.5 border-t border-blue-900/20 pt-3">
               <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-600 text-xs font-bold text-white">
@@ -200,12 +192,7 @@ const handleDelete = (id: string) => {
       </div>
     </div>
 
-    <button
-      class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
-      @click="openAdd"
-    >
-      <i class="pi pi-plus text-lg" />
-    </button>
+    <AppButton variant="fab" icon="pi-plus" @click="openAdd" />
 
     <BottomSheet
       :visible="sheetVisible"
@@ -216,15 +203,16 @@ const handleDelete = (id: string) => {
         <div>
           <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">თეგი</label>
           <div class="flex flex-wrap gap-2">
-            <button
+            <AppButton
               v-for="tag in tagOptions"
               :key="tag"
-              class="cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all"
+              variant="plain"
+              class="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all"
               :class="[tagMeta(tag).cls, form.tag === tag ? tagMeta(tag).active : 'bg-transparent']"
               @click="form.tag = tag"
             >
               {{ tag }}
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -248,22 +236,10 @@ const handleDelete = (id: string) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          v-if="isEditing"
-          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/20"
-          @click="handleDelete(currentId!)"
-        >
-          <i class="pi pi-trash" />
-          წაშლა
-        </button>
-        <button
-          :disabled="isSubmitting"
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
-          @click="handleSave"
-        >
-          <i class="pi pi-check" />
+        <AppButton v-if="isEditing" variant="danger" icon="pi-trash" @click="handleDelete(currentId!)">წაშლა</AppButton>
+        <AppButton variant="primary" :disabled="isSubmitting" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isEditing ? "შენახვა" : "დამატება" }}
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>

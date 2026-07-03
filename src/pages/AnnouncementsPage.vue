@@ -14,6 +14,7 @@ import {
   TAG_URGENT,
 } from "../composables/constants";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, announcements } = storeToRefs(useGlobalStore());
 
@@ -101,14 +102,15 @@ const formatDate = (value?: any) => {
             >
               {{ a.content }}
             </p>
-            <button
+            <AppButton
               v-if="a.content && a.content.length > 150"
-              class="mt-2 flex cursor-pointer items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300"
+              variant="link"
+              class="mt-2"
               @click="toggle(a.id)"
             >
               {{ isExpanded(a.id) ? "ნაკლები" : "სრულად" }}
               <i class="pi text-[9px]" :class="isExpanded(a.id) ? 'pi-chevron-up' : 'pi-chevron-down'" />
-            </button>
+            </AppButton>
 
             <div class="mt-4 flex items-center gap-2.5 border-t border-blue-900/20 pt-3">
               <div

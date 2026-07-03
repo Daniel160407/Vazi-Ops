@@ -8,6 +8,7 @@ import type { EveningScheduleItem } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, eveningScheduleItems } = storeToRefs(useGlobalStore());
 const { updateScheduleOrder, addEveningSchedule, updateEveningSchedule, deleteEveningSchedule, loading } = useSchedulesCrud();
@@ -128,14 +129,9 @@ const handleDelete = (id: string) => {
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ ნომერი</p>
           <p class="text-3xl font-bold text-white">{{ eveningScheduleItems.length }}</p>
         </div>
-        <button
-          :disabled="loading"
-          class="flex cursor-pointer items-center gap-2 self-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
-          @click="saveOrder"
-        >
-          <i class="pi pi-save" />
+        <AppButton variant="primary" :disabled="loading" icon="pi-save" class="self-center px-5" @click="saveOrder">
           რიგის შენახვა
-        </button>
+        </AppButton>
       </div>
 
       <div v-if="localItems.length === 0" class="py-16 text-center">
@@ -188,30 +184,15 @@ const handleDelete = (id: string) => {
               >
                 <i class="pi pi-play text-xs" />
               </a>
-              <button
-                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-blue-900/20 bg-blue-900/20 text-slate-500 hover:text-slate-300"
-                @click="openEdit(item)"
-              >
-                <i class="pi pi-pencil text-xs" />
-              </button>
-              <button
-                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-red-900/20 bg-red-500/5 text-red-500/60 hover:bg-red-500/15 hover:text-red-400"
-                @click="handleDelete(item.id!)"
-              >
-                <i class="pi pi-trash text-xs" />
-              </button>
+              <AppButton variant="icon-edit" size="md" icon="pi-pencil" @click="openEdit(item)" />
+              <AppButton variant="icon-delete" size="md" icon="pi-trash" @click="handleDelete(item.id!)" />
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <button
-      class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
-      @click="openAdd"
-    >
-      <i class="pi pi-plus text-lg" />
-    </button>
+    <AppButton variant="fab" icon="pi-plus" @click="openAdd" />
 
     <BottomSheet
       :visible="sheetVisible"
@@ -219,20 +200,8 @@ const handleDelete = (id: string) => {
       @close="sheetVisible = false"
     >
       <div class="mb-5 flex gap-2 rounded-xl border border-blue-900/30 bg-[#0d1829] p-1">
-        <button
-          class="flex-1 cursor-pointer rounded-lg py-2 text-xs font-semibold transition-all"
-          :class="mode === 'general' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-300'"
-          @click="mode = 'general'"
-        >
-          ზოგადი
-        </button>
-        <button
-          class="flex-1 cursor-pointer rounded-lg py-2 text-xs font-semibold transition-all"
-          :class="mode === 'child' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-300'"
-          @click="mode = 'child'"
-        >
-          ბავშვის ფორმა
-        </button>
+        <AppButton variant="segment" :active="mode === 'general'" @click="mode = 'general'">ზოგადი</AppButton>
+        <AppButton variant="segment" :active="mode === 'child'" @click="mode = 'child'">ბავშვის ფორმა</AppButton>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -294,22 +263,10 @@ const handleDelete = (id: string) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          v-if="isEditing"
-          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/20"
-          @click="handleDelete(editingId!)"
-        >
-          <i class="pi pi-trash text-sm" />
-          წაშლა
-        </button>
-        <button
-          :disabled="loading"
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
-          @click="handleSave"
-        >
-          <i class="pi pi-check text-sm" />
+        <AppButton v-if="isEditing" variant="danger" icon="pi-trash" @click="handleDelete(editingId!)">წაშლა</AppButton>
+        <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isEditing ? "შენახვა" : "დამატება" }}
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>

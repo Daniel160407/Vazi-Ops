@@ -12,6 +12,7 @@ import { REQUEST_PENDING, REQUEST_ACCEPTED, REQUEST_REJECTED } from "../composab
 import type { EveningScheduleItem, Event } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
 const { loading: loadingStore, deadline, events } = storeToRefs(globalStore);
@@ -119,14 +120,15 @@ const formatDate = (dateValue?: any) => {
               :pt="{ input: { class: 'rounded-xl border border-blue-900/30 bg-[#07101e] px-4 py-3 text-sm text-slate-200 w-full outline-none' } }"
             />
           </div>
-          <button
+          <AppButton
+            variant="primary"
             :disabled="loading || !newDeadlineDate"
-            class="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
+            icon="pi-check"
+            class="px-4"
             @click="handleUpdateDeadline"
           >
-            <i class="pi pi-check" />
             შენახვა
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -150,15 +152,15 @@ const formatDate = (dateValue?: any) => {
       </div>
 
       <div class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 overflow-x-auto pb-1">
-        <button
+        <AppButton
           v-for="f in filters"
           :key="f.key"
-          class="shrink-0 cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
-          :class="activeFilter === f.key ? 'bg-blue-600 text-white' : 'border border-blue-900/20 bg-[#0d1829] text-slate-500 hover:text-slate-300'"
+          variant="filter"
+          :active="activeFilter === f.key"
           @click="activeFilter = f.key"
         >
           {{ f.label }}
-        </button>
+        </AppButton>
       </div>
 
       <p v-if="filteredEvents.length === 0" class="py-10 text-center text-sm text-slate-600">
@@ -193,36 +195,39 @@ const formatDate = (dateValue?: any) => {
             </div>
 
             <div class="flex gap-2 border-t border-blue-900/20 pt-3">
-              <button
+              <AppButton
                 v-if="event.request_status !== REQUEST_ACCEPTED"
+                variant="plain"
                 :disabled="loading"
-                class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-emerald-900/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-400 transition-all hover:bg-emerald-500/20 disabled:opacity-50"
+                class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-900/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-400 transition-all hover:bg-emerald-500/20 disabled:opacity-50"
                 @click="setStatus(event.id, REQUEST_ACCEPTED)"
               >
                 <i class="pi pi-check text-xs" /> დადასტურება
-              </button>
-              <button
+              </AppButton>
+              <AppButton
                 v-if="event.request_status !== REQUEST_REJECTED"
+                variant="plain"
                 :disabled="loading"
-                class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-red-900/30 bg-red-500/10 py-2 text-xs font-semibold text-red-400 transition-all hover:bg-red-500/20 disabled:opacity-50"
+                class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-red-900/30 bg-red-500/10 py-2 text-xs font-semibold text-red-400 transition-all hover:bg-red-500/20 disabled:opacity-50"
                 @click="setStatus(event.id, REQUEST_REJECTED)"
               >
                 <i class="pi pi-times text-xs" /> უარყოფა
-              </button>
-              <button
+              </AppButton>
+              <AppButton
                 v-if="event.request_status === REQUEST_ACCEPTED"
+                variant="plain"
                 :disabled="loading"
-                class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-blue-900/30 bg-blue-500/10 py-2 text-xs font-semibold text-blue-400 transition-all hover:bg-blue-500/20 disabled:opacity-50"
+                class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-blue-900/30 bg-blue-500/10 py-2 text-xs font-semibold text-blue-400 transition-all hover:bg-blue-500/20 disabled:opacity-50"
                 @click="handleAddToSchedule(event)"
               >
                 <i class="pi pi-calendar text-xs" /> დამატება
-              </button>
-              <button
-                class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-red-900/20 bg-red-500/5 text-red-500/60 transition-all hover:bg-red-500/15 hover:text-red-400"
+              </AppButton>
+              <AppButton
+                variant="icon-delete"
+                size="md"
+                icon="pi-trash"
                 @click="handleDelete(event.id)"
-              >
-                <i class="pi pi-trash text-xs" />
-              </button>
+              />
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { DAY_SCHEDULE_CATEGORY } from "../composables/constants";
 import { useImgBB } from "../composables/useImgBB";
+import AppButton from "../components/UI/AppButton.vue";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
 import type { Schedule } from "../type/interfaces";
 
@@ -78,9 +79,10 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
         </div>
       </div>
 
-      <button
+      <AppButton
         v-else
-        class="flex w-full cursor-pointer flex-col items-center justify-center gap-3 py-16 text-center transition-colors hover:bg-blue-500/5"
+        variant="plain"
+        class="flex w-full flex-col items-center justify-center gap-3 py-16 text-center transition-colors hover:bg-blue-500/5"
         @click="triggerUpload"
       >
         <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-900/30 bg-blue-900/20">
@@ -90,27 +92,29 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
           <p class="text-sm font-semibold text-slate-300">სურათის ატვირთვა</p>
           <p class="mt-0.5 text-xs text-slate-600">დააჭირე ასარჩევად</p>
         </div>
-      </button>
+      </AppButton>
 
       <div class="flex items-center justify-between border-t border-blue-900/20 px-4 py-3">
-        <button
+        <AppButton
+          variant="plain"
           :disabled="isBusy"
-          class="flex cursor-pointer items-center gap-2 rounded-xl border border-blue-900/30 bg-blue-900/20 px-4 py-2 text-xs font-semibold text-slate-400 transition-all hover:text-slate-200 disabled:opacity-50"
+          class="flex items-center gap-2 rounded-xl border border-blue-900/30 bg-blue-900/20 px-4 py-2 text-xs font-semibold text-slate-400 transition-all hover:text-slate-200 disabled:opacity-50"
           @click="triggerUpload"
         >
           <i class="pi pi-upload" />
           {{ imageUrl || imagePreview ? "შეცვლა" : "ატვირთვა" }}
-        </button>
+        </AppButton>
 
-        <button
+        <AppButton
           v-if="selectedImage"
+          variant="plain"
           :disabled="isBusy"
-          class="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
+          class="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
           @click="saveNewImage"
         >
           <i class="pi" :class="isBusy ? 'pi-spin pi-spinner' : 'pi-check'" />
           შენახვა
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

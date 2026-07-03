@@ -10,6 +10,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
 const toast = useToast();
@@ -152,14 +153,16 @@ const handleRegister = async () => {
             <span>დედლაინი: {{ formatDate(deadline?.time) || "—" }}</span>
           </div>
 
-          <button
+          <AppButton
             v-if="!isDeadlinePassed"
-            class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 active:scale-95"
+            variant="primary"
+            icon="pi-plus-circle"
+            rounded="2xl"
+            class="w-full active:scale-95"
             @click="openSheet"
           >
-            <i class="pi pi-plus-circle" />
             რეგისტრაცია
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -179,15 +182,15 @@ const handleRegister = async () => {
       </div>
 
       <div class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 overflow-x-auto pb-1">
-        <button
+        <AppButton
           v-for="f in filters"
           :key="f.key"
-          class="shrink-0 cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
-          :class="activeFilter === f.key ? 'bg-blue-600 text-white' : 'border border-blue-900/20 bg-[#0d1829] text-slate-500 hover:text-slate-300'"
+          variant="filter"
+          :active="activeFilter === f.key"
           @click="activeFilter = f.key"
         >
           {{ f.label }}
-        </button>
+        </AppButton>
       </div>
 
       <p v-if="filteredEvents.length === 0" class="py-10 text-center text-sm text-slate-600">
@@ -281,20 +284,10 @@ const handleRegister = async () => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          class="cursor-pointer rounded-xl border border-blue-900/30 bg-[#0d1829] px-5 py-3 text-sm font-semibold text-slate-400 transition-all hover:text-slate-200"
-          @click="closeSheet"
-        >
-          გაუქმება
-        </button>
-        <button
-          :disabled="loading"
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
-          @click="handleRegister"
-        >
-          <i class="pi pi-check" />
+        <AppButton variant="ghost" @click="closeSheet">გაუქმება</AppButton>
+        <AppButton variant="primary" :disabled="loading" class="flex-1" icon="pi-check" @click="handleRegister">
           გაგზავნა
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>

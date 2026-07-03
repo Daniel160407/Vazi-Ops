@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import AppButton from "./UI/AppButton.vue";
 import { useAuth } from "../composables/useAuth";
 import {
   ANNOUNCEMENTS_ROUTE,
@@ -78,18 +79,14 @@ const adminItems = [
               დამატებითი ინფო
             </span>
           </div>
-          <button
-            class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-900/30 text-slate-400 transition-colors hover:bg-blue-900/60 hover:text-white"
-            @click="emit('close')"
-          >
-            <i class="pi pi-times text-xs" />
-          </button>
+          <AppButton variant="icon-close" icon="pi-times" @click="emit('close')" />
         </div>
 
         <div class="mb-6 grid grid-cols-2 gap-2">
-          <button
+          <AppButton
             v-for="item in mainItems"
             :key="item.path"
+            variant="plain"
             class="group flex items-center gap-3 rounded-2xl border border-blue-900/30 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/50 hover:bg-[#0f1f36]"
             @click="navigate(item.path)"
           >
@@ -97,7 +94,7 @@ const adminItems = [
               <i :class="item.icon" class="text-sm text-blue-400" />
             </div>
             <span class="text-sm font-medium text-slate-200">{{ item.label }}</span>
-          </button>
+          </AppButton>
         </div>
 
         <template v-if="user">
@@ -109,9 +106,10 @@ const adminItems = [
             <div class="h-px flex-1 bg-blue-900/30" />
           </div>
           <div class="grid grid-cols-2 gap-2">
-            <button
+            <AppButton
               v-for="item in adminItems"
               :key="item.path"
+              variant="plain"
               class="group flex items-center gap-3 rounded-2xl border border-blue-900/20 bg-[#0a1220] p-4 text-left transition-all duration-150 hover:border-blue-700/40 hover:bg-[#0d1829]"
               @click="handleAdminNav(item.path)"
             >
@@ -121,7 +119,7 @@ const adminItems = [
               <span class="text-sm font-medium text-slate-400 group-hover:text-slate-200">
                 {{ item.label }}
               </span>
-            </button>
+            </AppButton>
           </div>
         </template>
 
@@ -133,7 +131,8 @@ const adminItems = [
             </span>
             <div class="h-px flex-1 bg-blue-900/30" />
           </div>
-          <button
+          <AppButton
+            variant="plain"
             class="flex w-full items-center justify-center gap-3 rounded-2xl border border-blue-900/30 bg-[#0d1829] p-4 text-slate-300 transition-all hover:border-blue-700/50 hover:bg-[#0f1f36]"
             @click="signInWithGoogle"
           >
@@ -141,7 +140,7 @@ const adminItems = [
               <i class="pi pi-sign-in text-sm text-blue-400" />
             </div>
             <span class="text-sm font-medium">ადმინ პანელი (შესვლა)</span>
-          </button>
+          </AppButton>
         </template>
 
         <div class="h-8" />

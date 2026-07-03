@@ -4,6 +4,7 @@ import { GENDER_MALE } from "../composables/constants";
 import { useGroupsCrud } from "../composables/useGroupsCrud";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, groups } = useGroupsCrud();
 
@@ -63,7 +64,8 @@ const toggle = (id: string) => {
           :key="group.id"
           class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] transition-all duration-200"
         >
-          <button
+          <AppButton
+            variant="plain"
             class="w-full p-4 text-left"
             @click="toggle(group.id)"
           >
@@ -113,7 +115,7 @@ const toggle = (id: string) => {
                 />
               </div>
             </div>
-          </button>
+          </AppButton>
 
           <Transition name="expand">
             <div

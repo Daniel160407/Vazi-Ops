@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import AppButton from "./UI/AppButton.vue";
 import {
   GROUPS_ROUTE,
   CLUBS_ROUTE,
@@ -50,9 +51,10 @@ onUnmounted(() => {
     style="box-shadow: 0 -4px 24px 0 rgba(0, 10, 40, 0.7)"
     :class="{ 'translate-y-full': !isVisible }"
   >
-    <button
+    <AppButton
       v-for="item in navItems"
       :key="item.path"
+      variant="plain"
       class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-all duration-200"
       :class="
         isActive(item.path)
@@ -72,23 +74,20 @@ onUnmounted(() => {
       >
         <i :class="item.icon" class="text-lg" />
       </div>
-      <span
-        class="text-center text-[10px] font-medium leading-none tracking-wide"
-      >
+      <span class="text-center text-[10px] font-medium leading-none tracking-wide">
         {{ item.label }}
       </span>
-    </button>
+    </AppButton>
 
-    <button
+    <AppButton
+      variant="plain"
       class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-3 text-slate-500 transition-all duration-200 hover:text-slate-300"
       @click="$emit('openMore')"
     >
       <div class="flex h-9 w-9 items-center justify-center rounded-xl">
         <i class="pi pi-bars text-lg" />
       </div>
-      <span class="text-[10px] font-medium leading-none tracking-wide"
-        >სხვა</span
-      >
-    </button>
+      <span class="text-[10px] font-medium leading-none tracking-wide">სხვა</span>
+    </AppButton>
   </nav>
 </template>

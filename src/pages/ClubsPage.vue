@@ -12,6 +12,7 @@ import SearchInput from "../components/UI/SearchInput.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
 const toast = useToast();
@@ -188,7 +189,8 @@ const accentBorder = (n: number) => {
               </InfoRow>
             </div>
 
-            <button
+            <AppButton
+              variant="plain"
               :disabled="club.places_quantity <= 0 || loading"
               class="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-150"
               :class="club.places_quantity <= 0 ? 'cursor-not-allowed bg-slate-800/60 text-slate-600' : 'bg-blue-600 text-white hover:bg-blue-500 active:scale-95'"
@@ -196,7 +198,7 @@ const accentBorder = (n: number) => {
             >
               <i class="pi pi-check text-sm" />
               {{ club.places_quantity <= 0 ? "ადგილი არ არის" : "ჩაეწერე" }}
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>
@@ -216,9 +218,10 @@ const accentBorder = (n: number) => {
       <div v-if="selectionMode === 'switch'" class="mb-5">
         <p class="mb-3 text-sm text-slate-400">გაქვს 2 წრე. აირჩიე რომელი გინდა შეცვალო:</p>
         <div class="flex flex-col gap-2">
-          <button
+          <AppButton
             v-for="booking in userBookings"
             :key="booking.id"
+            variant="plain"
             class="flex items-center gap-3 rounded-xl border p-3 text-left transition-all"
             :class="bookingToReplaceId === booking.id ? 'border-blue-600 bg-blue-600/15 text-blue-300' : 'border-blue-900/30 bg-[#0d1829] text-slate-400'"
             @click="bookingToReplaceId = booking.id"
@@ -226,7 +229,7 @@ const accentBorder = (n: number) => {
             <i class="pi pi-sparkles text-sm" />
             <span class="text-sm font-medium">{{ booking.club_name }}</span>
             <i v-if="bookingToReplaceId === booking.id" class="pi pi-check ml-auto text-sm text-blue-400" />
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -256,21 +259,10 @@ const accentBorder = (n: number) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          v-if="selectionMode === 'switch'"
-          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm font-semibold text-slate-400 transition-all hover:text-slate-200"
-          @click="selectionMode = 'register'"
-        >
-          <i class="pi pi-arrow-left text-sm" />
-        </button>
-        <button
-          :disabled="loading"
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
-          @click="handleConfirmRegister"
-        >
-          <i class="pi pi-check text-sm" />
+        <AppButton v-if="selectionMode === 'switch'" variant="ghost" icon="pi-arrow-left" @click="selectionMode = 'register'" />
+        <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleConfirmRegister">
           {{ selectionMode === "switch" ? "შეცვლა" : "ჩაწერა" }}
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>
