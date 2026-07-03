@@ -11,7 +11,6 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
     <LoadingSpinner v-if="loading && eveningScheduleItems.length === 0" />
 
     <div v-else>
-      <!-- Header card -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           საღამოს
@@ -19,7 +18,6 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
         <h1 class="text-2xl font-bold text-white">პროგრამა</h1>
       </div>
 
-      <!-- Stats -->
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -37,13 +35,11 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
         </div>
       </div>
 
-      <!-- Empty state -->
       <div v-if="eveningScheduleItems.length === 0" class="py-16 text-center">
         <i class="pi pi-calendar-times mb-4 block text-4xl text-slate-700" />
         <p class="text-sm text-slate-600">პროგრამა ჯერ არ არის დამატებული</p>
       </div>
 
-      <!-- Schedule items -->
       <div v-else class="flex flex-col gap-3">
         <div
           v-for="(item, index) in eveningScheduleItems"
@@ -51,14 +47,12 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
           class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] p-4"
         >
           <div class="flex items-start gap-3">
-            <!-- Number badge -->
             <div
               class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15"
             >
               <span class="text-sm font-bold text-blue-400">{{ index + 1 }}</span>
             </div>
 
-            <!-- Content -->
             <div class="min-w-0 flex-1">
               <h3 class="mb-2 font-bold leading-tight text-white">{{ item.scene_name }}</h3>
 
@@ -86,7 +80,6 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
               </div>
             </div>
 
-            <!-- Media link -->
             <a
               v-if="item.media_url"
               :href="item.media_url"

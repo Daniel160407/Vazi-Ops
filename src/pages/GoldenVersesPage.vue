@@ -19,7 +19,6 @@ const formatDate = (value?: any) => {
     <LoadingSpinner v-if="loading && goldenVerses.length === 0" />
 
     <div v-else>
-      <!-- Header card -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           ყოველდღიური
@@ -27,20 +26,17 @@ const formatDate = (value?: any) => {
         <h1 class="text-2xl font-bold text-white">ოქროს მუხლები</h1>
       </div>
 
-      <!-- Empty state -->
       <div v-if="goldenVerses.length === 0" class="py-16 text-center">
         <i class="pi pi-book mb-4 block text-4xl text-slate-700" />
         <p class="text-sm text-slate-600">მუხლები ჯერ არ არის დამატებული</p>
       </div>
 
-      <!-- Verse cards -->
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div
           v-for="verse in goldenVerses"
           :key="verse.id"
           class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-yellow-500/50 bg-[#0d1829] p-4"
         >
-          <!-- Date badge -->
           <div class="mb-3 flex items-center gap-2">
             <div
               class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-yellow-500/15"
@@ -52,12 +48,10 @@ const formatDate = (value?: any) => {
             </span>
           </div>
 
-          <!-- Verse text -->
           <p class="mb-3 text-sm italic leading-relaxed text-slate-300">
             "{{ verse.verse }}"
           </p>
 
-          <!-- Reference -->
           <div class="flex items-center gap-2 border-t border-blue-900/20 pt-3">
             <i class="pi pi-book text-[10px] text-slate-600" />
             <span class="text-xs font-semibold text-slate-500">{{ verse.reference }}</span>

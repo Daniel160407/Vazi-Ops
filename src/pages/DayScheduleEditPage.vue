@@ -48,7 +48,6 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
 
 <template>
   <div class="pb-4">
-    <!-- Header card -->
     <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
       <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         დღის
@@ -56,7 +55,6 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
       <h1 class="text-2xl font-bold text-white">განრიგი</h1>
     </div>
 
-    <!-- Hidden file input -->
     <input
       ref="fileInput"
       type="file"
@@ -65,9 +63,7 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
       @change="handleImageSelect"
     />
 
-    <!-- Upload / preview card -->
     <div class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]">
-      <!-- Preview area -->
       <div v-if="imagePreview || imageUrl" class="relative">
         <img
           :src="imagePreview || imageUrl"
@@ -82,7 +78,6 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
         </div>
       </div>
 
-      <!-- Drop / no image zone -->
       <button
         v-else
         class="flex w-full cursor-pointer flex-col items-center justify-center gap-3 py-16 text-center transition-colors hover:bg-blue-500/5"
@@ -97,7 +92,6 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
         </div>
       </button>
 
-      <!-- Footer actions -->
       <div class="flex items-center justify-between border-t border-blue-900/20 px-4 py-3">
         <button
           :disabled="isBusy"

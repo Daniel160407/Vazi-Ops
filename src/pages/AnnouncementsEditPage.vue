@@ -20,7 +20,6 @@ const { addAnnouncement, updateAnnouncement, deleteAnnouncement } = useAnnouncem
 const { fullName, profileImg } = useAuth();
 const confirm = useConfirm();
 
-// ── tag config ────────────────────────────────────────────
 const tagOptions = [TAG_URGENT, TAG_SCHEDULE, TAG_DINING, TAG_GATHERING, TAG_ACTIVITY, TAG_HEALTH, TAG_NOTEWORTHY];
 
 const tagMeta = (tag: string) => {
@@ -68,7 +67,6 @@ const formatDate = (value?: any) => {
   return isNaN(date.getTime()) ? "—" : format(date, "d MMMM, HH:mm", { locale: ka });
 };
 
-// ── expand ────────────────────────────────────────────────
 const expandedIds = ref(new Set<string>());
 const toggle = (id: string) => {
   if (expandedIds.value.has(id)) expandedIds.value.delete(id);
@@ -76,7 +74,6 @@ const toggle = (id: string) => {
 };
 const isExpanded = (id: string) => expandedIds.value.has(id);
 
-// ── sheet state ───────────────────────────────────────────
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const currentId = ref<string | null>(null);
@@ -138,7 +135,6 @@ const handleDelete = (id: string) => {
     <LoadingSpinner v-if="loadingStore && announcements.length === 0" />
 
     <div v-else>
-      <!-- Stats -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ განცხადება</p>
         <p class="text-3xl font-bold text-white">{{ announcements.length }}</p>
@@ -149,7 +145,6 @@ const handleDelete = (id: string) => {
         <p class="text-sm text-slate-600">განცხადებები ჯერ არ არის</p>
       </div>
 
-      <!-- Cards -->
       <div class="flex flex-col gap-3">
         <article
           v-for="a in announcements"
@@ -205,7 +200,6 @@ const handleDelete = (id: string) => {
       </div>
     </div>
 
-    <!-- FAB -->
     <button
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
       @click="openAdd"
@@ -219,7 +213,6 @@ const handleDelete = (id: string) => {
       @close="sheetVisible = false"
     >
       <div class="flex flex-col gap-4">
-        <!-- Tag picker -->
         <div>
           <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">თეგი</label>
           <div class="flex flex-wrap gap-2">

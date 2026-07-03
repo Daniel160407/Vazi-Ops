@@ -58,13 +58,11 @@ const adminItems = [
     class="fixed top-0 left-0 z-30 flex h-svh w-56 flex-col border-r border-blue-900/30 bg-[#05080f]"
     style="box-shadow: 4px 0 24px 0 rgba(0,10,40,0.5)"
   >
-    <!-- Logo -->
     <div class="flex items-center gap-3 px-5 py-6 border-b border-blue-900/20">
       <img src="../assets/images/logo.png" class="h-8 w-8 object-contain" />
       <span class="text-base font-semibold tracking-tight text-white">ბანაკი "ვაზი"</span>
     </div>
 
-    <!-- Nav items -->
     <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
       <button
         v-for="item in mainItems"
@@ -77,7 +75,6 @@ const adminItems = [
         "
         @click="navigate(item.path)"
       >
-        <!-- active left bar -->
         <span
           v-if="isActive(item.path)"
           class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-blue-400"
@@ -86,7 +83,6 @@ const adminItems = [
         <span class="text-sm font-medium">{{ item.label }}</span>
       </button>
 
-      <!-- Admin section -->
       <div class="mt-4 mb-2 flex items-center gap-2 px-3">
         <i class="pi pi-lock text-[10px] text-blue-500/50" />
         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-600">
@@ -127,7 +123,6 @@ const adminItems = [
       </template>
     </nav>
 
-    <!-- User footer -->
     <div v-if="user" class="border-t border-blue-900/20 px-4 py-4">
       <div class="flex items-center gap-3">
         <img

@@ -20,10 +20,8 @@ defineEmits<{ close: [] }>()
         style="box-shadow: 0 -8px 40px 0 rgba(0, 10, 40, 0.8)"
         @click.stop
       >
-        <!-- drag pill -->
         <div class="mx-auto mb-4 h-1 w-10 rounded-full bg-blue-900/60" />
 
-        <!-- header -->
         <div class="mb-5 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="h-4 w-[3px] rounded-full bg-blue-500" />
@@ -37,7 +35,6 @@ defineEmits<{ close: [] }>()
           </button>
         </div>
 
-        <!-- content -->
         <slot />
 
         <div class="h-6" />
@@ -45,13 +42,3 @@ defineEmits<{ close: [] }>()
     </Transition>
   </Teleport>
 </template>
-
-<style scoped>
-.backdrop-enter-active { transition: opacity 0.25s ease; }
-.backdrop-leave-active { transition: opacity 0.2s ease; }
-.backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
-
-.sheet-enter-active { transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
-.sheet-leave-active { transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
-.sheet-enter-from, .sheet-leave-to { transform: translateY(100%); }
-</style>

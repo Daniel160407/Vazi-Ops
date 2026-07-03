@@ -35,7 +35,6 @@ const downloadImage = async () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch {
-    /* silently fail */
   } finally {
     downloading.value = false;
   }
@@ -47,7 +46,6 @@ const downloadImage = async () => {
     <LoadingSpinner v-if="loading && !imageUrl" />
 
     <div v-else>
-      <!-- Header card -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           დღის
@@ -55,15 +53,12 @@ const downloadImage = async () => {
         <h1 class="text-2xl font-bold text-white">განრიგი</h1>
       </div>
 
-      <!-- No image yet -->
       <div v-if="!imageUrl" class="py-16 text-center">
         <i class="pi pi-calendar mb-4 block text-4xl text-slate-700" />
         <p class="text-sm text-slate-600">განრიგი ჯერ არ არის დამატებული</p>
       </div>
 
-      <!-- Image card -->
       <div v-else class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]">
-        <!-- Image -->
         <div class="relative">
           <img
             :src="imageUrl"
@@ -81,7 +76,6 @@ const downloadImage = async () => {
           </div>
         </div>
 
-        <!-- Download footer -->
         <div class="flex items-center justify-between border-t border-blue-900/20 px-4 py-3">
           <span class="text-xs text-slate-600">დღის განრიგი</span>
           <button

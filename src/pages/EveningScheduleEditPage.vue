@@ -13,7 +13,6 @@ const { loading: loadingStore, eveningScheduleItems } = storeToRefs(useGlobalSto
 const { updateScheduleOrder, addEveningSchedule, updateEveningSchedule, deleteEveningSchedule, loading } = useSchedulesCrud();
 const confirm = useConfirm();
 
-// ── local reorderable list ────────────────────────────────
 const localItems = ref<EveningScheduleItem[]>([]);
 
 watch(eveningScheduleItems, (val) => {
@@ -24,7 +23,6 @@ const saveOrder = async () => {
   await updateScheduleOrder(localItems.value);
 };
 
-// ── drag-and-drop reorder ─────────────────────────────────
 const dragIndex = ref<number | null>(null);
 
 const onDragStart = (index: number) => {
@@ -46,7 +44,6 @@ const onDragEnd = () => {
   dragIndex.value = null;
 };
 
-// ── sheet state ───────────────────────────────────────────
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const editingId = ref<string | null>(null);
@@ -126,7 +123,6 @@ const handleDelete = (id: string) => {
     <LoadingSpinner v-if="loadingStore && eveningScheduleItems.length === 0" />
 
     <div v-else>
-      <!-- Stats + save row -->
       <div class="mb-5 flex gap-3">
         <div class="flex-1 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ ნომერი</p>
@@ -147,7 +143,6 @@ const handleDelete = (id: string) => {
         <p class="text-sm text-slate-600">ნომრები ჯერ არ არის დამატებული</p>
       </div>
 
-      <!-- Drag-reorder list -->
       <div v-else class="flex flex-col gap-3">
         <div
           v-for="(item, index) in localItems"
@@ -211,7 +206,6 @@ const handleDelete = (id: string) => {
       </div>
     </div>
 
-    <!-- FAB -->
     <button
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
       @click="openAdd"
@@ -224,7 +218,6 @@ const handleDelete = (id: string) => {
       :title="isEditing ? 'ნომრის რედაქტირება' : 'ახალი ნომერი'"
       @close="sheetVisible = false"
     >
-      <!-- Mode toggle -->
       <div class="mb-5 flex gap-2 rounded-xl border border-blue-900/30 bg-[#0d1829] p-1">
         <button
           class="flex-1 cursor-pointer rounded-lg py-2 text-xs font-semibold transition-all"

@@ -123,7 +123,6 @@ const handleRegister = async () => {
     <LoadingSpinner v-if="loading && events.length === 0 && !deadline" />
 
     <div v-else>
-      <!-- Countdown card -->
       <div class="mb-5 overflow-hidden rounded-3xl border border-blue-900/30 bg-[#0d1829]">
         <div class="p-5">
           <p class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">საღამოს ნომრები</p>
@@ -164,7 +163,6 @@ const handleRegister = async () => {
         </div>
       </div>
 
-      <!-- Stats -->
       <div class="mb-4 grid grid-cols-3 gap-2">
         <div class="rounded-xl border border-blue-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-xl font-bold text-white">{{ events.length }}</p>
@@ -180,7 +178,6 @@ const handleRegister = async () => {
         </div>
       </div>
 
-      <!-- Filters -->
       <div class="mb-4 flex gap-2 overflow-x-auto pb-1">
         <button
           v-for="f in filters"
@@ -197,7 +194,6 @@ const handleRegister = async () => {
         ნომრები არ მოიძებნა
       </p>
 
-      <!-- Event cards -->
       <div class="flex flex-col gap-3">
         <div
           v-for="event in filteredEvents"

@@ -15,7 +15,6 @@ const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubB
 const { loading: loadingStore } = storeToRefs(useGlobalStore());
 const confirm = useConfirm();
 
-// ── search ───────────────────────────────────────────────
 const search = ref("");
 
 const filtered = computed(() => {
@@ -31,7 +30,6 @@ const filtered = computed(() => {
   );
 });
 
-// ── group by club ────────────────────────────────────────
 const groupedByClub = computed(() => {
   const groups = new Map<string, ClubBooking[]>();
   filtered.value.forEach((b) => {
@@ -44,7 +42,6 @@ const groupedByClub = computed(() => {
 
 const uniqueClubs = computed(() => groupedByClub.value.size);
 
-// ── sheet state ──────────────────────────────────────────
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const submitted = ref(false);
@@ -104,13 +101,12 @@ const formatDate = (value?: Date | string) => {
 </script>
 
 <template>
-  <div class="relative pb-4">
+  <div class="relative overflow-x-hidden pb-4">
     <LoadingSpinner v-if="loadingStore && bookings.length === 0" />
 
     <div v-else>
       <SearchInput v-model="search" placeholder="მოძებნე სახელი, წრე, ჯგუფი..." />
 
-      <!-- Stats -->
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ რეგისტ.</p>
@@ -126,14 +122,12 @@ const formatDate = (value?: Date | string) => {
         რეგისტრაცია ვერ მოიძებნა
       </p>
 
-      <!-- Club groups -->
       <div class="flex flex-col gap-4">
         <div
           v-for="[clubName, rows] in groupedByClub"
           :key="clubName"
           class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]"
         >
-          <!-- Club header -->
           <div class="flex items-center justify-between border-b border-blue-900/20 bg-blue-500/5 px-4 py-3">
             <div class="flex items-center gap-2.5">
               <span class="h-4 w-[3px] rounded-full bg-blue-500" />
@@ -144,7 +138,6 @@ const formatDate = (value?: Date | string) => {
             </span>
           </div>
 
-          <!-- Scrollable table -->
           <div class="table-scroll overflow-x-auto pb-2">
             <table class="w-full min-w-130 text-sm">
               <thead>
@@ -192,7 +185,6 @@ const formatDate = (value?: Date | string) => {
       </div>
     </div>
 
-    <!-- FAB -->
     <button
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
       @click="openAdd"
@@ -273,10 +265,3 @@ const formatDate = (value?: Date | string) => {
     </BottomSheet>
   </div>
 </template>
-
-<style scoped>
-.table-scroll::-webkit-scrollbar { height: 4px; }
-.table-scroll::-webkit-scrollbar-track { background: transparent; }
-.table-scroll::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 9999px; }
-.table-scroll::-webkit-scrollbar-thumb:hover { background: #2563eb55; }
-</style>

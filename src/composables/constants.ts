@@ -1,4 +1,3 @@
-//router
 export const GROUPS_ROUTE = "/groups";
 export const CLUBS_ROUTE = "/clubs";
 export const DAY_SCHEDULE_ROUTE = "/day-schedule";
@@ -46,7 +45,6 @@ export const ADMIN_SCHEDULE_ICON = "pi pi-clock";
 export const ACTIVITIES_ICON = "pi pi-sparkles";
 export const ADMIN_ACTIVITIES_ICON = "pi pi-briefcase";
 
-//firebase
 export const GROUPS_DB = "groups";
 export const ADMINS_DB = "admins";
 export const CLUBS_DB = "clubs";
@@ -58,7 +56,6 @@ export const DEADLINE_DB = "deadline";
 export const GOLDEN_VERSES_DB = "verses";
 export const ANNOUNCEMENTS_DB = "announcements";
 
-//other
 export const GENDER_MALE = "male";
 export const GENDER_FEMALE = "female";
 
@@ -69,7 +66,6 @@ export const REQUEST_PENDING = "pending";
 export const REQUEST_ACCEPTED = "accepted";
 export const REQUEST_REJECTED = "rejected";
 
-//announcement article tags
 export const TAG_URGENT = "სასწრაფო";
 export const TAG_NOTEWORTHY = "გასათვალისწინებელი";
 export const TAG_SCHEDULE = "განრიგი";
@@ -78,6 +74,5 @@ export const TAG_GATHERING = "შეკრება";
 export const TAG_ACTIVITY = "აქტივობა";
 export const TAG_HEALTH = "ჯანმრთელობა";
 
-//imgBB
 export const MAX_IMAGE_SIZE_MB = 5;
 export const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024;

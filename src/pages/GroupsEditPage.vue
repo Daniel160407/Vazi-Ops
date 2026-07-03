@@ -12,7 +12,6 @@ import SheetField from "../components/UI/SheetField.vue";
 const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
 const confirm = useConfirm();
 
-// ── sheet state ───────────────────────────────────────────
 const sheetVisible = ref(false);
 const isAdding = ref(false);
 
@@ -60,7 +59,6 @@ const handleDelete = () => {
   });
 };
 
-// ── search + stats ─────────────────────────────────────────
 const search = ref("");
 
 const filtered = computed(() => {
@@ -83,7 +81,6 @@ const totalMembers = computed(() =>
     <div v-else>
       <SearchInput v-model="search" placeholder="მოძებნე ჯგუფი ან ლიდერი..." />
 
-      <!-- Stats -->
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -105,7 +102,6 @@ const totalMembers = computed(() =>
         ჯგუფი ვერ მოიძებნა
       </p>
 
-      <!-- Group cards -->
       <div class="flex flex-col gap-3">
         <button
           v-for="group in filtered"
@@ -153,7 +149,6 @@ const totalMembers = computed(() =>
       </div>
     </div>
 
-    <!-- FAB -->
     <button
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
       @click="openAdd"

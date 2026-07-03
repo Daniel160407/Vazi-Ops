@@ -16,10 +16,8 @@ const showMore = ref(false);
 <template>
   <div class="font-bpg flex min-h-svh w-full bg-[#03060f] text-white">
 
-    <!-- Desktop sidebar -->
     <SideNav class="hidden lg:flex" />
 
-    <!-- Main content -->
     <div class="flex flex-1 flex-col items-center lg:ml-56">
 
       <AppHeader />
@@ -33,7 +31,6 @@ const showMore = ref(false);
       </div>
     </div>
 
-    <!-- Mobile bottom nav + sheet -->
     <BottomNav class="lg:hidden" @open-more="showMore = true" />
     <MoreSheet :visible="showMore" @close="showMore = false" />
 
@@ -43,15 +40,3 @@ const showMore = ref(false);
     <ConfirmDialog class="mx-2" />
   </div>
 </template>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

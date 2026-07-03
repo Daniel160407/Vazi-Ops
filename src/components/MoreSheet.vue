@@ -149,27 +149,3 @@ const adminItems = [
     </Transition>
   </Teleport>
 </template>
-
-<style scoped>
-.backdrop-enter-active {
-  transition: opacity 0.25s ease;
-}
-.backdrop-leave-active {
-  transition: opacity 0.2s ease;
-}
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-
-.sheet-enter-active {
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.sheet-leave-active {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1);
-}
-.sheet-enter-from,
-.sheet-leave-to {
-  transform: translateY(100%);
-}
-</style>

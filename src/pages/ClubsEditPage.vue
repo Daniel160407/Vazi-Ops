@@ -17,7 +17,6 @@ const { loading: loadingStore, clubs } = storeToRefs(useGlobalStore());
 const { addClub, updateClub, deleteClub, loading } = useClubsCrud();
 const confirm = useConfirm();
 
-// ── sheet state ──────────────────────────────────────────
 const sheetVisible = ref(false);
 const isAdding = ref(false);
 
@@ -58,7 +57,6 @@ const handleDelete = () => {
   });
 };
 
-// ── search + stats ───────────────────────────────────────
 const search = ref("");
 
 const filtered = computed(() => {
@@ -76,7 +74,6 @@ const totalPlaces = computed(() =>
   clubs.value.reduce((acc, c) => acc + (c.places_quantity ?? 0), 0),
 );
 
-// ── helpers ──────────────────────────────────────────────
 const formatTime = (value?: string | Date | null) => {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -104,7 +101,6 @@ const accentBorder = (n: number) => {
     <div v-else>
       <SearchInput v-model="search" placeholder="მოძებნე წრე, მასწავლებელი..." />
 
-      <!-- Stats -->
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ წრე</p>
@@ -122,7 +118,6 @@ const accentBorder = (n: number) => {
         წრე ვერ მოიძებნა
       </p>
 
-      <!-- Club cards -->
       <div class="flex flex-col gap-3">
         <button
           v-for="club in filtered"
@@ -151,7 +146,6 @@ const accentBorder = (n: number) => {
       </div>
     </div>
 
-    <!-- FAB -->
     <button
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
       @click="openAdd"

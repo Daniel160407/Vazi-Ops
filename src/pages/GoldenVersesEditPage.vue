@@ -16,7 +16,6 @@ const { loading: loadingStore, goldenVerses } = storeToRefs(useGlobalStore());
 const { loading, addGoldenVerse, updateGoldenVerse, deleteGoldenVerse } = useGoldenVersesCrud();
 const confirm = useConfirm();
 
-// ── sheet state ───────────────────────────────────────────
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const editId = ref<string | null>(null);
@@ -75,7 +74,6 @@ const formatDate = (value?: any) => {
     <LoadingSpinner v-if="loadingStore && goldenVerses.length === 0" />
 
     <div v-else>
-      <!-- Stats -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ მუხლი</p>
         <p class="text-3xl font-bold text-white">{{ goldenVerses.length }}</p>
@@ -86,7 +84,6 @@ const formatDate = (value?: any) => {
         <p class="text-sm text-slate-600">მუხლები ჯერ არ არის დამატებული</p>
       </div>
 
-      <!-- Verse cards grid -->
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div
           v-for="verse in goldenVerses"
@@ -126,7 +123,6 @@ const formatDate = (value?: any) => {
       </div>
     </div>
 
-    <!-- FAB -->
     <button
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
       @click="openAdd"

@@ -103,7 +103,6 @@ const formatDate = (dateValue?: any) => {
     <LoadingSpinner v-if="loadingStore && events.length === 0" />
 
     <div v-else>
-      <!-- Deadline control -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">
           რეგისტრაციის დედლაინი
@@ -131,7 +130,6 @@ const formatDate = (dateValue?: any) => {
         </div>
       </div>
 
-      <!-- Stats -->
       <div class="mb-4 grid grid-cols-4 gap-2">
         <div class="rounded-xl border border-blue-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-lg font-bold text-white">{{ events.length }}</p>
@@ -151,7 +149,6 @@ const formatDate = (dateValue?: any) => {
         </div>
       </div>
 
-      <!-- Filters -->
       <div class="mb-4 flex gap-2 overflow-x-auto pb-1">
         <button
           v-for="f in filters"
@@ -168,7 +165,6 @@ const formatDate = (dateValue?: any) => {
         ნომრები არ მოიძებნა
       </p>
 
-      <!-- Event cards -->
       <div class="flex flex-col gap-3">
         <div
           v-for="event in filteredEvents"

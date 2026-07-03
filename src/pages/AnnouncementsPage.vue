@@ -62,7 +62,6 @@ const formatDate = (value?: any) => {
     <LoadingSpinner v-if="loading && announcements.length === 0" />
 
     <div v-else>
-      <!-- Stats -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
         <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           სულ განცხადება
@@ -70,13 +69,11 @@ const formatDate = (value?: any) => {
         <p class="text-3xl font-bold text-white">{{ announcements.length }}</p>
       </div>
 
-      <!-- Empty state -->
       <div v-if="announcements.length === 0" class="py-16 text-center">
         <i class="pi pi-megaphone mb-4 block text-4xl text-slate-700" />
         <p class="text-sm text-slate-600">განცხადებები ჯერ არ არის</p>
       </div>
 
-      <!-- Announcement cards -->
       <div class="flex flex-col gap-3">
         <article
           v-for="a in announcements"
@@ -85,7 +82,6 @@ const formatDate = (value?: any) => {
           :class="accentBorder(a.tag)"
         >
           <div class="p-4">
-            <!-- Tag + date -->
             <div class="mb-3 flex items-center justify-between gap-2">
               <span
                 class="rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest"
@@ -97,10 +93,8 @@ const formatDate = (value?: any) => {
               <span class="text-[11px] text-slate-600">{{ formatDate(a.date) }}</span>
             </div>
 
-            <!-- Title -->
             <h3 class="mb-2 text-base font-bold leading-snug text-white">{{ a.title }}</h3>
 
-            <!-- Content -->
             <p
               class="text-sm leading-relaxed text-slate-400 transition-all"
               :class="{ 'line-clamp-3': !isExpanded(a.id) }"
@@ -116,7 +110,6 @@ const formatDate = (value?: any) => {
               <i class="pi text-[9px]" :class="isExpanded(a.id) ? 'pi-chevron-up' : 'pi-chevron-down'" />
             </button>
 
-            <!-- Author -->
             <div class="mt-4 flex items-center gap-2.5 border-t border-blue-900/20 pt-3">
               <div
                 class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white overflow-hidden"

@@ -19,7 +19,6 @@ const { loading: loadingStore, clubs } = storeToRefs(globalStore);
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
 const { fetchUserBookings } = useClubBookingsCrud();
 
-// ── search ──────────────────────────────────────────────
 const search = ref("");
 const filtered = computed(() => {
   const q = search.value.toLowerCase().trim();
@@ -36,7 +35,6 @@ const totalPlaces = computed(() =>
   clubs.value.reduce((acc, c) => acc + (c.places_quantity ?? 0), 0),
 );
 
-// ── registration sheet ──────────────────────────────────
 const selectedClub = ref<Club | null>(null);
 const sheetVisible = ref(false);
 const childFullName = ref("");
@@ -122,7 +120,6 @@ const handleConfirmRegister = async () => {
   closeSheet();
 };
 
-// ── helpers ─────────────────────────────────────────────
 const formatTime = (value?: string | Date | null) => {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -150,7 +147,6 @@ const accentBorder = (n: number) => {
     <div v-else>
       <SearchInput v-model="search" placeholder="მოძებნე წრე, მასწავლებელი..." />
 
-      <!-- Stats -->
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ წრეების რაოდენობა</p>
@@ -168,7 +164,6 @@ const accentBorder = (n: number) => {
         წრე ვერ მოიძებნა
       </p>
 
-      <!-- Club cards -->
       <div class="flex flex-col gap-3">
         <div
           v-for="club in filtered"
@@ -207,20 +202,17 @@ const accentBorder = (n: number) => {
       </div>
     </div>
 
-    <!-- Registration sheet -->
     <BottomSheet
       :visible="sheetVisible"
       :title="selectionMode === 'switch' ? 'შეცვლე წრე' : 'ჩაეწერე წრეში'"
       @close="closeSheet"
     >
-      <!-- Selected club badge -->
       <div v-if="selectedClub" class="mb-5 flex items-center gap-2 rounded-xl bg-blue-500/10 px-3 py-2.5">
         <i class="pi pi-sparkles text-sm text-blue-400" />
         <span class="text-sm font-semibold text-blue-300">{{ selectedClub.name }}</span>
         <span class="ml-auto text-xs text-slate-500">{{ formatTime(selectedClub.time) }}</span>
       </div>
 
-      <!-- Switch mode -->
       <div v-if="selectionMode === 'switch'" class="mb-5">
         <p class="mb-3 text-sm text-slate-400">გაქვს 2 წრე. აირჩიე რომელი გინდა შეცვალო:</p>
         <div class="flex flex-col gap-2">
@@ -238,7 +230,6 @@ const accentBorder = (n: number) => {
         </div>
       </div>
 
-      <!-- Register form -->
       <div v-else class="flex flex-col gap-3">
         <SheetField label="ბავშვის სახელი და გვარი">
           <input

@@ -36,7 +36,6 @@ const toggle = (id: string) => {
     <div v-else>
       <SearchInput v-model="search" placeholder="მოძებნე ჯგუფი ან ლიდერი..." />
 
-      <!-- Stats -->
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -52,28 +51,23 @@ const toggle = (id: string) => {
         </div>
       </div>
 
-      <!-- Section title -->
       <h2 class="mb-3 text-base font-bold text-slate-200">ჯგუფები</h2>
 
-      <!-- Empty -->
       <p v-if="filtered.length === 0" class="py-10 text-center text-sm text-slate-600">
         ჯგუფი ვერ მოიძებნა
       </p>
 
-      <!-- Group cards -->
       <div class="flex flex-col gap-3">
         <div
           v-for="group in filtered"
           :key="group.id"
           class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] transition-all duration-200"
         >
-          <!-- Card header -->
           <button
             class="w-full p-4 text-left"
             @click="toggle(group.id)"
           >
             <div class="flex items-start justify-between gap-2">
-              <!-- Name + leader -->
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <span
@@ -86,7 +80,6 @@ const toggle = (id: string) => {
                   ლიდერი: {{ group.leader || "—" }}
                 </p>
               </div>
-              <!-- Gender badge + cottage -->
               <div class="shrink-0 text-right">
                 <span
                   class="inline-block rounded-md px-2 py-0.5 text-xs font-semibold"
@@ -102,7 +95,6 @@ const toggle = (id: string) => {
               </div>
             </div>
 
-            <!-- Stats row -->
             <div class="mt-3 flex gap-6 border-t border-blue-900/20 pt-3">
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ასაკი</p>
@@ -123,7 +115,6 @@ const toggle = (id: string) => {
             </div>
           </button>
 
-          <!-- Expanded children list -->
           <Transition name="expand">
             <div
               v-if="expandedId === group.id && group.children.length > 0"
@@ -154,17 +145,3 @@ const toggle = (id: string) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.expand-enter-active,
-.expand-leave-active {
-  transition: opacity 0.2s ease, max-height 0.25s ease;
-  max-height: 600px;
-  overflow: hidden;
-}
-.expand-enter-from,
-.expand-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-</style>
