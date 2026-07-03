@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
+import { useAuth } from "../composables/useAuth";
 import { useConfirm } from "primevue";
 import type { EveningScheduleItem } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
@@ -10,8 +11,9 @@ import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
-const { loading: loadingStore, eveningScheduleItems } =
+const { loading: loadingStore, eveningScheduleItems, appUsers } =
   storeToRefs(useGlobalStore());
+const { fullName } = useAuth();
 const {
   updateScheduleOrder,
   addEveningSchedule,
@@ -81,6 +83,18 @@ const onTouchEnd = () => {
   dragIndex.value = null;
 };
 
+const leaderOpen = ref(false);
+
+const leaderSuggestions = computed(() => {
+  const q = form.value.leader_full_name.toLowerCase().trim();
+  return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
+});
+
+const selectLeader = (name: string) => {
+  form.value.leader_full_name = name;
+  leaderOpen.value = false;
+};
+
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const editingId = ref<string | null>(null);
@@ -102,7 +116,7 @@ const openAdd = () => {
   isEditing.value = false;
   editingId.value = null;
   mode.value = "general";
-  form.value = blankForm();
+  form.value = { ...blankForm(), leader_full_name: fullName.value };
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -348,42 +362,64 @@ const handleDelete = (id: string) => {
             />
           </SheetField>
 
-          <div class="grid grid-cols-2 gap-3">
-            <SheetField
-              label="ლიდერი"
-              :required="true"
-              :error="
-                submitted && !form.leader_full_name ? 'ლიდერი აუცილებელია' : ''
-              "
-            >
+          <SheetField
+            label="ლიდერი"
+            :required="true"
+            :error="submitted && !form.leader_full_name ? 'ლიდერი აუცილებელია' : ''"
+          >
+            <div class="relative">
               <input
                 v-model="form.leader_full_name"
                 type="text"
+                autocomplete="off"
                 class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-                :class="
-                  submitted && !form.leader_full_name
-                    ? 'border-red-500/60 bg-red-500/5'
-                    : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-                "
+                :class="submitted && !form.leader_full_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
+                @focus="leaderOpen = true"
+                @blur="leaderOpen = false"
               />
-            </SheetField>
-            <SheetField
-              label="ჯგუფი"
-              :required="true"
-              :error="submitted && !form.group_name ? 'ჯგუფი აუცილებელია' : ''"
-            >
-              <input
-                v-model="form.group_name"
-                type="text"
-                class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-                :class="
-                  submitted && !form.group_name
-                    ? 'border-red-500/60 bg-red-500/5'
-                    : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-                "
-              />
-            </SheetField>
-          </div>
+              <Transition
+                enter-active-class="transition-all duration-150 ease-out"
+                enter-from-class="opacity-0 -translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition-all duration-100 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-1"
+              >
+                <ul
+                  v-if="leaderOpen && leaderSuggestions.length"
+                  class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                  style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                  @mousedown.prevent
+                >
+                  <li
+                    v-for="u in leaderSuggestions"
+                    :key="u.id"
+                    class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                    @click="selectLeader(u.name)"
+                  >
+                    <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
+                      <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />
+                      <span v-else>{{ u.name.charAt(0).toUpperCase() }}</span>
+                    </div>
+                    <span class="text-sm text-slate-200">{{ u.name }}</span>
+                  </li>
+                </ul>
+              </Transition>
+            </div>
+          </SheetField>
+
+          <SheetField
+            label="ჯგუფი"
+            :required="true"
+            :error="submitted && !form.group_name ? 'ჯგუფი აუცილებელია' : ''"
+          >
+            <input
+              v-model="form.group_name"
+              type="text"
+              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
+              :class="submitted && !form.group_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
+            />
+          </SheetField>
         </template>
 
         <SheetField label="მედია ლინკი">
