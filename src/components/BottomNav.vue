@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import {
   GROUPS_ROUTE,
@@ -12,6 +13,9 @@ defineEmits<{ openMore: [] }>();
 const router = useRouter();
 const route = useRoute();
 
+const isVisible = ref(true);
+const lastScrollPosition = ref(0);
+
 const navItems = [
   { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE },
   { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE },
@@ -20,18 +24,41 @@ const navItems = [
 ];
 
 const isActive = (path: string) => route.path === path;
+
+const handleScroll = () => {
+  const currentScrollPosition =
+    window.pageYOffset || document.documentElement.scrollTop;
+  if (Math.abs(lastScrollPosition.value - currentScrollPosition) < 60) {
+    return;
+  }
+  isVisible.value = currentScrollPosition < lastScrollPosition.value;
+  lastScrollPosition.value = currentScrollPosition;
+};
+
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
 </script>
 
 <template>
   <nav
-    class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch border-t border-blue-900/60 bg-[#05080f]"
-    style="box-shadow: 0 -4px 24px 0 rgba(0,10,40,0.7)"
+    class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch border-t border-blue-900/60 bg-[#05080f] transition-transform duration-300"
+    style="box-shadow: 0 -4px 24px 0 rgba(0, 10, 40, 0.7)"
+    :class="{ 'translate-y-full': !isVisible }"
   >
     <button
       v-for="item in navItems"
       :key="item.path"
       class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-all duration-200"
-      :class="isActive(item.path) ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'"
+      :class="
+        isActive(item.path)
+          ? 'text-blue-400'
+          : 'text-slate-500 hover:text-slate-300'
+      "
       @click="router.push(item.path)"
     >
       <span
@@ -45,7 +72,9 @@ const isActive = (path: string) => route.path === path;
       >
         <i :class="item.icon" class="text-lg" />
       </div>
-      <span class="text-center text-[10px] font-medium leading-none tracking-wide">
+      <span
+        class="text-center text-[10px] font-medium leading-none tracking-wide"
+      >
         {{ item.label }}
       </span>
     </button>
@@ -57,7 +86,9 @@ const isActive = (path: string) => route.path === path;
       <div class="flex h-9 w-9 items-center justify-center rounded-xl">
         <i class="pi pi-bars text-lg" />
       </div>
-      <span class="text-[10px] font-medium leading-none tracking-wide">სხვა</span>
+      <span class="text-[10px] font-medium leading-none tracking-wide"
+        >სხვა</span
+      >
     </button>
   </nav>
 </template>
