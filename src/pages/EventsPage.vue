@@ -14,7 +14,7 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
-const { fullName } = useAuth();
+const { fullName, userGroupName } = useAuth();
 const toast = useToast();
 
 const isDeadlinePassed = ref(false);
@@ -89,7 +89,7 @@ const sheetVisible = ref(false);
 const submitted = ref(false);
 
 const getEmptyForm = (): Omit<AppEvent, "id"> => ({
-  scene_name: "", performer_full_name: "", leader_full_name: fullName.value, group_name: "",
+  scene_name: "", performer_full_name: "", leader_full_name: fullName.value, group_name: userGroupName.value,
   media_url: "", additional_info: "", request_status: REQUEST_PENDING, created_at: new Date(),
 });
 

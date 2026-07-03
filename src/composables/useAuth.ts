@@ -67,11 +67,17 @@ async function resolveUserRole(u: User): Promise<UserRole> {
 }
 
 export function useAuth() {
-  const { appUsers } = storeToRefs(useGlobalStore());
+  const { appUsers, groups } = storeToRefs(useGlobalStore());
 
   const avatarUrl = computed(() => {
     if (!user.value?.email) return null;
     return appUsers.value.find((u) => u.email === user.value!.email)?.avatar_url ?? null;
+  });
+
+  const userGroupName = computed(() => {
+    if (!user.value?.email) return "";
+    const name = appUsers.value.find((u) => u.email === user.value!.email)?.name ?? "";
+    return groups.value.find((g) => g.leader === name)?.name ?? "";
   });
 
   const signInWithGoogle = async () => {
@@ -100,6 +106,7 @@ export function useAuth() {
     isAdmin: computed(() => role.value === UserRole.ADMIN),
     isLoggedIn: computed(() => !!user.value),
     fullName: computed(() => user.value?.displayName || "ანონიმი"),
+    userGroupName,
     profileImg: computed(() => user.value?.photoURL),
     loading,
     error,

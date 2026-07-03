@@ -18,7 +18,7 @@ import AppButton from "../components/UI/AppButton.vue";
 const globalStore = useGlobalStore();
 const toast = useToast();
 const { loading: loadingStore, clubs } = storeToRefs(globalStore);
-const { fullName } = useAuth();
+const { fullName, userGroupName } = useAuth();
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
 const { fetchUserBookings } = useClubBookingsCrud();
 
@@ -56,6 +56,7 @@ const openSheet = (club: Club) => {
   if (club.places_quantity <= 0) return;
   selectedClub.value = club;
   leaderName.value = fullName.value;
+  groupName.value = userGroupName.value;
   sheetVisible.value = true;
   selectionMode.value = "register";
   userBookings.value = [];

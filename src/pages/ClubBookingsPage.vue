@@ -15,7 +15,7 @@ import AppButton from "../components/UI/AppButton.vue";
 
 const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubBookingsCrud();
 const { loading: loadingStore, appUsers } = storeToRefs(useGlobalStore());
-const { fullName } = useAuth();
+const { fullName, userGroupName } = useAuth();
 const confirm = useConfirm();
 
 const leaderOpen = ref(false);
@@ -69,7 +69,7 @@ const form = ref<Partial<ClubBooking>>(blankForm());
 
 const openAdd = () => {
   isEditing.value = false;
-  form.value = { ...blankForm(), leader_name: fullName.value };
+  form.value = { ...blankForm(), leader_name: fullName.value, group_name: userGroupName.value };
   submitted.value = false;
   sheetVisible.value = true;
 };

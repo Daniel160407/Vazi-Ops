@@ -13,7 +13,7 @@ import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, eveningScheduleItems, appUsers } =
   storeToRefs(useGlobalStore());
-const { fullName } = useAuth();
+const { fullName, userGroupName } = useAuth();
 const {
   updateScheduleOrder,
   addEveningSchedule,
@@ -116,7 +116,7 @@ const openAdd = () => {
   isEditing.value = false;
   editingId.value = null;
   mode.value = "general";
-  form.value = { ...blankForm(), leader_full_name: fullName.value };
+  form.value = { ...blankForm(), leader_full_name: fullName.value, group_name: userGroupName.value };
   submitted.value = false;
   sheetVisible.value = true;
 };
