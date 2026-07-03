@@ -173,11 +173,11 @@ const handleRegister = async () => {
         </div>
         <div class="rounded-xl border border-amber-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-xl font-bold text-amber-400">{{ events.filter((e) => e.request_status === REQUEST_PENDING).length }}</p>
-          <p class="text-[10px] text-slate-600">მოლოდინი</p>
+          <p class="text-[10px] text-slate-600">მოლოდინში</p>
         </div>
         <div class="rounded-xl border border-emerald-900/20 bg-[#0d1829] p-3 text-center">
           <p class="text-xl font-bold text-emerald-400">{{ events.filter((e) => e.request_status === REQUEST_ACCEPTED).length }}</p>
-          <p class="text-[10px] text-slate-600">დადასტურ.</p>
+          <p class="text-[10px] text-slate-600">დადასტურებული</p>
         </div>
       </div>
 
@@ -230,7 +230,6 @@ const handleRegister = async () => {
           <input
             v-model="form.performer_full_name"
             type="text"
-            placeholder="მაგ: ნიკა გელაშვილი"
             class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
             :class="submitted && !form.performer_full_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
           />
@@ -246,7 +245,7 @@ const handleRegister = async () => {
         </SheetField>
 
         <div class="grid grid-cols-2 gap-3">
-          <SheetField label="ჯგუფი" :required="true" :error="submitted && !form.group_name ? 'სავალდებულოა' : ''">
+          <SheetField label="ჯგუფის სახელი" :required="true" :error="submitted && !form.group_name ? 'სავალდებულოა' : ''">
             <input
               v-model="form.group_name"
               type="text"
@@ -274,7 +273,7 @@ const handleRegister = async () => {
           />
         </SheetField>
 
-        <SheetField label="კომენტარი">
+        <SheetField label="დამატებითი კომენტარი">
           <textarea
             v-model="form.additional_info"
             rows="3"

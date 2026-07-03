@@ -11,15 +11,6 @@ const imageUrl = ref("");
 const downloading = ref(false);
 const imgLoaded = ref(false);
 
-watch(
-  schedules,
-  (val) => {
-    const found = val.find((s) => s.name === DAY_SCHEDULE_CATEGORY);
-    imageUrl.value = found?.image_url ?? "";
-    imgLoaded.value = false;
-  },
-  { deep: true, immediate: true },
-);
 
 const downloadImage = async () => {
   if (!imageUrl.value) return;
@@ -35,11 +26,21 @@ const downloadImage = async () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  } catch {
   } finally {
     downloading.value = false;
   }
 };
+
+
+watch(
+  schedules,
+  (val) => {
+    const found = val.find((s) => s.name === DAY_SCHEDULE_CATEGORY);
+    imageUrl.value = found?.image_url ?? "";
+    imgLoaded.value = false;
+  },
+  { deep: true, immediate: true },
+);
 </script>
 
 <template>

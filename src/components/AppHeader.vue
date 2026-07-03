@@ -3,7 +3,6 @@ import logo from "../assets/images/logo.png";
 </script>
 
 <template>
-  <!-- Mobile header — sticky, matches dark blue theme -->
   <header
     class="sticky mb-4 top-0 z-20 flex w-full items-center gap-3 border-b border-blue-900/20 bg-[#03060f]/95 px-5 py-3.5 backdrop-blur-md lg:hidden"
     style="box-shadow: 0 2px 20px 0 rgba(0, 6, 30, 0.5)"

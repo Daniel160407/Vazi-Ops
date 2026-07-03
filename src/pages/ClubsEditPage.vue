@@ -104,7 +104,7 @@ const accentBorder = (n: number) => {
 
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ წრე</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">წრეების რაოდენობა</p>
           <p class="text-3xl font-bold text-white">{{ clubs.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
@@ -172,7 +172,7 @@ const accentBorder = (n: number) => {
               class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
             />
           </SheetField>
-          <SheetField label="ადგილი">
+          <SheetField label="ჩატარების ადგილი">
             <input
               v-model="form.place"
               type="text"
@@ -182,7 +182,7 @@ const accentBorder = (n: number) => {
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <SheetField label="ადგილების რ-ბა">
+          <SheetField label="ადგილების რაოდენობა">
             <input
               v-model.number="form.places_quantity"
               type="number"
@@ -202,7 +202,7 @@ const accentBorder = (n: number) => {
           </SheetField>
         </div>
 
-        <SheetField label="დამატებითი ინფო">
+        <SheetField label="დამატებითი ინფორმაცია">
           <textarea
             v-model="form.additional_info"
             rows="3"

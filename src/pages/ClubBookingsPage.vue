@@ -110,11 +110,11 @@ const formatDate = (value?: Date | string) => {
 
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ რეგისტ.</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">რეგისტრაციების რაოდენობა</p>
           <p class="text-3xl font-bold text-white">{{ bookings.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">აქტიური წრე</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">წრეების რაოდენობა</p>
           <p class="text-3xl font-bold text-blue-400">{{ uniqueClubs }}</p>
         </div>
       </div>
@@ -131,7 +131,7 @@ const formatDate = (value?: Date | string) => {
         >
           <div class="flex items-center justify-between border-b border-blue-900/20 bg-blue-500/5 px-4 py-3">
             <div class="flex items-center gap-2.5">
-              <span class="h-4 w-[3px] rounded-full bg-blue-500" />
+              <span class="h-4 w-0.75 rounded-full bg-blue-500" />
               <span class="font-bold text-white">{{ clubName }}</span>
             </div>
             <span class="rounded-lg border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400">
@@ -144,7 +144,7 @@ const formatDate = (value?: Date | string) => {
               <thead>
                 <tr class="border-b border-blue-900/20">
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">#</th>
-                  <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">სახელი გვარი</th>
+                  <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ბავშვი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ლიდერი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ჯგუფი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">თარიღი</th>

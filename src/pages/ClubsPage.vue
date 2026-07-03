@@ -150,7 +150,7 @@ const accentBorder = (n: number) => {
 
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ წრეების რაოდენობა</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">წრეების რაოდენობა</p>
           <p class="text-3xl font-bold text-white">{{ clubs.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
@@ -238,11 +238,10 @@ const accentBorder = (n: number) => {
           <input
             v-model="childFullName"
             type="text"
-            placeholder="მაგ: ნიკა გელაშვილი"
             class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
           />
         </SheetField>
-        <SheetField label="ლიდერის სახელი">
+        <SheetField label="ლიდერის სახელი და გვარი">
           <input
             v-model="leaderName"
             type="text"

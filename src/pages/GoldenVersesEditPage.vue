@@ -76,7 +76,7 @@ const formatDate = (value?: any) => {
 
     <div v-else>
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ მუხლი</p>
+        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">მუხლების რაოდენობა</p>
         <p class="text-3xl font-bold text-white">{{ goldenVerses.length }}</p>
       </div>
 
