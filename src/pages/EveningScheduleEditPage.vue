@@ -63,13 +63,15 @@ const onTouchStart = (index: number) => {
 const onTouchMove = (e: TouchEvent) => {
   if (dragIndex.value === null) return;
   const touch = e.touches[0];
+  if (!touch) return;
   const target = document.elementFromPoint(touch.clientX, touch.clientY);
   const card = target?.closest<HTMLElement>("[data-drag-index]");
   if (!card) return;
   const targetIndex = parseInt(card.dataset.dragIndex ?? "-1");
   if (targetIndex < 0 || targetIndex === dragIndex.value) return;
   const items = [...localItems.value];
-  const [dragged] = items.splice(dragIndex.value, 1);
+  const dragged = items.splice(dragIndex.value, 1)[0];
+  if (!dragged) return;
   items.splice(targetIndex, 0, dragged);
   localItems.value = items;
   dragIndex.value = targetIndex;
@@ -216,7 +218,7 @@ const handleDelete = (id: string) => {
             <div
               class="flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-xl bg-blue-900/20 text-slate-600 active:cursor-grabbing"
               style="touch-action: none"
-              @touchstart="onTouchStart(index)"
+              @touchstart.passive="onTouchStart(index)"
               @touchmove.prevent="onTouchMove"
               @touchend="onTouchEnd"
             >
