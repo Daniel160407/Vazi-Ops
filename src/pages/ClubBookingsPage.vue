@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import { useConfirm } from "primevue";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
 import { useGlobalStore } from "../stores/GlobalStore";
-import { useAuth } from "../composables/useAuth";
 import type { ClubBooking } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
@@ -14,20 +13,33 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubBookingsCrud();
-const { loading: loadingStore, appUsers } = storeToRefs(useGlobalStore());
-const { fullName, userGroupName } = useAuth();
+const { loading: loadingStore, appUsers, clubs, groups } = storeToRefs(useGlobalStore());
 const confirm = useConfirm();
 
 const leaderOpen = ref(false);
+const clubOpen = ref(false);
 
 const leaderSuggestions = computed(() => {
   const q = (form.value.leader_name ?? "").toLowerCase().trim();
   return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
 });
 
+const clubSuggestions = computed(() => {
+  const q = (form.value.club_name ?? "").toLowerCase().trim();
+  return clubs.value.filter((c) => c.name.toLowerCase().includes(q));
+});
+
 const selectLeader = (name: string) => {
   form.value.leader_name = name;
+  const group = groups.value.find((g) => g.leader === name);
+  if (group) form.value.group_name = group.name;
   leaderOpen.value = false;
+};
+
+const selectClub = (id: string, name: string) => {
+  form.value.club_id = id;
+  form.value.club_name = name;
+  clubOpen.value = false;
 };
 
 const search = ref("");
@@ -60,6 +72,12 @@ const uniqueClubs = computed(() => groupedByClub.value.size);
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const submitted = ref(false);
+const childFullName = ref("");
+
+const splitName = (full: string) => {
+  const parts = full.trim().split(/\s+/);
+  return { first: parts[0] ?? "", last: parts.slice(1).join(" ") };
+};
 
 const blankForm = (): Partial<ClubBooking> => ({
   club_id: "", club_name: "", child_first_name: "", child_last_name: "", leader_name: "", group_name: "",
@@ -69,7 +87,8 @@ const form = ref<Partial<ClubBooking>>(blankForm());
 
 const openAdd = () => {
   isEditing.value = false;
-  form.value = { ...blankForm(), leader_name: fullName.value, group_name: userGroupName.value };
+  form.value = blankForm();
+  childFullName.value = "";
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -77,13 +96,18 @@ const openAdd = () => {
 const openEdit = (booking: ClubBooking) => {
   isEditing.value = true;
   form.value = { ...booking };
+  childFullName.value = `${booking.child_first_name} ${booking.child_last_name}`.trim();
   submitted.value = false;
   sheetVisible.value = true;
 };
 
 const handleSave = async () => {
   submitted.value = true;
-  if (!form.value.club_name || !form.value.child_first_name || !form.value.child_last_name) return;
+  if (!form.value.club_name || !childFullName.value.trim()) return;
+
+  const { first, last } = splitName(childFullName.value);
+  form.value.child_first_name = first;
+  form.value.child_last_name = last;
 
   if (isEditing.value && form.value.id) {
     await updateBooking(form.value as ClubBooking);
@@ -198,33 +222,55 @@ const formatDate = (value?: Date | string) => {
       @close="sheetVisible = false"
     >
       <div class="flex flex-col gap-4">
-        <SheetField label="წრის სახელი" :required="true" :error="submitted && !form.club_name ? 'წრის სახელი აუცილებელია' : ''">
-          <input
-            v-model="form.club_name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="submitted && !form.club_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+        <SheetField label="წრე" :required="true" :error="submitted && !form.club_name ? 'წრის სახელი აუცილებელია' : ''">
+          <div class="relative">
+            <input
+              v-model="form.club_name"
+              type="text"
+              autocomplete="off"
+              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
+              :class="submitted && !form.club_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
+              @focus="clubOpen = true"
+              @blur="clubOpen = false"
+            />
+            <Transition
+              enter-active-class="transition-all duration-150 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-100 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1"
+            >
+              <ul
+                v-if="clubOpen && clubSuggestions.length"
+                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                @mousedown.prevent
+              >
+                <li
+                  v-for="club in clubSuggestions"
+                  :key="club.id"
+                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                  @click="selectClub(club.id, club.name)"
+                >
+                  <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-900/30">
+                    <i class="pi pi-sparkles text-[10px] text-blue-400" />
+                  </div>
+                  <span class="text-sm text-slate-200">{{ club.name }}</span>
+                </li>
+              </ul>
+            </Transition>
+          </div>
         </SheetField>
 
-        <div class="grid grid-cols-2 gap-3">
-          <SheetField label="სახელი" :required="true" :error="submitted && !form.child_first_name ? 'სახელი აუცილებელია' : ''">
-            <input
-              v-model="form.child_first_name"
-              type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="submitted && !form.child_first_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
-          </SheetField>
-          <SheetField label="გვარი" :required="true" :error="submitted && !form.child_last_name ? 'გვარი აუცილებელია' : ''">
-            <input
-              v-model="form.child_last_name"
-              type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="submitted && !form.child_last_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
-          </SheetField>
-        </div>
+        <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !childFullName.trim() ? 'სახელი და გვარი აუცილებელია' : ''">
+          <input
+            v-model="childFullName"
+            type="text"
+            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
+            :class="submitted && !childFullName.trim() ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
+          />
+        </SheetField>
 
         <SheetField label="ლიდერი">
           <div class="relative">
