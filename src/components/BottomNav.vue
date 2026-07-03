@@ -30,9 +30,9 @@ const isActive = (path: string) => route.path === path;
     <button
       v-for="item in navItems"
       :key="item.path"
-      @click="router.push(item.path)"
       class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-all duration-200"
       :class="isActive(item.path) ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'"
+      @click="router.push(item.path)"
     >
       <span
         v-if="isActive(item.path)"
@@ -51,8 +51,8 @@ const isActive = (path: string) => route.path === path;
     </button>
 
     <button
-      @click="$emit('openMore')"
       class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-3 text-slate-500 transition-all duration-200 hover:text-slate-300"
+      @click="$emit('openMore')"
     >
       <div class="flex h-9 w-9 items-center justify-center rounded-xl">
         <i class="pi pi-bars text-lg" />

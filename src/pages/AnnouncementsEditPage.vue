@@ -8,16 +8,12 @@ import { useGlobalStore } from "../stores/GlobalStore";
 import { useAnnouncementsCrud } from "../composables/useAnnouncementsCrud";
 import { useAuth } from "../composables/useAuth";
 import {
-  TAG_ACTIVITY,
-  TAG_DINING,
-  TAG_GATHERING,
-  TAG_HEALTH,
-  TAG_NOTEWORTHY,
-  TAG_SCHEDULE,
-  TAG_URGENT,
+  TAG_ACTIVITY, TAG_DINING, TAG_GATHERING, TAG_HEALTH, TAG_NOTEWORTHY, TAG_SCHEDULE, TAG_URGENT,
 } from "../composables/constants";
 import type { Announcement } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import BottomSheet from "../components/UI/BottomSheet.vue";
+import SheetField from "../components/UI/SheetField.vue";
 
 const { loading: loadingStore, announcements } = storeToRefs(useGlobalStore());
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } = useAnnouncementsCrud();
@@ -25,20 +21,17 @@ const { fullName, profileImg } = useAuth();
 const confirm = useConfirm();
 
 // ── tag config ────────────────────────────────────────────
-const tagOptions = [
-  TAG_URGENT, TAG_SCHEDULE, TAG_DINING,
-  TAG_GATHERING, TAG_ACTIVITY, TAG_HEALTH, TAG_NOTEWORTHY,
-];
+const tagOptions = [TAG_URGENT, TAG_SCHEDULE, TAG_DINING, TAG_GATHERING, TAG_ACTIVITY, TAG_HEALTH, TAG_NOTEWORTHY];
 
 const tagMeta = (tag: string) => {
   const map: Record<string, { cls: string; active: string }> = {
-    [TAG_URGENT]:     { cls: "border-red-500/30 text-red-400",     active: "bg-red-500/20 border-red-500/40" },
-    [TAG_SCHEDULE]:   { cls: "border-blue-500/30 text-blue-400",   active: "bg-blue-500/20 border-blue-500/40" },
-    [TAG_DINING]:     { cls: "border-amber-500/30 text-amber-400", active: "bg-amber-500/20 border-amber-500/40" },
+    [TAG_URGENT]:     { cls: "border-red-500/30 text-red-400",       active: "bg-red-500/20 border-red-500/40" },
+    [TAG_SCHEDULE]:   { cls: "border-blue-500/30 text-blue-400",     active: "bg-blue-500/20 border-blue-500/40" },
+    [TAG_DINING]:     { cls: "border-amber-500/30 text-amber-400",   active: "bg-amber-500/20 border-amber-500/40" },
     [TAG_GATHERING]:  { cls: "border-purple-500/30 text-purple-400", active: "bg-purple-500/20 border-purple-500/40" },
     [TAG_ACTIVITY]:   { cls: "border-emerald-500/30 text-emerald-400", active: "bg-emerald-500/20 border-emerald-500/40" },
-    [TAG_HEALTH]:     { cls: "border-teal-500/30 text-teal-400",   active: "bg-teal-500/20 border-teal-500/40" },
-    [TAG_NOTEWORTHY]: { cls: "border-cyan-500/30 text-cyan-400",   active: "bg-cyan-500/20 border-cyan-500/40" },
+    [TAG_HEALTH]:     { cls: "border-teal-500/30 text-teal-400",     active: "bg-teal-500/20 border-teal-500/40" },
+    [TAG_NOTEWORTHY]: { cls: "border-cyan-500/30 text-cyan-400",     active: "bg-cyan-500/20 border-cyan-500/40" },
   };
   return map[tag] ?? { cls: "border-slate-500/30 text-slate-400", active: "bg-slate-500/20 border-slate-500/40" };
 };
@@ -91,12 +84,8 @@ const isSubmitting = ref(false);
 const submitted = ref(false);
 
 const blankForm = () => ({
-  title: "",
-  content: "",
-  tag: TAG_URGENT,
-  author: fullName.value || "ანონიმი",
-  author_image_url: profileImg.value || "",
-  date: new Date(),
+  title: "", content: "", tag: TAG_URGENT,
+  author: fullName.value || "ანონიმი", author_image_url: profileImg.value || "", date: new Date(),
 });
 
 const form = reactive(blankForm());
@@ -112,14 +101,7 @@ const openAdd = () => {
 const openEdit = (a: Announcement) => {
   isEditing.value = true;
   currentId.value = a.id;
-  Object.assign(form, {
-    title: a.title,
-    content: a.content,
-    tag: a.tag,
-    author: a.author,
-    author_image_url: a.author_image_url,
-    date: a.date,
-  });
+  Object.assign(form, { title: a.title, content: a.content, tag: a.tag, author: a.author, author_image_url: a.author_image_url, date: a.date });
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -127,14 +109,10 @@ const openEdit = (a: Announcement) => {
 const handleSave = async () => {
   submitted.value = true;
   if (!form.title || !form.content) return;
-
   isSubmitting.value = true;
   try {
-    if (isEditing.value && currentId.value) {
-      await updateAnnouncement(currentId.value, { ...form });
-    } else {
-      await addAnnouncement({ ...form });
-    }
+    if (isEditing.value && currentId.value) await updateAnnouncement(currentId.value, { ...form });
+    else await addAnnouncement({ ...form });
     sheetVisible.value = false;
   } finally {
     isSubmitting.value = false;
@@ -162,13 +140,10 @@ const handleDelete = (id: string) => {
     <div v-else>
       <!-- Stats -->
       <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-          სულ განცხადება
-        </p>
+        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ განცხადება</p>
         <p class="text-3xl font-bold text-white">{{ announcements.length }}</p>
       </div>
 
-      <!-- Empty state -->
       <div v-if="announcements.length === 0" class="py-16 text-center">
         <i class="pi pi-megaphone mb-4 block text-4xl text-slate-700" />
         <p class="text-sm text-slate-600">განცხადებები ჯერ არ არის</p>
@@ -183,61 +158,44 @@ const handleDelete = (id: string) => {
           :class="accentBorder(a.tag)"
         >
           <div class="p-4">
-            <!-- Tag + actions -->
             <div class="mb-3 flex items-center justify-between gap-2">
-              <span
-                class="rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest"
-                :class="cardTagCls(a.tag)"
-              >
+              <span class="rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest" :class="cardTagCls(a.tag)">
                 {{ a.tag }}
               </span>
               <div class="flex items-center gap-1.5">
                 <span class="text-[11px] text-slate-600">{{ formatDate(a.date) }}</span>
                 <button
-                  @click="openEdit(a)"
                   class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-blue-900/20 bg-blue-900/20 text-slate-500 hover:text-slate-300"
+                  @click="openEdit(a)"
                 >
                   <i class="pi pi-pencil text-[10px]" />
                 </button>
                 <button
-                  @click="handleDelete(a.id)"
                   class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-red-900/20 bg-red-500/5 text-red-500/60 hover:bg-red-500/15 hover:text-red-400"
+                  @click="handleDelete(a.id)"
                 >
                   <i class="pi pi-trash text-[10px]" />
                 </button>
               </div>
             </div>
 
-            <!-- Title -->
             <h3 class="mb-2 text-base font-bold leading-snug text-white">{{ a.title }}</h3>
 
-            <!-- Content -->
-            <p
-              class="text-sm leading-relaxed text-slate-400"
-              :class="{ 'line-clamp-3': !isExpanded(a.id) }"
-            >
+            <p class="text-sm leading-relaxed text-slate-400" :class="{ 'line-clamp-3': !isExpanded(a.id) }">
               {{ a.content }}
             </p>
             <button
               v-if="a.content && a.content.length > 150"
-              @click="toggle(a.id)"
               class="mt-2 flex cursor-pointer items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300"
+              @click="toggle(a.id)"
             >
               {{ isExpanded(a.id) ? "ნაკლები" : "სრულად" }}
               <i class="pi text-[9px]" :class="isExpanded(a.id) ? 'pi-chevron-up' : 'pi-chevron-down'" />
             </button>
 
-            <!-- Author -->
             <div class="mt-4 flex items-center gap-2.5 border-t border-blue-900/20 pt-3">
-              <div
-                class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-600 text-xs font-bold text-white"
-              >
-                <img
-                  v-if="a.author_image_url"
-                  :src="a.author_image_url"
-                  referrerpolicy="no-referrer"
-                  class="h-full w-full object-cover"
-                />
+              <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-600 text-xs font-bold text-white">
+                <img v-if="a.author_image_url" :src="a.author_image_url" referrerpolicy="no-referrer" class="h-full w-full object-cover" />
                 <span v-else>{{ a.author?.charAt(0) }}</span>
               </div>
               <span class="text-sm font-semibold text-slate-300">{{ a.author }}</span>
@@ -249,143 +207,71 @@ const handleDelete = (id: string) => {
 
     <!-- FAB -->
     <button
-      @click="openAdd"
       class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
+      @click="openAdd"
     >
       <i class="pi pi-plus text-lg" />
     </button>
 
-    <!-- Sheet -->
-    <Teleport to="body">
-      <Transition name="backdrop">
-        <div
-          v-if="sheetVisible"
-          class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
-          @click="sheetVisible = false"
-        />
-      </Transition>
-
-      <Transition name="sheet">
-        <div
-          v-if="sheetVisible"
-          class="fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-blue-900/40 bg-[#07101e] p-5"
-          style="box-shadow: 0 -8px 40px 0 rgba(0,10,40,0.8)"
-          @click.stop
-        >
-          <div class="mx-auto mb-4 h-1 w-10 rounded-full bg-blue-900/60" />
-
-          <!-- Header -->
-          <div class="mb-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="h-4 w-[3px] rounded-full bg-blue-500" />
-              <span class="text-sm font-bold text-slate-200">
-                {{ isEditing ? "განცხადების რედაქტირება" : "ახალი განცხადება" }}
-              </span>
-            </div>
+    <BottomSheet
+      :visible="sheetVisible"
+      :title="isEditing ? 'განცხადების რედაქტირება' : 'ახალი განცხადება'"
+      @close="sheetVisible = false"
+    >
+      <div class="flex flex-col gap-4">
+        <!-- Tag picker -->
+        <div>
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">თეგი</label>
+          <div class="flex flex-wrap gap-2">
             <button
-              @click="sheetVisible = false"
-              class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-900/30 text-slate-400 hover:bg-blue-900/60 hover:text-white"
+              v-for="tag in tagOptions"
+              :key="tag"
+              class="cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all"
+              :class="[tagMeta(tag).cls, form.tag === tag ? tagMeta(tag).active : 'bg-transparent']"
+              @click="form.tag = tag"
             >
-              <i class="pi pi-times text-xs" />
+              {{ tag }}
             </button>
           </div>
-
-          <div class="flex flex-col gap-4">
-            <!-- Tag picker -->
-            <div>
-              <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-                თეგი
-              </label>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="tag in tagOptions"
-                  :key="tag"
-                  @click="form.tag = tag"
-                  class="cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all"
-                  :class="[
-                    tagMeta(tag).cls,
-                    form.tag === tag ? tagMeta(tag).active : 'bg-transparent',
-                  ]"
-                >
-                  {{ tag }}
-                </button>
-              </div>
-            </div>
-
-            <!-- Title -->
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-                სათაური <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.title"
-                type="text"
-                class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-                :class="
-                  submitted && !form.title
-                    ? 'border-red-500/60 bg-red-500/5'
-                    : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-                "
-              />
-              <p v-if="submitted && !form.title" class="mt-1 text-xs text-red-400">
-                სათაური აუცილებელია
-              </p>
-            </div>
-
-            <!-- Content -->
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-                განცხადება <span class="text-red-500">*</span>
-              </label>
-              <textarea
-                v-model="form.content"
-                rows="5"
-                class="w-full resize-none rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-                :class="
-                  submitted && !form.content
-                    ? 'border-red-500/60 bg-red-500/5'
-                    : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-                "
-              />
-              <p v-if="submitted && !form.content" class="mt-1 text-xs text-red-400">
-                ტექსტი აუცილებელია
-              </p>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="mt-5 flex gap-3">
-            <button
-              v-if="isEditing"
-              @click="handleDelete(currentId!)"
-              class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/20"
-            >
-              <i class="pi pi-trash" />
-              წაშლა
-            </button>
-            <button
-              @click="handleSave"
-              :disabled="isSubmitting"
-              class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
-            >
-              <i class="pi pi-check" />
-              {{ isEditing ? "შენახვა" : "დამატება" }}
-            </button>
-          </div>
-
-          <div class="h-6" />
         </div>
-      </Transition>
-    </Teleport>
+
+        <SheetField label="სათაური" :required="true" :error="submitted && !form.title ? 'სათაური აუცილებელია' : ''">
+          <input
+            v-model="form.title"
+            type="text"
+            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
+            :class="submitted && !form.title ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
+          />
+        </SheetField>
+
+        <SheetField label="განცხადება" :required="true" :error="submitted && !form.content ? 'ტექსტი აუცილებელია' : ''">
+          <textarea
+            v-model="form.content"
+            rows="5"
+            class="w-full resize-none rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
+            :class="submitted && !form.content ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
+          />
+        </SheetField>
+      </div>
+
+      <div class="mt-5 flex gap-3">
+        <button
+          v-if="isEditing"
+          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/20"
+          @click="handleDelete(currentId!)"
+        >
+          <i class="pi pi-trash" />
+          წაშლა
+        </button>
+        <button
+          :disabled="isSubmitting"
+          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+          @click="handleSave"
+        >
+          <i class="pi pi-check" />
+          {{ isEditing ? "შენახვა" : "დამატება" }}
+        </button>
+      </div>
+    </BottomSheet>
   </div>
 </template>
-
-<style scoped>
-.backdrop-enter-active { transition: opacity 0.25s ease; }
-.backdrop-leave-active { transition: opacity 0.2s ease; }
-.backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
-
-.sheet-enter-active { transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
-.sheet-leave-active { transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
-.sheet-enter-from, .sheet-leave-to { transform: translateY(100%); }
-</style>

@@ -79,8 +79,8 @@ const adminItems = [
             </span>
           </div>
           <button
-            @click="emit('close')"
             class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-900/30 text-slate-400 transition-colors hover:bg-blue-900/60 hover:text-white"
+            @click="emit('close')"
           >
             <i class="pi pi-times text-xs" />
           </button>
@@ -90,8 +90,8 @@ const adminItems = [
           <button
             v-for="item in mainItems"
             :key="item.path"
-            @click="navigate(item.path)"
             class="group flex items-center gap-3 rounded-2xl border border-blue-900/30 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/50 hover:bg-[#0f1f36]"
+            @click="navigate(item.path)"
           >
             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-900/40 transition-colors group-hover:bg-blue-800/50">
               <i :class="item.icon" class="text-sm text-blue-400" />
@@ -112,8 +112,8 @@ const adminItems = [
             <button
               v-for="item in adminItems"
               :key="item.path"
-              @click="handleAdminNav(item.path)"
               class="group flex items-center gap-3 rounded-2xl border border-blue-900/20 bg-[#0a1220] p-4 text-left transition-all duration-150 hover:border-blue-700/40 hover:bg-[#0d1829]"
+              @click="handleAdminNav(item.path)"
             >
               <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-950/60 transition-colors group-hover:bg-blue-900/50">
                 <i :class="item.icon" class="text-sm text-blue-500/80" />
@@ -134,8 +134,8 @@ const adminItems = [
             <div class="h-px flex-1 bg-blue-900/30" />
           </div>
           <button
-            @click="signInWithGoogle"
             class="flex w-full items-center justify-center gap-3 rounded-2xl border border-blue-900/30 bg-[#0d1829] p-4 text-slate-300 transition-all hover:border-blue-700/50 hover:bg-[#0f1f36]"
+            @click="signInWithGoogle"
           >
             <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-900/40">
               <i class="pi pi-sign-in text-sm text-blue-400" />

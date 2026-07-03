@@ -85,9 +85,9 @@ const downloadImage = async () => {
         <div class="flex items-center justify-between border-t border-blue-900/20 px-4 py-3">
           <span class="text-xs text-slate-600">დღის განრიგი</span>
           <button
-            @click="downloadImage"
             :disabled="downloading"
             class="flex cursor-pointer items-center gap-2 rounded-xl border border-blue-900/30 bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-400 transition-all hover:bg-blue-500/20 disabled:opacity-50"
+            @click="downloadImage"
           >
             <i class="pi" :class="downloading ? 'pi-spin pi-spinner' : 'pi-download'" />
             ჩამოტვირთვა

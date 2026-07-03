@@ -85,8 +85,8 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
       <!-- Drop / no image zone -->
       <button
         v-else
-        @click="triggerUpload"
         class="flex w-full cursor-pointer flex-col items-center justify-center gap-3 py-16 text-center transition-colors hover:bg-blue-500/5"
+        @click="triggerUpload"
       >
         <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-900/30 bg-blue-900/20">
           <i class="pi pi-image text-2xl text-blue-400" />
@@ -100,9 +100,9 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
       <!-- Footer actions -->
       <div class="flex items-center justify-between border-t border-blue-900/20 px-4 py-3">
         <button
-          @click="triggerUpload"
           :disabled="isBusy"
           class="flex cursor-pointer items-center gap-2 rounded-xl border border-blue-900/30 bg-blue-900/20 px-4 py-2 text-xs font-semibold text-slate-400 transition-all hover:text-slate-200 disabled:opacity-50"
+          @click="triggerUpload"
         >
           <i class="pi pi-upload" />
           {{ imageUrl || imagePreview ? "შეცვლა" : "ატვირთვა" }}
@@ -110,9 +110,9 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
 
         <button
           v-if="selectedImage"
-          @click="saveNewImage"
           :disabled="isBusy"
           class="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
+          @click="saveNewImage"
         >
           <i class="pi" :class="isBusy ? 'pi-spin pi-spinner' : 'pi-check'" />
           შენახვა

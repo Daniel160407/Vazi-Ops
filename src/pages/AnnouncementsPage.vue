@@ -109,8 +109,8 @@ const formatDate = (value?: any) => {
             </p>
             <button
               v-if="a.content && a.content.length > 150"
-              @click="toggle(a.id)"
               class="mt-2 flex cursor-pointer items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300"
+              @click="toggle(a.id)"
             >
               {{ isExpanded(a.id) ? "ნაკლები" : "სრულად" }}
               <i class="pi text-[9px]" :class="isExpanded(a.id) ? 'pi-chevron-up' : 'pi-chevron-down'" />

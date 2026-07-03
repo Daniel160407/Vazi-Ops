@@ -22,15 +22,16 @@ import {
   GOLDEN_VERSES_DB,
   ANNOUNCEMENTS_DB,
 } from "../composables/constants";
+import type {
+  FirestoreError,
+  Query,
+  QueryDocumentSnapshot,
+  QuerySnapshot} from "firebase/firestore";
 import {
   collection,
-  FirestoreError,
   onSnapshot,
   orderBy,
-  Query,
   query,
-  QueryDocumentSnapshot,
-  QuerySnapshot,
   type DocumentData,
 } from "firebase/firestore";
 import { db } from "../../firebase";

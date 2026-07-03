@@ -69,13 +69,13 @@ const adminItems = [
       <button
         v-for="item in mainItems"
         :key="item.path"
-        @click="navigate(item.path)"
         class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
         :class="
           isActive(item.path)
             ? 'bg-blue-500/10 text-blue-400'
             : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
         "
+        @click="navigate(item.path)"
       >
         <!-- active left bar -->
         <span
@@ -99,13 +99,13 @@ const adminItems = [
         <button
           v-for="item in adminItems"
           :key="item.path"
-          @click="handleAdminNav(item.path)"
           class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
           :class="
             isActive(item.path)
               ? 'bg-blue-500/10 text-blue-400'
               : 'text-slate-600 hover:bg-white/5 hover:text-slate-400'
           "
+          @click="handleAdminNav(item.path)"
         >
           <span
             v-if="isActive(item.path)"
@@ -118,8 +118,8 @@ const adminItems = [
 
       <template v-else>
         <button
-          @click="signInWithGoogle"
           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-600 transition-all hover:bg-white/5 hover:text-slate-400"
+          @click="signInWithGoogle"
         >
           <i class="pi pi-sign-in w-4 text-center text-sm" />
           <span class="text-sm font-medium">შესვლა</span>
@@ -143,9 +143,9 @@ const adminItems = [
           <p class="text-[10px] text-slate-600">ადმინი</p>
         </div>
         <button
-          @click="logout"
           class="text-slate-600 transition-colors hover:text-slate-400"
           title="გასვლა"
+          @click="logout"
         >
           <i class="pi pi-sign-out text-sm" />
         </button>
