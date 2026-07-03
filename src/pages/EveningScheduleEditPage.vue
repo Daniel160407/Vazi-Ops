@@ -56,6 +56,29 @@ const onDragEnd = () => {
   dragIndex.value = null;
 };
 
+const onTouchStart = (index: number) => {
+  dragIndex.value = index;
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  if (dragIndex.value === null) return;
+  const touch = e.touches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  const card = target?.closest<HTMLElement>("[data-drag-index]");
+  if (!card) return;
+  const targetIndex = parseInt(card.dataset.dragIndex ?? "-1");
+  if (targetIndex < 0 || targetIndex === dragIndex.value) return;
+  const items = [...localItems.value];
+  const [dragged] = items.splice(dragIndex.value, 1);
+  items.splice(targetIndex, 0, dragged);
+  localItems.value = items;
+  dragIndex.value = targetIndex;
+};
+
+const onTouchEnd = () => {
+  dragIndex.value = null;
+};
+
 const sheetVisible = ref(false);
 const isEditing = ref(false);
 const editingId = ref<string | null>(null);
@@ -182,6 +205,7 @@ const handleDelete = (id: string) => {
           v-for="(item, index) in localItems"
           :key="item.id || index"
           draggable="true"
+          :data-drag-index="index"
           class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] transition-all duration-150"
           :class="dragIndex === index ? 'scale-[0.98] opacity-50' : ''"
           @dragstart="onDragStart(index)"
@@ -191,6 +215,10 @@ const handleDelete = (id: string) => {
           <div class="flex items-center gap-3 p-4">
             <div
               class="flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-xl bg-blue-900/20 text-slate-600 active:cursor-grabbing"
+              style="touch-action: none"
+              @touchstart="onTouchStart(index)"
+              @touchmove.prevent="onTouchMove"
+              @touchend="onTouchEnd"
             >
               <i class="pi pi-bars text-xs" />
             </div>
