@@ -42,21 +42,18 @@ onAuthStateChanged(auth, async (firebaseUser) => {
 async function resolveUserRole(u: User): Promise<UserRole> {
   const usersRef = collection(db, USERS_DB);
 
-  // Check by UID first (new documents use UID as ID)
   const uidDocRef = doc(db, USERS_DB, u.uid);
   const uidDoc = await getDoc(uidDocRef);
   if (uidDoc.exists()) {
     return uidDoc.data().role as UserRole;
   }
 
-  // Fallback: check by email for documents created before UID-based IDs
   const q = query(usersRef, where("email", "==", u.email));
   const snapshot = await getDocs(q);
   if (!snapshot.empty) {
     return snapshot.docs[0]!.data().role as UserRole;
   }
 
-  // New user — use UID as document ID so concurrent calls can't create duplicates
   await setDoc(uidDocRef, {
     email: u.email,
     name: u.displayName || u.email,
