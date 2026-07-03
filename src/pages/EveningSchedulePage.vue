@@ -7,75 +7,88 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto pb-20">
-    <LoadingSpinner v-if="loading" />
+  <div class="pb-4">
+    <LoadingSpinner v-if="loading && eveningScheduleItems.length === 0" />
 
     <div v-else>
-      <div class="flex flex-col items-center mb-8">
-        <h2
-          class="text-2xl md:text-3xl font-bold text-primary mb-2 text-center"
-        >
-          საღამოს პროგრამა
-        </h2>
-        <p class="text-surface-500 text-sm">იხილეთ მიმდინარე განრიგი</p>
+      <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          საღამოს
+        </p>
+        <h1 class="text-2xl font-bold text-white">პროგრამა</h1>
       </div>
 
-      <div class="flex flex-col gap-4">
+      <div class="mb-5 grid grid-cols-2 gap-3">
+        <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            სულ ნომერი
+          </p>
+          <p class="text-3xl font-bold text-white">{{ eveningScheduleItems.length }}</p>
+        </div>
+        <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            მედია
+          </p>
+          <p class="text-3xl font-bold text-blue-400">
+            {{ eveningScheduleItems.filter((i) => i.media_url).length }}
+          </p>
+        </div>
+      </div>
+
+      <div v-if="eveningScheduleItems.length === 0" class="py-16 text-center">
+        <i class="pi pi-calendar-times mb-4 block text-4xl text-slate-700" />
+        <p class="text-sm text-slate-600">პროგრამა ჯერ არ არის დამატებული</p>
+      </div>
+
+      <div v-else class="flex flex-col gap-3">
         <div
           v-for="(item, index) in eveningScheduleItems"
           :key="item.id || index"
-          class="flex items-center gap-4 p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] p-4"
         >
-          <div
-            class="flex-none w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20"
-          >
-            <span class="font-bold text-primary">{{ index + 1 }}</span>
-          </div>
-
-          <div class="flex-1 min-w-0">
-            <div class="flex flex-wrap items-baseline gap-x-2">
-              <h3
-                class="font-bold text-lg text-surface-900 dark:text-surface-0 truncate"
-              >
-                {{ item.scene_name }}
-              </h3>
-              <span
-                v-if="item.performer_full_name"
-                class="text-surface-500 text-sm italic"
-              >
-                — {{ item.performer_full_name }}
-              </span>
-            </div>
-
+          <div class="flex items-start gap-3">
             <div
-              v-if="item.group_name"
-              class="flex items-center gap-2 mt-1 text-sm text-surface-600"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15"
             >
-              <i class="pi pi-users text-xs"></i>
-              <span>{{ item.group_name }}</span>
-              <span v-if="item.leader_full_name" class="opacity-70">
-                ({{ item.leader_full_name }})
-              </span>
+              <span class="text-sm font-bold text-blue-400">{{ index + 1 }}</span>
             </div>
-          </div>
 
-          <div v-if="item.media_url" class="flex-none">
+            <div class="min-w-0 flex-1">
+              <h3 class="mb-2 font-bold leading-tight text-white">{{ item.scene_name }}</h3>
+
+              <div class="flex flex-col gap-1.5">
+                <div v-if="item.performer_full_name" class="flex items-center gap-2">
+                  <div
+                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-900/30"
+                  >
+                    <i class="pi pi-user text-[9px] text-blue-400" />
+                  </div>
+                  <span class="text-sm text-slate-400">{{ item.performer_full_name }}</span>
+                </div>
+
+                <div v-if="item.group_name" class="flex items-center gap-2">
+                  <div
+                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-900/30"
+                  >
+                    <i class="pi pi-users text-[9px] text-blue-400" />
+                  </div>
+                  <span class="text-sm text-slate-500">
+                    {{ item.group_name
+                    }}<span v-if="item.leader_full_name"> · {{ item.leader_full_name }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <a
+              v-if="item.media_url"
               :href="item.media_url"
               target="_blank"
-              class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-400 transition-colors hover:bg-blue-500/20"
             >
-              <i class="pi pi-play-circle text-2xl text-blue-500"></i>
+              <i class="pi pi-play text-xs" />
             </a>
           </div>
-        </div>
-
-        <div
-          v-if="eveningScheduleItems.length === 0 && !loading"
-          class="text-center py-12 text-surface-400"
-        >
-          <i class="pi pi-calendar-times text-4xl mb-4"></i>
-          <p>პროგრამა ჯერ არ არის დამატებული</p>
         </div>
       </div>
     </div>

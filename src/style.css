@@ -12,3 +12,39 @@
 :root {
   --font-sans: "Google Sans", ui-sans-serif, system-ui, sans-serif;
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.backdrop-enter-active { transition: opacity 0.25s ease; }
+.backdrop-leave-active { transition: opacity 0.2s ease; }
+.backdrop-enter-from,
+.backdrop-leave-to { opacity: 0; }
+
+.sheet-enter-active { transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
+.sheet-leave-active { transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
+.sheet-enter-from,
+.sheet-leave-to { transform: translateY(100%); }
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: opacity 0.2s ease, max-height 0.25s ease;
+  max-height: 600px;
+  overflow: hidden;
+}
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.table-scroll::-webkit-scrollbar { height: 4px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 9999px; }
+.table-scroll::-webkit-scrollbar-thumb:hover { background: #2563eb55; }
