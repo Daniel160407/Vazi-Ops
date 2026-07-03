@@ -178,7 +178,7 @@ const handleRegister = async () => {
         </div>
       </div>
 
-      <div class="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 overflow-x-auto pb-1">
         <button
           v-for="f in filters"
           :key="f.key"
