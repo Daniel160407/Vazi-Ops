@@ -269,7 +269,6 @@ const formatDate = (dateValue?: any) => {
         </div>
       </div>
     </div>
-  </div>
 
   <BottomSheet :visible="sheetVisible" title="ნომრის რედაქტირება" @close="sheetVisible = false">
     <div v-if="form" class="flex flex-col gap-4">
@@ -362,4 +361,5 @@ const formatDate = (dateValue?: any) => {
       </AppButton>
     </div>
   </BottomSheet>
+  </div>
 </template>
