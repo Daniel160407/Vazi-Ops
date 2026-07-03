@@ -14,8 +14,8 @@ import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
-const { loading: loadingStore, clubs } = storeToRefs(useGlobalStore());
-const { addClub, updateClub, deleteClub, loading } = useClubsCrud();
+const { loading: loadingStore, clubs, clubRegistration } = storeToRefs(useGlobalStore());
+const { addClub, updateClub, deleteClub, toggleRegistration, loading } = useClubsCrud();
 const confirm = useConfirm();
 
 const sheetVisible = ref(false);
@@ -112,6 +112,19 @@ const accentBorder = (n: number) => {
           <p class="text-3xl font-bold text-blue-400">{{ totalPlaces }}</p>
         </div>
       </div>
+
+      <AppButton
+        variant="plain"
+        :disabled="loading"
+        class="mb-5 flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-semibold transition-all duration-150"
+        :class="clubRegistration?.open
+          ? 'border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+          : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'"
+        @click="toggleRegistration(clubRegistration)"
+      >
+        <i class="pi text-sm" :class="clubRegistration?.open ? 'pi-lock' : 'pi-lock-open'" />
+        {{ clubRegistration?.open ? "რეგისტრაციის დახურვა" : "რეგისტრაციის გახსნა" }}
+      </AppButton>
 
       <h2 class="mb-3 text-base font-bold text-slate-200">წრეები</h2>
 

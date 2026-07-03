@@ -17,7 +17,7 @@ import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
 const toast = useToast();
-const { loading: loadingStore, clubs } = storeToRefs(globalStore);
+const { loading: loadingStore, clubs, clubRegistration } = storeToRefs(globalStore);
 const { fullName, userGroupName } = useAuth();
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
 const { fetchUserBookings } = useClubBookingsCrud();
@@ -53,7 +53,7 @@ const splitName = (full: string) => {
 };
 
 const openSheet = (club: Club) => {
-  if (club.places_quantity <= 0) return;
+  if (club.places_quantity <= 0 || !clubRegistration.value?.open) return;
   selectedClub.value = club;
   leaderName.value = fullName.value;
   groupName.value = userGroupName.value;
@@ -195,13 +195,13 @@ const accentBorder = (n: number) => {
 
             <AppButton
               variant="plain"
-              :disabled="club.places_quantity <= 0 || loading"
+              :disabled="club.places_quantity <= 0 || !clubRegistration?.open || loading"
               class="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-150"
-              :class="club.places_quantity <= 0 ? 'cursor-not-allowed bg-slate-800/60 text-slate-600' : 'bg-blue-600 text-white hover:bg-blue-500 active:scale-95'"
+              :class="(club.places_quantity <= 0 || !clubRegistration?.open) ? 'cursor-not-allowed bg-slate-800/60 text-slate-600' : 'bg-blue-600 text-white hover:bg-blue-500 active:scale-95'"
               @click="openSheet(club)"
             >
-              <i class="pi pi-check text-sm" />
-              {{ club.places_quantity <= 0 ? "ადგილი არ არის" : "ჩაეწერე" }}
+              <i class="pi text-sm" :class="!clubRegistration?.open ? 'pi-lock' : 'pi-check'" />
+              {{ club.places_quantity <= 0 ? "ადგილი არ არის" : !clubRegistration?.open ? "რეგისტრაცია დახურულია" : "ჩაეწერე" }}
             </AppButton>
           </div>
         </div>
