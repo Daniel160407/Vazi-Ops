@@ -1,3 +1,18 @@
+export const UserRole = {
+  ADMIN: "ADMIN",
+  USER: "USER",
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  avatar_url?: string;
+}
+
 export interface Group {
   id: string;
   name: string;

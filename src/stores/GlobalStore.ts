@@ -10,6 +10,7 @@ import type {
   EveningScheduleItem,
   GoldenVerse,
   Announcement,
+  AppUser,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -21,6 +22,7 @@ import {
   EVENING_SCHEDULE_DB,
   GOLDEN_VERSES_DB,
   ANNOUNCEMENTS_DB,
+  USERS_DB,
 } from "../composables/constants";
 import type {
   FirestoreError,
@@ -40,6 +42,7 @@ import { useToast } from "primevue";
 export const useGlobalStore = defineStore("globalStore", () => {
   const toast = useToast();
 
+  const appUsers = ref<AppUser[]>([]);
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
@@ -126,6 +129,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchAppUsers = () =>
+    subscribe("users", USERS_DB, (data) => (appUsers.value = data as AppUser[]));
+
   const fetchGroups = () =>
     subscribe("groups", GROUPS_DB, (data) => (groups.value = data as Group[]));
   const fetchSchedules = () =>
@@ -174,6 +180,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   const setData = () => {
+    fetchAppUsers();
     fetchGroups();
     fetchClubs();
     fetchClubBookings();
@@ -186,6 +193,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   return {
+    appUsers,
     groups,
     clubs,
     clubBookings,

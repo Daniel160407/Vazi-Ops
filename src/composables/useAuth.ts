@@ -6,10 +6,22 @@ import {
   onAuthStateChanged,
   type User,
 } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { ADMINS_DB } from "./constants";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
+import { storeToRefs } from "pinia";
+import { useGlobalStore } from "../stores/GlobalStore";
+import { USERS_DB } from "./constants";
+import { UserRole } from "../type/interfaces";
 
 const user = ref<User | null>(null);
+const role = ref<UserRole | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
@@ -17,35 +29,51 @@ onAuthStateChanged(auth, async (firebaseUser) => {
   loading.value = true;
 
   if (firebaseUser) {
-    const isAdmin = await checkIfUserIsAdmin(firebaseUser);
-    if (isAdmin) {
-      user.value = firebaseUser;
-    } else {
-      await signOut(auth);
-      user.value = null;
-      error.value = "წვდომა უარყოფილია: თქვენ არ ხართ ადმინისტრატორი";
-    }
+    role.value = await resolveUserRole(firebaseUser);
+    user.value = firebaseUser;
   } else {
     user.value = null;
+    role.value = null;
   }
 
   loading.value = false;
 });
 
-async function checkIfUserIsAdmin(u: User | null) {
-  if (!u?.email) return false;
-  try {
-    const usersRef = collection(db, ADMINS_DB);
-    const q = query(usersRef, where("email", "==", u.email));
-    const snapshot = await getDocs(q);
-    return !snapshot.empty;
-  } catch (err) {
-    console.error("Admin check failed", err);
-    return false;
+async function resolveUserRole(u: User): Promise<UserRole> {
+  const usersRef = collection(db, USERS_DB);
+
+  // Check by UID first (new documents use UID as ID)
+  const uidDocRef = doc(db, USERS_DB, u.uid);
+  const uidDoc = await getDoc(uidDocRef);
+  if (uidDoc.exists()) {
+    return uidDoc.data().role as UserRole;
   }
+
+  // Fallback: check by email for documents created before UID-based IDs
+  const q = query(usersRef, where("email", "==", u.email));
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    return snapshot.docs[0]!.data().role as UserRole;
+  }
+
+  // New user — use UID as document ID so concurrent calls can't create duplicates
+  await setDoc(uidDocRef, {
+    email: u.email,
+    name: u.displayName || u.email,
+    role: UserRole.USER,
+    avatar_url: u.photoURL || "",
+  });
+  return UserRole.USER;
 }
 
 export function useAuth() {
+  const { appUsers } = storeToRefs(useGlobalStore());
+
+  const avatarUrl = computed(() => {
+    if (!user.value?.email) return null;
+    return appUsers.value.find((u) => u.email === user.value!.email)?.avatar_url ?? null;
+  });
+
   const signInWithGoogle = async () => {
     try {
       error.value = null;
@@ -59,6 +87,7 @@ export function useAuth() {
     try {
       await signOut(auth);
       user.value = null;
+      role.value = null;
     } catch (err: any) {
       error.value = err.message;
     }
@@ -66,6 +95,10 @@ export function useAuth() {
 
   return {
     user,
+    role,
+    avatarUrl,
+    isAdmin: computed(() => role.value === UserRole.ADMIN),
+    isLoggedIn: computed(() => !!user.value),
     fullName: computed(() => user.value?.displayName || "ანონიმი"),
     profileImg: computed(() => user.value?.photoURL),
     loading,

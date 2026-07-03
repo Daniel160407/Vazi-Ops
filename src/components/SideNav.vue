@@ -18,18 +18,19 @@ import {
   ADMIN_EVENTS_ROUTE,
   ADMIN_GOLDEN_VERSES_ROUTE,
   ADMIN_ANNOUNCEMENTS_ROUTE,
+  ADMIN_USERS_ROUTE,
 } from "../composables/constants";
 
 const router = useRouter();
 const route = useRoute();
-const { user, signInWithGoogle, logout } = useAuth();
+const { user, isAdmin, signInWithGoogle, logout } = useAuth();
 
 const isActive = (path: string) => route.path === path;
 const navigate = (path: string) => router.push(path);
 
 const handleAdminNav = async (path: string) => {
   if (!user.value) await signInWithGoogle();
-  if (user.value) router.push(path);
+  if (user.value && isAdmin.value) router.push(path);
 };
 
 const mainItems = [
@@ -51,6 +52,7 @@ const adminItems = [
   { label: "საღამოს პრ.", icon: "pi pi-moon", path: ADMIN_EVENING_SCHEDULE_ROUTE },
   { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
   { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
+  { label: "მომხმარებლები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
 ];
 </script>
 
@@ -93,7 +95,7 @@ const adminItems = [
         <div class="h-px flex-1 bg-blue-900/20" />
       </div>
 
-      <template v-if="user">
+      <template v-if="user && isAdmin">
         <AppButton
           v-for="item in adminItems"
           :key="item.path"
@@ -139,7 +141,7 @@ const adminItems = [
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate text-xs font-medium text-slate-300">{{ user.displayName }}</p>
-          <p class="text-[10px] text-slate-600">ადმინი</p>
+          <p class="text-[10px] text-slate-600">{{ isAdmin ? 'ადმინი' : 'მომხმარებელი' }}</p>
         </div>
         <AppButton
           variant="plain"

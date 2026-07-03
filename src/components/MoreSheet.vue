@@ -14,22 +14,22 @@ import {
   ADMIN_EVENTS_ROUTE,
   ADMIN_GOLDEN_VERSES_ROUTE,
   ADMIN_ANNOUNCEMENTS_ROUTE,
+  ADMIN_USERS_ROUTE,
 } from "../composables/constants";
 
 const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const router = useRouter();
-const { user, signInWithGoogle } = useAuth();
+const { user, isAdmin } = useAuth();
 
 const navigate = (path: string) => {
   router.push(path);
   emit("close");
 };
 
-const handleAdminNav = async (path: string) => {
-  if (!user.value) await signInWithGoogle();
-  if (user.value) {
+const handleAdminNav = (path: string) => {
+  if (user.value && isAdmin.value) {
     router.push(path);
     emit("close");
   }
@@ -50,6 +50,7 @@ const adminItems = [
   { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
   { label: "ოქროს მუხ.", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ADMIN_ANNOUNCEMENTS_ROUTE },
+  { label: "მომხმარებლები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
 ];
 </script>
 
@@ -97,7 +98,7 @@ const adminItems = [
           </AppButton>
         </div>
 
-        <template v-if="user">
+        <template v-if="user && isAdmin">
           <div class="mb-3 flex items-center gap-2">
             <i class="pi pi-lock text-[11px] text-blue-500/70" />
             <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -121,26 +122,6 @@ const adminItems = [
               </span>
             </AppButton>
           </div>
-        </template>
-
-        <template v-else>
-          <div class="mb-3 flex items-center gap-2">
-            <i class="pi pi-lock text-[11px] text-blue-500/70" />
-            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-              ადმინი
-            </span>
-            <div class="h-px flex-1 bg-blue-900/30" />
-          </div>
-          <AppButton
-            variant="plain"
-            class="flex w-full items-center justify-center gap-3 rounded-2xl border border-blue-900/30 bg-[#0d1829] p-4 text-slate-300 transition-all hover:border-blue-700/50 hover:bg-[#0f1f36]"
-            @click="signInWithGoogle"
-          >
-            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-900/40">
-              <i class="pi pi-sign-in text-sm text-blue-400" />
-            </div>
-            <span class="text-sm font-medium">ადმინ პანელი (შესვლა)</span>
-          </AppButton>
         </template>
 
         <div class="h-8" />
