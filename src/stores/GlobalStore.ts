@@ -4,6 +4,7 @@ import type {
   Group,
   Club,
   ClubBooking,
+  ClubRegistration,
   Schedule,
   Event,
   Deadline,
@@ -31,6 +32,7 @@ import type {
   QuerySnapshot} from "firebase/firestore";
 import {
   collection,
+  doc,
   onSnapshot,
   orderBy,
   query,
@@ -46,6 +48,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
+  const clubRegistration = ref<ClubRegistration | null>(null);
   const schedules = ref<Schedule[]>([]);
   const eveningScheduleItems = ref<EveningScheduleItem[]>([]);
   const events = ref<Event[]>([]);
@@ -120,12 +123,14 @@ export const useGlobalStore = defineStore("globalStore", () => {
 
   const fetchClubBookings = () => {
     subscribe("bookings", CLUB_BOOKINGS_DB, (data) => {
-      clubBookings.value = data.map((d) => ({
-        ...d,
-        created_at: d.created_at?.toDate
-          ? d.created_at.toDate()
-          : new Date(d.created_at),
-      })) as ClubBooking[];
+      clubBookings.value = data
+        .filter((d) => d.id !== "registration")
+        .map((d) => ({
+          ...d,
+          created_at: d.created_at?.toDate
+            ? d.created_at.toDate()
+            : new Date(d.created_at),
+        })) as ClubBooking[];
     });
   };
 
@@ -169,6 +174,17 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchClubRegistration = () => {
+    if (subscriptions["clubRegistration"]) return;
+    subscriptions["clubRegistration"] = onSnapshot(doc(db, CLUB_BOOKINGS_DB, "registration"), (snap) => {
+      if (snap.exists()) {
+        clubRegistration.value = { id: snap.id, open: snap.data().open ?? false } as ClubRegistration;
+      } else {
+        clubRegistration.value = null;
+      }
+    });
+  };
+
   const fetchGoldenVerses = () => {
     const q = query(collection(db, GOLDEN_VERSES_DB), orderBy("day", "asc"));
     subscribe(
@@ -184,6 +200,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     fetchGroups();
     fetchClubs();
     fetchClubBookings();
+    fetchClubRegistration();
     fetchSchedules();
     fetchEveningSchedule();
     fetchEvents();
@@ -197,6 +214,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     groups,
     clubs,
     clubBookings,
+    clubRegistration,
     schedules,
     eveningScheduleItems,
     events,

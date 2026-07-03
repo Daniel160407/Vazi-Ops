@@ -6,10 +6,11 @@ import {
   deleteDoc,
   doc,
   runTransaction,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { CLUBS_DB, CLUB_BOOKINGS_DB } from "../composables/constants";
-import type { Club, ClubBooking } from "../type/interfaces";
+import type { Club, ClubBooking, ClubRegistration } from "../type/interfaces";
 import { useToast } from "primevue";
 
 export function useClubsCrud() {
@@ -202,6 +203,17 @@ export function useClubsCrud() {
     }
   };
 
+  const toggleRegistration = async (current: ClubRegistration | null) => {
+    await handleAsyncOperation(
+      async () => {
+        await setDoc(doc(db, CLUB_BOOKINGS_DB, "registration"), { open: !(current?.open ?? false) });
+        showToast("success", current?.open ? "რეგისტრაცია დაიხურა" : "რეგისტრაცია გაიხსნა");
+      },
+      "მოხდა შეცდომა",
+      "სტატუსი ვერ შეიცვალა"
+    );
+  };
+
   return {
     loading,
     addClub,
@@ -209,5 +221,6 @@ export function useClubsCrud() {
     deleteClub,
     registerInClub,
     changeClubBooking,
+    toggleRegistration,
   };
 }

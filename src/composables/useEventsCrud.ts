@@ -60,6 +60,20 @@ export const useEventsCrud = () => {
     }
   };
 
+  const updateEvent = async (event: AppEvent) => {
+    saving.value = true;
+    try {
+      const { id, created_at, ...data } = event;
+      await updateDoc(doc(db, EVENTS_DB, id), data);
+      toast.add({ severity: "success", summary: "ნომერი განახლებულია", life: 3000 });
+    } catch (err) {
+      console.error("Update Event Error:", err);
+      toast.add({ severity: "error", summary: "მოხდა შეცდომა", detail: "ნომერი ვერ განახლდა", life: 3000 });
+    } finally {
+      saving.value = false;
+    }
+  };
+
   const deleteEvent = async (eventId: string) => {
     saving.value = true;
     try {
@@ -113,6 +127,7 @@ export const useEventsCrud = () => {
     loading,
 
     createEvent,
+    updateEvent,
     updateEventStatus,
     deleteEvent,
     updateDeadline,

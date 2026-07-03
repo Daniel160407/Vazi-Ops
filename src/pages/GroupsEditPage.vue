@@ -75,6 +75,11 @@ const handleDelete = () => {
   });
 };
 
+const expandedId = ref<string | null>(null);
+const toggle = (id: string) => {
+  expandedId.value = expandedId.value === id ? null : id;
+};
+
 const search = ref("");
 
 const filtered = computed(() => {
@@ -119,50 +124,92 @@ const totalMembers = computed(() =>
       </p>
 
       <div class="flex flex-col gap-3">
-        <AppButton
+        <div
           v-for="group in filtered"
           :key="group.id"
-          variant="plain"
-          class="w-full rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/40 hover:bg-[#0f1f36]"
-          @click="openEdit(group)"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] transition-all duration-200"
         >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <span
-                  class="h-2.5 w-2.5 shrink-0 rounded-full"
-                  :class="group.gender === GENDER_MALE ? 'bg-blue-400' : 'bg-rose-400'"
-                />
-                <span class="truncate text-lg font-bold text-white">{{ group.name }}</span>
+          <AppButton
+            variant="plain"
+            class="w-full p-4 text-left transition-all duration-150 hover:border-blue-700/40 hover:bg-[#0f1f36]"
+            @click="openEdit(group)"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="h-2.5 w-2.5 shrink-0 rounded-full"
+                    :class="group.gender === GENDER_MALE ? 'bg-blue-400' : 'bg-rose-400'"
+                  />
+                  <span class="truncate text-lg font-bold text-white">{{ group.name }}</span>
+                </div>
+                <p class="mt-0.5 pl-4.5 text-sm text-slate-400">
+                  ლიდერი: {{ group.leader || "—" }}
+                </p>
               </div>
-              <p class="mt-0.5 pl-4.5 text-sm text-slate-400">
-                ლიდერი: {{ group.leader || "—" }}
-              </p>
+              <div class="shrink-0 text-right">
+                <span
+                  class="inline-block rounded-md px-2 py-0.5 text-xs font-semibold"
+                  :class="group.gender === GENDER_MALE ? 'bg-blue-500/15 text-blue-400' : 'bg-rose-500/15 text-rose-400'"
+                >
+                  {{ group.gender === GENDER_MALE ? "ბიჭები" : "გოგოები" }}
+                </span>
+                <p class="mt-1 text-xs text-slate-500">კოტეჯი {{ group.cottage_num }}</p>
+              </div>
             </div>
-            <div class="shrink-0 text-right">
-              <span
-                class="inline-block rounded-md px-2 py-0.5 text-xs font-semibold"
-                :class="group.gender === GENDER_MALE ? 'bg-blue-500/15 text-blue-400' : 'bg-rose-500/15 text-rose-400'"
-              >
-                {{ group.gender === GENDER_MALE ? "ბიჭები" : "გოგოები" }}
-              </span>
-              <p class="mt-1 text-xs text-slate-500">კოტეჯი {{ group.cottage_num }}</p>
+            <div class="mt-3 flex gap-6 border-t border-blue-900/20 pt-3">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ასაკი</p>
+                <p class="text-sm font-semibold text-slate-300">{{ group.age || "—" }}</p>
+              </div>
+              <div class="ml-auto flex items-end">
+                <i class="pi pi-pencil text-xs text-slate-600" />
+              </div>
             </div>
-          </div>
-          <div class="mt-3 flex gap-6 border-t border-blue-900/20 pt-3">
-            <div>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ასაკი</p>
-              <p class="text-sm font-semibold text-slate-300">{{ group.age || "—" }}</p>
+          </AppButton>
+
+          <AppButton
+            variant="plain"
+            class="w-full border-t border-blue-900/20 px-4 py-2.5 text-left hover:bg-blue-500/5"
+            @click="toggle(group.id)"
+          >
+            <div class="flex items-center gap-6">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ბავშვები</p>
+                <p class="text-sm font-semibold text-slate-300">{{ group.children.length }} ბავშვი</p>
+              </div>
+              <div class="ml-auto">
+                <i
+                  class="pi text-xs text-slate-600 transition-transform duration-200"
+                  :class="expandedId === group.id ? 'pi-chevron-up' : 'pi-chevron-down'"
+                />
+              </div>
             </div>
-            <div>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ბავშვები</p>
-              <p class="text-sm font-semibold text-slate-300">{{ group.children.length }} ბავშვი</p>
+          </AppButton>
+
+          <Transition name="expand">
+            <div
+              v-if="expandedId === group.id && group.children.length > 0"
+              class="border-t border-blue-900/20 px-4 pb-4 pt-3"
+            >
+              <div class="flex flex-col gap-1.5">
+                <div
+                  v-for="(child, i) in group.children"
+                  :key="i"
+                  class="flex items-center gap-3 rounded-xl bg-[#0a1220] px-3 py-2"
+                >
+                  <span
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                    :class="group.gender === GENDER_MALE ? 'bg-blue-500/20 text-blue-400' : 'bg-rose-500/20 text-rose-400'"
+                  >
+                    {{ i + 1 }}
+                  </span>
+                  <span class="text-sm text-slate-300">{{ child }}</span>
+                </div>
+              </div>
             </div>
-            <div class="ml-auto flex items-end">
-              <i class="pi pi-pencil text-xs text-slate-600" />
-            </div>
-          </div>
-        </AppButton>
+          </Transition>
+        </div>
       </div>
     </div>
 

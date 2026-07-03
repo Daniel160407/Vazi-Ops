@@ -12,11 +12,13 @@ import { REQUEST_PENDING, REQUEST_ACCEPTED, REQUEST_REJECTED } from "../composab
 import type { EveningScheduleItem, Event } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
+import BottomSheet from "../components/UI/BottomSheet.vue";
+import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
-const { loading: loadingStore, deadline, events } = storeToRefs(globalStore);
-const { loading, updateEventStatus, deleteEvent, updateDeadline } = useEventsCrud();
+const { loading: loadingStore, deadline, events, appUsers, groups } = storeToRefs(globalStore);
+const { loading, updateEvent, updateEventStatus, deleteEvent, updateDeadline } = useEventsCrud();
 const { addEveningSchedule } = useSchedulesCrud();
 const confirm = useConfirm();
 const newDeadlineDate = ref<Date | null>(null);
@@ -55,6 +57,34 @@ const handleAddToSchedule = async (event: Event) => {
     created_at: new Date(),
   };
   await addEveningSchedule(item);
+};
+
+const sheetVisible = ref(false);
+const form = ref<Event | null>(null);
+const leaderOpen = ref(false);
+
+const leaderSuggestions = computed(() => {
+  const q = (form.value?.leader_full_name ?? "").toLowerCase().trim();
+  return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
+});
+
+const selectLeader = (name: string) => {
+  if (!form.value) return;
+  form.value.leader_full_name = name;
+  const group = groups.value.find((g) => g.leader === name);
+  if (group) form.value.group_name = group.name;
+  leaderOpen.value = false;
+};
+
+const openEdit = (event: Event) => {
+  form.value = { ...event };
+  sheetVisible.value = true;
+};
+
+const handleSave = async () => {
+  if (!form.value) return;
+  await updateEvent(form.value);
+  sheetVisible.value = false;
 };
 
 const activeFilter = ref<"all" | "pending" | "accepted" | "rejected">("all");
@@ -223,6 +253,12 @@ const formatDate = (dateValue?: any) => {
                 <i class="pi pi-calendar text-xs" /> დამატება
               </AppButton>
               <AppButton
+                variant="icon-edit"
+                size="md"
+                icon="pi-pencil"
+                @click="openEdit(event)"
+              />
+              <AppButton
                 variant="icon-delete"
                 size="md"
                 icon="pi-trash"
@@ -234,4 +270,96 @@ const formatDate = (dateValue?: any) => {
       </div>
     </div>
   </div>
+
+  <BottomSheet :visible="sheetVisible" title="ნომრის რედაქტირება" @close="sheetVisible = false">
+    <div v-if="form" class="flex flex-col gap-4">
+      <SheetField label="ნომრის სახელი">
+        <input
+          v-model="form.scene_name"
+          type="text"
+          class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+        />
+      </SheetField>
+
+      <SheetField label="შემსრულებელი">
+        <input
+          v-model="form.performer_full_name"
+          type="text"
+          class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+        />
+      </SheetField>
+
+      <div class="grid grid-cols-2 gap-3">
+        <SheetField label="ლიდერი">
+          <div class="relative">
+            <input
+              v-model="form.leader_full_name"
+              type="text"
+              autocomplete="off"
+              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+              @focus="leaderOpen = true"
+              @blur="leaderOpen = false"
+            />
+            <Transition
+              enter-active-class="transition-all duration-150 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-100 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1"
+            >
+              <ul
+                v-if="leaderOpen && leaderSuggestions.length"
+                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                @mousedown.prevent
+              >
+                <li
+                  v-for="u in leaderSuggestions"
+                  :key="u.id"
+                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                  @click="selectLeader(u.name)"
+                >
+                  <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
+                    <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />
+                    <span v-else>{{ u.name.charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <span class="text-sm text-slate-200">{{ u.name }}</span>
+                </li>
+              </ul>
+            </Transition>
+          </div>
+        </SheetField>
+        <SheetField label="ჯგუფი">
+          <input
+            v-model="form.group_name"
+            type="text"
+            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+          />
+        </SheetField>
+      </div>
+
+      <SheetField label="მედია ლინკი">
+        <input
+          v-model="form.media_url"
+          type="text"
+          class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+        />
+      </SheetField>
+
+      <SheetField label="დამატებითი ინფორმაცია">
+        <textarea
+          v-model="form.additional_info"
+          rows="3"
+          class="w-full resize-none rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
+        />
+      </SheetField>
+    </div>
+
+    <div class="mt-5 flex gap-3">
+      <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleSave">
+        შენახვა
+      </AppButton>
+    </div>
+  </BottomSheet>
 </template>

@@ -33,6 +33,11 @@ export interface Club {
   additional_info: string;
 }
 
+export interface ClubRegistration {
+  id: string;
+  open: boolean;
+}
+
 export interface ClubBooking {
   id: string;
   club_id: string;
