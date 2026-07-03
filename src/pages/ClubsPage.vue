@@ -6,6 +6,7 @@ import { useToast } from "primevue";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useClubsCrud } from "../composables/useClubsCrud";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
+import { useAuth } from "../composables/useAuth";
 import type { Club, ClubBooking } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
@@ -17,6 +18,7 @@ import AppButton from "../components/UI/AppButton.vue";
 const globalStore = useGlobalStore();
 const toast = useToast();
 const { loading: loadingStore, clubs } = storeToRefs(globalStore);
+const { fullName, userGroupName } = useAuth();
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
 const { fetchUserBookings } = useClubBookingsCrud();
 
@@ -53,6 +55,8 @@ const splitName = (full: string) => {
 const openSheet = (club: Club) => {
   if (club.places_quantity <= 0) return;
   selectedClub.value = club;
+  leaderName.value = fullName.value;
+  groupName.value = userGroupName.value;
   sheetVisible.value = true;
   selectionMode.value = "register";
   userBookings.value = [];

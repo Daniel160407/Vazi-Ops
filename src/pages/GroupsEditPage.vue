@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
 import { GENDER_MALE, GENDER_FEMALE } from "../composables/constants";
 import type { Group } from "../type/interfaces";
 import { useGroupsCrud } from "../composables/useGroupsCrud";
+import { useGlobalStore } from "../stores/GlobalStore";
 import { useConfirm } from "primevue";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
@@ -11,6 +13,19 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
+const { appUsers } = storeToRefs(useGlobalStore());
+
+const leaderOpen = ref(false);
+
+const leaderSuggestions = computed(() => {
+  const q = (form.value.leader ?? "").toLowerCase().trim();
+  return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
+});
+
+const selectLeader = (name: string) => {
+  form.value.leader = name;
+  leaderOpen.value = false;
+};
 const confirm = useConfirm();
 
 const sheetVisible = ref(false);
@@ -169,11 +184,44 @@ const totalMembers = computed(() =>
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ლიდერი">
-            <input
-              v-model="form.leader"
-              type="text"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-            />
+            <div class="relative">
+              <input
+                v-model="form.leader"
+                type="text"
+                autocomplete="off"
+                class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
+                @focus="leaderOpen = true"
+                @blur="leaderOpen = false"
+              />
+              <Transition
+                enter-active-class="transition-all duration-150 ease-out"
+                enter-from-class="opacity-0 -translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition-all duration-100 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-1"
+              >
+                <ul
+                  v-if="leaderOpen && leaderSuggestions.length"
+                  class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                  style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                  @mousedown.prevent
+                >
+                  <li
+                    v-for="u in leaderSuggestions"
+                    :key="u.id"
+                    class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                    @click="selectLeader(u.name)"
+                  >
+                    <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
+                      <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />
+                      <span v-else>{{ u.name.charAt(0).toUpperCase() }}</span>
+                    </div>
+                    <span class="text-sm text-slate-200">{{ u.name }}</span>
+                  </li>
+                </ul>
+              </Transition>
+            </div>
           </SheetField>
           <SheetField label="ასაკი">
             <input

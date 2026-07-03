@@ -16,6 +16,8 @@ There is no test suite and no lint script configured.
 
 - Write lifecycle hooks in the script section below all other code.
 - Define all constant string variables in constants.ts and use those constants instead of hardcoding strings.
+- Use my custom components instead of native html tags, if they are available. Make editions in those components if needed.
+- Always remove comments.
 
 ## Environment variables
 

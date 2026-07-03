@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { ka } from "date-fns/locale";
 import { format, intervalToDuration, type Duration } from "date-fns";
 import { useEventsCrud } from "../composables/useEventsCrud";
+import { useAuth } from "../composables/useAuth";
 import { useToast } from "primevue";
 import { REQUEST_PENDING, REQUEST_ACCEPTED, REQUEST_REJECTED } from "../composables/constants";
 import type { Event as AppEvent } from "../type/interfaces";
@@ -13,6 +14,7 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
+const { fullName, userGroupName } = useAuth();
 const toast = useToast();
 
 const isDeadlinePassed = ref(false);
@@ -87,7 +89,7 @@ const sheetVisible = ref(false);
 const submitted = ref(false);
 
 const getEmptyForm = (): Omit<AppEvent, "id"> => ({
-  scene_name: "", performer_full_name: "", leader_full_name: "", group_name: "",
+  scene_name: "", performer_full_name: "", leader_full_name: fullName.value, group_name: userGroupName.value,
   media_url: "", additional_info: "", request_status: REQUEST_PENDING, created_at: new Date(),
 });
 
