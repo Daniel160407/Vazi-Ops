@@ -15,11 +15,9 @@ const showMore = ref(false);
 
 <template>
   <div class="font-bpg flex min-h-svh w-full bg-[#03060f] text-white">
-
     <SideNav class="hidden lg:flex" />
 
-    <div class="flex flex-1 flex-col items-center lg:ml-56">
-
+    <div class="flex flex-1 w-full min-w-0 flex-col items-center lg:ml-56">
       <AppHeader />
 
       <div class="w-full max-w-2xl px-4 pb-24 lg:px-8 lg:pb-10">

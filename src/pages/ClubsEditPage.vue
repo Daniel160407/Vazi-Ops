@@ -12,6 +12,7 @@ import SearchInput from "../components/UI/SearchInput.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, clubs } = storeToRefs(useGlobalStore());
 const { addClub, updateClub, deleteClub, loading } = useClubsCrud();
@@ -103,7 +104,7 @@ const accentBorder = (n: number) => {
 
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ წრე</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">წრეების რაოდენობა</p>
           <p class="text-3xl font-bold text-white">{{ clubs.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
@@ -119,9 +120,10 @@ const accentBorder = (n: number) => {
       </p>
 
       <div class="flex flex-col gap-3">
-        <button
+        <AppButton
           v-for="club in filtered"
           :key="club.id"
+          variant="plain"
           class="w-full overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/30 hover:bg-[#0f1f36]"
           :class="accentBorder(club.places_quantity)"
           @click="openEdit(club)"
@@ -142,16 +144,11 @@ const accentBorder = (n: number) => {
           <div class="flex items-center justify-end border-t border-blue-900/20 pt-2.5">
             <i class="pi pi-pencil text-xs text-slate-600" />
           </div>
-        </button>
+        </AppButton>
       </div>
     </div>
 
-    <button
-      class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
-      @click="openAdd"
-    >
-      <i class="pi pi-plus text-lg" />
-    </button>
+    <AppButton variant="fab" icon="pi-plus" @click="openAdd" />
 
     <BottomSheet
       :visible="sheetVisible"
@@ -175,7 +172,7 @@ const accentBorder = (n: number) => {
               class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
             />
           </SheetField>
-          <SheetField label="ადგილი">
+          <SheetField label="ჩატარების ადგილი">
             <input
               v-model="form.place"
               type="text"
@@ -185,7 +182,7 @@ const accentBorder = (n: number) => {
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <SheetField label="ადგილების რ-ბა">
+          <SheetField label="ადგილების რაოდენობა">
             <input
               v-model.number="form.places_quantity"
               type="number"
@@ -205,7 +202,7 @@ const accentBorder = (n: number) => {
           </SheetField>
         </div>
 
-        <SheetField label="დამატებითი ინფო">
+        <SheetField label="დამატებითი ინფორმაცია">
           <textarea
             v-model="form.additional_info"
             rows="3"
@@ -215,22 +212,10 @@ const accentBorder = (n: number) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          v-if="!isAdding"
-          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/20"
-          @click="handleDelete"
-        >
-          <i class="pi pi-trash text-sm" />
-          წაშლა
-        </button>
-        <button
-          :disabled="loading"
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
-          @click="handleSave"
-        >
-          <i class="pi pi-check text-sm" />
+        <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete">წაშლა</AppButton>
+        <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isAdding ? "დამატება" : "შენახვა" }}
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>

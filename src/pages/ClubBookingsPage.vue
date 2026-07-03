@@ -10,6 +10,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubBookingsCrud();
 const { loading: loadingStore } = storeToRefs(useGlobalStore());
@@ -109,11 +110,11 @@ const formatDate = (value?: Date | string) => {
 
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">სულ რეგისტ.</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">რეგისტრაციების რაოდენობა</p>
           <p class="text-3xl font-bold text-white">{{ bookings.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">აქტიური წრე</p>
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">წრეების რაოდენობა</p>
           <p class="text-3xl font-bold text-blue-400">{{ uniqueClubs }}</p>
         </div>
       </div>
@@ -130,7 +131,7 @@ const formatDate = (value?: Date | string) => {
         >
           <div class="flex items-center justify-between border-b border-blue-900/20 bg-blue-500/5 px-4 py-3">
             <div class="flex items-center gap-2.5">
-              <span class="h-4 w-[3px] rounded-full bg-blue-500" />
+              <span class="h-4 w-0.75 rounded-full bg-blue-500" />
               <span class="font-bold text-white">{{ clubName }}</span>
             </div>
             <span class="rounded-lg border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400">
@@ -143,7 +144,7 @@ const formatDate = (value?: Date | string) => {
               <thead>
                 <tr class="border-b border-blue-900/20">
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">#</th>
-                  <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">სახელი გვარი</th>
+                  <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ბავშვი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ლიდერი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ჯგუფი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">თარიღი</th>
@@ -163,18 +164,8 @@ const formatDate = (value?: Date | string) => {
                   <td class="px-4 py-3 text-xs text-slate-600">{{ formatDate(row.created_at) }}</td>
                   <td class="px-4 py-3">
                     <div class="flex items-center justify-end gap-1.5">
-                      <button
-                        class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-blue-900/20 bg-blue-900/20 text-slate-500 transition-all hover:text-slate-300"
-                        @click="openEdit(row)"
-                      >
-                        <i class="pi pi-pencil text-[10px]" />
-                      </button>
-                      <button
-                        class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-red-900/20 bg-red-500/5 text-red-500/60 transition-all hover:bg-red-500/15 hover:text-red-400"
-                        @click="handleDelete(row)"
-                      >
-                        <i class="pi pi-trash text-[10px]" />
-                      </button>
+                      <AppButton variant="icon-edit" icon="pi-pencil" @click="openEdit(row)" />
+                      <AppButton variant="icon-delete" icon="pi-trash" @click="handleDelete(row)" />
                     </div>
                   </td>
                 </tr>
@@ -185,12 +176,7 @@ const formatDate = (value?: Date | string) => {
       </div>
     </div>
 
-    <button
-      class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
-      @click="openAdd"
-    >
-      <i class="pi pi-plus text-lg" />
-    </button>
+    <AppButton variant="fab" icon="pi-plus" @click="openAdd" />
 
     <BottomSheet
       :visible="sheetVisible"
@@ -245,22 +231,10 @@ const formatDate = (value?: Date | string) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          v-if="isEditing"
-          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-900/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/20"
-          @click="handleDelete(form as ClubBooking)"
-        >
-          <i class="pi pi-trash text-sm" />
-          წაშლა
-        </button>
-        <button
-          :disabled="loading"
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 disabled:opacity-50"
-          @click="handleSave"
-        >
-          <i class="pi pi-check text-sm" />
+        <AppButton v-if="isEditing" variant="danger" icon="pi-trash" @click="handleDelete(form as ClubBooking)">წაშლა</AppButton>
+        <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isEditing ? "შენახვა" : "დამატება" }}
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>

@@ -4,6 +4,7 @@ import { GENDER_MALE } from "../composables/constants";
 import { useGroupsCrud } from "../composables/useGroupsCrud";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, groups } = useGroupsCrud();
 
@@ -39,13 +40,13 @@ const toggle = (id: string) => {
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            აქტიური ჯგუფები
+            ჯგუფების რაოდენობა
           </p>
           <p class="text-3xl font-bold text-white">{{ groups.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            სულ წევრი
+            ბავშვების რაოდენობა
           </p>
           <p class="text-3xl font-bold text-blue-400">{{ totalMembers }}</p>
         </div>
@@ -63,7 +64,8 @@ const toggle = (id: string) => {
           :key="group.id"
           class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] transition-all duration-200"
         >
-          <button
+          <AppButton
+            variant="plain"
             class="w-full p-4 text-left"
             @click="toggle(group.id)"
           >
@@ -101,9 +103,9 @@ const toggle = (id: string) => {
                 <p class="text-sm font-semibold text-slate-300">{{ group.age || "—" }}</p>
               </div>
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">წევრები</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ბავშვები</p>
                 <p class="text-sm font-semibold text-slate-300">
-                  {{ group.children.length }} აქტიური
+                  {{ group.children.length }} ბავშვი
                 </p>
               </div>
               <div class="ml-auto flex items-end">
@@ -113,7 +115,7 @@ const toggle = (id: string) => {
                 />
               </div>
             </div>
-          </button>
+          </AppButton>
 
           <Transition name="expand">
             <div

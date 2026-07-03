@@ -12,6 +12,11 @@ npm run preview   # preview the production build
 
 There is no test suite and no lint script configured.
 
+## Best practices for coding
+
+- Write lifecycle hooks in the script section below all other code.
+- Define all constant string variables in constants.ts and use those constants instead of hardcoding strings.
+
 ## Environment variables
 
 Copy `.env` and populate the following before running locally:

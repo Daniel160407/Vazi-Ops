@@ -8,6 +8,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
 const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
 const confirm = useConfirm();
@@ -75,7 +76,7 @@ const totalMembers = computed(() =>
 </script>
 
 <template>
-  <div class="relative pb-4">
+  <div class="relative pb-16">
     <LoadingSpinner v-if="loading && groups.length === 0" />
 
     <div v-else>
@@ -84,13 +85,13 @@ const totalMembers = computed(() =>
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            აქტიური ჯგუფები
+            ჯგუფების რაოდენობა
           </p>
           <p class="text-3xl font-bold text-white">{{ groups.length }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            სულ წევრი
+            ბავშვების რაოდენობა
           </p>
           <p class="text-3xl font-bold text-blue-400">{{ totalMembers }}</p>
         </div>
@@ -103,9 +104,10 @@ const totalMembers = computed(() =>
       </p>
 
       <div class="flex flex-col gap-3">
-        <button
+        <AppButton
           v-for="group in filtered"
           :key="group.id"
+          variant="plain"
           class="w-full rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/40 hover:bg-[#0f1f36]"
           @click="openEdit(group)"
         >
@@ -138,23 +140,18 @@ const totalMembers = computed(() =>
               <p class="text-sm font-semibold text-slate-300">{{ group.age || "—" }}</p>
             </div>
             <div>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">წევრები</p>
-              <p class="text-sm font-semibold text-slate-300">{{ group.children.length }} აქტიური</p>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ბავშვები</p>
+              <p class="text-sm font-semibold text-slate-300">{{ group.children.length }} ბავშვი</p>
             </div>
             <div class="ml-auto flex items-end">
               <i class="pi pi-pencil text-xs text-slate-600" />
             </div>
           </div>
-        </button>
+        </AppButton>
       </div>
     </div>
 
-    <button
-      class="fixed bottom-24 right-5 z-30 flex h-13 w-13 cursor-pointer items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40 transition-all hover:scale-105 hover:bg-blue-500 active:scale-95 lg:bottom-8 lg:right-8"
-      @click="openAdd"
-    >
-      <i class="pi pi-plus text-lg" />
-    </button>
+    <AppButton variant="fab" icon="pi-plus" @click="openAdd" />
 
     <BottomSheet
       :visible="sheetVisible"
@@ -198,20 +195,22 @@ const totalMembers = computed(() =>
 
         <SheetField label="სქესი">
           <div class="flex gap-3">
-            <button
-              class="flex-1 cursor-pointer rounded-xl border py-2.5 text-sm font-semibold transition-all"
+            <AppButton
+              variant="plain"
+              class="flex-1 rounded-xl border py-2.5 text-sm font-semibold transition-all"
               :class="form.gender === GENDER_MALE ? 'border-blue-600 bg-blue-600/20 text-blue-400' : 'border-blue-900/30 bg-[#0d1829] text-slate-500'"
               @click="form.gender = GENDER_MALE"
             >
               ბიჭები
-            </button>
-            <button
-              class="flex-1 cursor-pointer rounded-xl border py-2.5 text-sm font-semibold transition-all"
+            </AppButton>
+            <AppButton
+              variant="plain"
+              class="flex-1 rounded-xl border py-2.5 text-sm font-semibold transition-all"
               :class="form.gender === GENDER_FEMALE ? 'border-rose-600 bg-rose-600/20 text-rose-400' : 'border-blue-900/30 bg-[#0d1829] text-slate-500'"
               @click="form.gender = GENDER_FEMALE"
             >
               გოგოები
-            </button>
+            </AppButton>
           </div>
         </SheetField>
 
@@ -226,21 +225,10 @@ const totalMembers = computed(() =>
       </div>
 
       <div class="mt-5 flex gap-3">
-        <button
-          v-if="!isAdding"
-          class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose-900/40 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-400 transition-all hover:bg-rose-500/20"
-          @click="handleDelete"
-        >
-          <i class="pi pi-trash text-sm" />
-          წაშლა
-        </button>
-        <button
-          class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500"
-          @click="handleSave"
-        >
-          <i class="pi pi-check text-sm" />
+        <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete">წაშლა</AppButton>
+        <AppButton variant="primary" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isAdding ? "დამატება" : "შენახვა" }}
-        </button>
+        </AppButton>
       </div>
     </BottomSheet>
   </div>

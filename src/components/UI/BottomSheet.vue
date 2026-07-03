@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppButton from "./AppButton.vue";
 defineProps<{ visible: boolean; title: string }>()
 defineEmits<{ close: [] }>()
 </script>
@@ -27,12 +28,7 @@ defineEmits<{ close: [] }>()
             <span class="h-4 w-[3px] rounded-full bg-blue-500" />
             <span class="text-sm font-bold text-slate-200">{{ title }}</span>
           </div>
-          <button
-            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-blue-900/30 text-slate-400 hover:bg-blue-900/60 hover:text-white"
-            @click="$emit('close')"
-          >
-            <i class="pi pi-times text-xs" />
-          </button>
+          <AppButton variant="icon-close" icon="pi-times" @click="$emit('close')" />
         </div>
 
         <slot />

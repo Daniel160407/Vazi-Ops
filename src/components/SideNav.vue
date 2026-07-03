@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
+import AppButton from "./UI/AppButton.vue";
 import { useAuth } from "../composables/useAuth";
 import {
   GROUPS_ROUTE,
@@ -64,9 +65,10 @@ const adminItems = [
     </div>
 
     <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
-      <button
+      <AppButton
         v-for="item in mainItems"
         :key="item.path"
+        variant="plain"
         class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
         :class="
           isActive(item.path)
@@ -81,7 +83,7 @@ const adminItems = [
         />
         <i :class="item.icon" class="w-4 text-center text-sm" />
         <span class="text-sm font-medium">{{ item.label }}</span>
-      </button>
+      </AppButton>
 
       <div class="mt-4 mb-2 flex items-center gap-2 px-3">
         <i class="pi pi-lock text-[10px] text-blue-500/50" />
@@ -92,9 +94,10 @@ const adminItems = [
       </div>
 
       <template v-if="user">
-        <button
+        <AppButton
           v-for="item in adminItems"
           :key="item.path"
+          variant="plain"
           class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
           :class="
             isActive(item.path)
@@ -109,17 +112,18 @@ const adminItems = [
           />
           <i :class="item.icon" class="w-4 text-center text-sm" />
           <span class="text-sm font-medium">{{ item.label }}</span>
-        </button>
+        </AppButton>
       </template>
 
       <template v-else>
-        <button
+        <AppButton
+          variant="plain"
           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-600 transition-all hover:bg-white/5 hover:text-slate-400"
           @click="signInWithGoogle"
         >
           <i class="pi pi-sign-in w-4 text-center text-sm" />
           <span class="text-sm font-medium">შესვლა</span>
-        </button>
+        </AppButton>
       </template>
     </nav>
 
@@ -137,13 +141,14 @@ const adminItems = [
           <p class="truncate text-xs font-medium text-slate-300">{{ user.displayName }}</p>
           <p class="text-[10px] text-slate-600">ადმინი</p>
         </div>
-        <button
+        <AppButton
+          variant="plain"
           class="text-slate-600 transition-colors hover:text-slate-400"
           title="გასვლა"
           @click="logout"
         >
           <i class="pi pi-sign-out text-sm" />
-        </button>
+        </AppButton>
       </div>
     </div>
   </aside>
