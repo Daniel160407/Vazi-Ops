@@ -5,6 +5,7 @@ import { useGlobalStore } from "./stores/GlobalStore";
 import BottomNav from "./components/BottomNav.vue";
 import MoreSheet from "./components/MoreSheet.vue";
 import SideNav from "./components/SideNav.vue";
+import AppHeader from "./components/AppHeader.vue";
 
 const { setData } = useGlobalStore();
 setData();
@@ -21,16 +22,7 @@ const showMore = ref(false);
     <!-- Main content -->
     <div class="flex flex-1 flex-col items-center lg:ml-56">
 
-      <!-- Mobile header -->
-      <div class="flex w-full items-center justify-center gap-3 px-4 pt-8 pb-4 lg:hidden">
-        <h1 class="text-2xl font-semibold tracking-tight">ბანაკი "ვაზი"</h1>
-        <img src="./assets/images/logo.png" class="h-10 w-10 object-contain" />
-      </div>
-
-      <!-- Desktop header -->
-      <div class="hidden w-full items-center gap-3 px-8 pt-8 pb-4 lg:flex">
-        <h1 class="text-xl font-semibold tracking-tight text-slate-200">ბანაკი "ვაზი"</h1>
-      </div>
+      <AppHeader />
 
       <div class="w-full max-w-2xl px-4 pb-24 lg:px-8 lg:pb-10">
         <router-view v-slot="{ Component }">
