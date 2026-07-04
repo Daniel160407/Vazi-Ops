@@ -37,7 +37,7 @@ import AnnouncementsEditPage from "../pages/AnnouncementsEditPage.vue";
 import UsersEditPage from "../pages/UsersEditPage.vue";
 
 const routes = [
-  { path: "/", redirect: ANNOUNCEMENTS_ROUTE },
+  { path: "/", redirect: GROUPS_ROUTE },
   { path: GROUPS_ROUTE, component: GroupsPage },
   { path: CLUBS_ROUTE, component: ClubsPage },
   { path: DAY_SCHEDULE_ROUTE, component: DaySchedulePage },
