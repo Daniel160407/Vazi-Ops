@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { watch } from "vue";
 import {
   ADMIN_GROUPS_ROUTE,
   ADMIN_CLUBS_ROUTE,
@@ -17,6 +18,7 @@ import {
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
 } from "./constants";
+import { useAuth } from "./useAuth";
 import GroupsPage from "../pages/GroupsPage.vue";
 import ClubsPage from "../pages/ClubsPage.vue";
 import GroupsEditPage from "../pages/GroupsEditPage.vue";
@@ -57,6 +59,27 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+function waitForAuth(): Promise<void> {
+  const { loading } = useAuth();
+  if (!loading.value) return Promise.resolve();
+  return new Promise((resolve) => {
+    const stop = watch(loading, (val) => {
+      if (!val) {
+        stop();
+        resolve();
+      }
+    });
+  });
+}
+
+router.beforeEach(async (to) => {
+  if (!to.path.startsWith("/admin")) return true;
+  await waitForAuth();
+  const { isAdmin } = useAuth();
+  if (!isAdmin.value) return ANNOUNCEMENTS_ROUTE;
+  return true;
 });
 
 export default router;
