@@ -20,7 +20,7 @@ const showMore = ref(false);
     <div class="flex flex-1 w-full min-w-0 flex-col items-center lg:ml-56">
       <AppHeader />
 
-      <div class="w-full max-w-2xl px-4 pb-24 lg:px-8 lg:pb-10">
+      <div class="w-full max-w-2xl px-4 pb-24 lg:px-8 lg:pb-10 lg:pt-10">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
