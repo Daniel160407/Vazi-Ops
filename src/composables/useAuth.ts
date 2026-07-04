@@ -102,7 +102,7 @@ export function useAuth() {
     avatarUrl,
     isAdmin: computed(() => role.value === UserRole.ADMIN),
     isLoggedIn: computed(() => !!user.value),
-    fullName: computed(() => user.value?.displayName || "ანონიმი"),
+    fullName: computed(() => user.value?.displayName ?? ""),
     userGroupName,
     profileImg: computed(() => user.value?.photoURL),
     loading,

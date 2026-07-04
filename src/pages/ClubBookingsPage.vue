@@ -11,6 +11,7 @@ import SearchInput from "../components/UI/SearchInput.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubBookingsCrud();
 const { loading: loadingStore, appUsers, clubs, groups } = storeToRefs(useGlobalStore());
@@ -224,15 +225,7 @@ const formatDate = (value?: Date | string) => {
       <div class="flex flex-col gap-4">
         <SheetField label="წრე" :required="true" :error="submitted && !form.club_name ? 'წრის სახელი აუცილებელია' : ''">
           <div class="relative">
-            <input
-              v-model="form.club_name"
-              type="text"
-              autocomplete="off"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="submitted && !form.club_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-              @focus="clubOpen = true"
-              @blur="clubOpen = false"
-            />
+            <AppInput v-model="form.club_name" autocomplete="off" :error="submitted && !form.club_name" @focus="clubOpen = true" @blur="clubOpen = false" />
             <Transition
               enter-active-class="transition-all duration-150 ease-out"
               enter-from-class="opacity-0 -translate-y-1"
@@ -264,24 +257,12 @@ const formatDate = (value?: Date | string) => {
         </SheetField>
 
         <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !childFullName.trim() ? 'სახელი და გვარი აუცილებელია' : ''">
-          <input
-            v-model="childFullName"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="submitted && !childFullName.trim() ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+          <AppInput v-model="childFullName" :error="submitted && !childFullName.trim()" />
         </SheetField>
 
         <SheetField label="ლიდერი">
           <div class="relative">
-            <input
-              v-model="form.leader_name"
-              type="text"
-              autocomplete="off"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-              @focus="leaderOpen = true"
-              @blur="leaderOpen = false"
-            />
+            <AppInput v-model="form.leader_name" autocomplete="off" @focus="leaderOpen = true" @blur="leaderOpen = false" />
             <Transition
               enter-active-class="transition-all duration-150 ease-out"
               enter-from-class="opacity-0 -translate-y-1"
@@ -314,11 +295,7 @@ const formatDate = (value?: Date | string) => {
         </SheetField>
 
         <SheetField label="ჯგუფი">
-          <input
-            v-model="form.group_name"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.group_name" />
         </SheetField>
       </div>
 

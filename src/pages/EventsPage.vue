@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { storeToRefs } from "pinia";
 import { ka } from "date-fns/locale";
 import { format, intervalToDuration, type Duration } from "date-fns";
 import { useEventsCrud } from "../composables/useEventsCrud";
 import { useAuth } from "../composables/useAuth";
+import { useGlobalStore } from "../stores/GlobalStore";
 import { useToast } from "primevue";
 import { REQUEST_PENDING, REQUEST_ACCEPTED, REQUEST_REJECTED } from "../composables/constants";
 import type { Event as AppEvent } from "../type/interfaces";
@@ -12,14 +14,37 @@ import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
 const { fullName, userGroupName } = useAuth();
+const { groups, appUsers } = storeToRefs(useGlobalStore());
 const toast = useToast();
 
+const leaderOpen = ref(false);
+
+const leaderSuggestions = computed(() => {
+  const q = (form.value.leader_full_name ?? "").toLowerCase().trim();
+  return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
+});
+
+const selectLeader = (name: string) => {
+  form.value.leader_full_name = name;
+  leaderOpen.value = false;
+};
+
+const childOpen = ref(false);
 const isDeadlinePassed = ref(false);
 const timeLeft = ref<Duration | null>(null);
 let timer: number | null = null;
+
+const childSuggestions = computed(() => {
+  const leader = (form.value.leader_full_name ?? "").trim();
+  const q = (form.value.performer_full_name ?? "").toLowerCase().trim();
+  const matchedGroup = groups.value.find((g) => g.leader === leader);
+  if (!matchedGroup) return [];
+  return matchedGroup.children.filter((c) => !q || c.toLowerCase().includes(q));
+});
 
 const updateCountdown = () => {
   if (!deadline.value?.time) return;
@@ -33,14 +58,6 @@ const updateCountdown = () => {
   isDeadlinePassed.value = false;
   timeLeft.value = intervalToDuration({ start: now, end });
 };
-
-onMounted(() => {
-  updateCountdown();
-  timer = window.setInterval(updateCountdown, 1000);
-});
-onUnmounted(() => {
-  if (timer) clearInterval(timer);
-});
 
 const pad = (n?: number) => String(n ?? 0).padStart(2, "0");
 
@@ -106,9 +123,10 @@ const closeSheet = () => {
   submitted.value = false;
 };
 
-watch(sheetVisible, (v) => {
-  if (!v) submitted.value = false;
-});
+const selectChild = (name: string) => {
+  form.value.performer_full_name = name;
+  childOpen.value = false;
+};
 
 const handleRegister = async () => {
   submitted.value = true;
@@ -119,6 +137,19 @@ const handleRegister = async () => {
   await createEvent(form.value);
   closeSheet();
 };
+
+watch(sheetVisible, (v) => {
+  if (!v) submitted.value = false;
+});
+
+onMounted(() => {
+  updateCountdown();
+  timer = window.setInterval(updateCountdown, 1000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
 </script>
 
 <template>
@@ -229,50 +260,80 @@ const handleRegister = async () => {
     <BottomSheet :visible="sheetVisible" title="ნომრის ჩაწერა" @close="closeSheet">
       <div class="flex flex-col gap-4">
         <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !form.performer_full_name ? 'სავალდებულოა' : ''">
-          <input
-            v-model="form.performer_full_name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
-            :class="submitted && !form.performer_full_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+          <div class="relative">
+            <AppInput v-model="form.performer_full_name" autocomplete="off" :error="submitted && !form.performer_full_name" @focus="childOpen = true" @blur="childOpen = false" />
+            <Transition
+              enter-active-class="transition-all duration-150 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-100 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1"
+            >
+              <ul
+                v-if="childOpen && childSuggestions.length"
+                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                @mousedown.prevent
+              >
+                <li
+                  v-for="child in childSuggestions"
+                  :key="child"
+                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                  @click="selectChild(child)"
+                >
+                  <span class="text-sm text-slate-200">{{ child }}</span>
+                </li>
+              </ul>
+            </Transition>
+          </div>
         </SheetField>
 
         <SheetField label="ლიდერის სახელი და გვარი" :required="true" :error="submitted && !form.leader_full_name ? 'სავალდებულოა' : ''">
-          <input
-            v-model="form.leader_full_name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="submitted && !form.leader_full_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+          <div class="relative">
+            <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @focus="leaderOpen = true" @blur="leaderOpen = false" />
+            <Transition
+              enter-active-class="transition-all duration-150 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-100 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1"
+            >
+              <ul
+                v-if="leaderOpen && leaderSuggestions.length"
+                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                @mousedown.prevent
+              >
+                <li
+                  v-for="u in leaderSuggestions"
+                  :key="u.id"
+                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                  @click="selectLeader(u.name)"
+                >
+                  <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
+                    <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />
+                    <span v-else>{{ u.name.charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <span class="text-sm text-slate-200">{{ u.name }}</span>
+                </li>
+              </ul>
+            </Transition>
+          </div>
         </SheetField>
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ჯგუფის სახელი" :required="true" :error="submitted && !form.group_name ? 'სავალდებულოა' : ''">
-            <input
-              v-model="form.group_name"
-              type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="submitted && !form.group_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
+            <AppInput v-model="form.group_name" :error="submitted && !form.group_name" />
           </SheetField>
           <SheetField label="ნომრის სახელი" :required="true" :error="submitted && !form.scene_name ? 'სავალდებულოა' : ''">
-            <input
-              v-model="form.scene_name"
-              type="text"
-              placeholder="სიმღერა, ცეკვა..."
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
-              :class="submitted && !form.scene_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
+            <AppInput v-model="form.scene_name" placeholder="სიმღერა, ცეკვა..." :error="submitted && !form.scene_name" />
           </SheetField>
         </div>
 
         <SheetField label="მედია ლინკი">
-          <input
-            v-model="form.media_url"
-            type="url"
-            placeholder="YouTube, Google Drive..."
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.media_url" type="url" placeholder="YouTube, Google Drive..." />
         </SheetField>
 
         <SheetField label="დამატებითი კომენტარი">

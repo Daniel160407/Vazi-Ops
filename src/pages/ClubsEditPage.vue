@@ -13,6 +13,7 @@ import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, clubs, clubRegistration } = storeToRefs(useGlobalStore());
 const { addClub, updateClub, deleteClub, toggleRegistration, loading } = useClubsCrud();
@@ -170,38 +171,21 @@ const accentBorder = (n: number) => {
     >
       <div class="flex flex-col gap-4">
         <SheetField label="წრის სახელი">
-          <input
-            v-model="form.name"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.name" />
         </SheetField>
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="მასწავლებელი">
-            <input
-              v-model="form.teacher"
-              type="text"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-            />
+            <AppInput v-model="form.teacher" />
           </SheetField>
           <SheetField label="ჩატარების ადგილი">
-            <input
-              v-model="form.place"
-              type="text"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-            />
+            <AppInput v-model="form.place" />
           </SheetField>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ადგილების რაოდენობა">
-            <input
-              v-model.number="form.places_quantity"
-              type="number"
-              min="0"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-            />
+            <AppInput v-model="form.places_quantity" type="number" min="0" />
           </SheetField>
           <SheetField label="დრო">
             <DatePicker

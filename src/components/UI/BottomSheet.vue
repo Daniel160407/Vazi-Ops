@@ -72,3 +72,11 @@ const onTouchEnd = () => {
     </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+:deep(input),
+:deep(textarea),
+:deep(select) {
+  font-size: 16px;
+}
+</style>

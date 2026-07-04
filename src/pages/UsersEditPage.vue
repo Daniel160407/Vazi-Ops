@@ -9,6 +9,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { appUsers, loading, addUser, updateUser, updateUserRole, deleteUser } =
   useUsersCrud();
@@ -304,16 +305,7 @@ const userCount = () =>
           :required="true"
           :error="submitted && !form.name ? 'სახელი აუცილებელია' : ''"
         >
-          <input
-            v-model="form.name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="
-              submitted && !form.name
-                ? 'border-red-500/60 bg-red-500/5'
-                : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-            "
-          />
+          <AppInput v-model="form.name" :error="submitted && !form.name" />
         </SheetField>
 
         <SheetField
@@ -321,16 +313,7 @@ const userCount = () =>
           :required="true"
           :error="submitted && !form.email ? 'ელ-ფოსტა აუცილებელია' : ''"
         >
-          <input
-            v-model="form.email"
-            type="email"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="
-              submitted && !form.email
-                ? 'border-red-500/60 bg-red-500/5'
-                : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-            "
-          />
+          <AppInput v-model="form.email" type="email" :error="submitted && !form.email" />
         </SheetField>
       </div>
 

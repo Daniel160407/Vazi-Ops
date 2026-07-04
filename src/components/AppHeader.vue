@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import logo from "../assets/images/logo.png";
 import { useAuth } from "../composables/useAuth";
+import { GROUPS_ROUTE } from "../composables/constants";
 
 const { user, avatarUrl, signInWithGoogle, logout } = useAuth();
+const router = useRouter();
 
 const menuOpen = ref(false);
 
@@ -18,7 +21,7 @@ const handleLogout = async () => {
     class="sticky mb-4 top-0 z-20 flex w-full items-center gap-3 border-b border-blue-900/20 bg-[#03060f]/95 px-5 py-3.5 backdrop-blur-md lg:hidden"
     style="box-shadow: 0 2px 20px 0 rgba(0, 6, 30, 0.5)"
   >
-    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-950/60 ring-1 ring-blue-800/30">
+    <div class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-blue-950/60 ring-1 ring-blue-800/30 transition-opacity active:opacity-70" @click="router.push(GROUPS_ROUTE)">
       <img :src="logo" alt="ბანაკი ვაზი" class="h-8 w-8 object-contain" />
     </div>
     <h1 class="flex-1 text-[24px] font-bold tracking-tight text-white">

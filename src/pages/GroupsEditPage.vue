@@ -11,6 +11,7 @@ import BottomSheet from "../components/UI/BottomSheet.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
 const { appUsers } = storeToRefs(useGlobalStore());
@@ -222,24 +223,13 @@ const totalMembers = computed(() =>
     >
       <div class="flex flex-col gap-4">
         <SheetField label="ჯგუფის სახელი">
-          <input
-            v-model="form.name"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.name" />
         </SheetField>
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ლიდერი">
             <div class="relative">
-              <input
-                v-model="form.leader"
-                type="text"
-                autocomplete="off"
-                class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-                @focus="leaderOpen = true"
-                @blur="leaderOpen = false"
-              />
+              <AppInput v-model="form.leader" autocomplete="off" @focus="leaderOpen = true" @blur="leaderOpen = false" />
               <Transition
                 enter-active-class="transition-all duration-150 ease-out"
                 enter-from-class="opacity-0 -translate-y-1"
@@ -271,21 +261,12 @@ const totalMembers = computed(() =>
             </div>
           </SheetField>
           <SheetField label="ასაკი">
-            <input
-              v-model="form.age"
-              type="text"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-            />
+            <AppInput v-model="form.age" />
           </SheetField>
         </div>
 
         <SheetField label="კოტეჯის ნომერი">
-          <input
-            v-model.number="form.cottage_num"
-            type="number"
-            min="0"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.cottage_num" type="number" min="0" />
         </SheetField>
 
         <SheetField label="სქესი">

@@ -13,6 +13,7 @@ import type { EveningScheduleItem, Event } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
+import AppInput from "../components/UI/AppInput.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
@@ -273,32 +274,17 @@ const formatDate = (dateValue?: any) => {
   <BottomSheet :visible="sheetVisible" title="ნომრის რედაქტირება" @close="sheetVisible = false">
     <div v-if="form" class="flex flex-col gap-4">
       <SheetField label="ნომრის სახელი">
-        <input
-          v-model="form.scene_name"
-          type="text"
-          class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-        />
+        <AppInput v-model="form.scene_name" />
       </SheetField>
 
       <SheetField label="შემსრულებელი">
-        <input
-          v-model="form.performer_full_name"
-          type="text"
-          class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-        />
+        <AppInput v-model="form.performer_full_name" />
       </SheetField>
 
       <div class="grid grid-cols-2 gap-3">
         <SheetField label="ლიდერი">
           <div class="relative">
-            <input
-              v-model="form.leader_full_name"
-              type="text"
-              autocomplete="off"
-              class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-              @focus="leaderOpen = true"
-              @blur="leaderOpen = false"
-            />
+            <AppInput v-model="form.leader_full_name" autocomplete="off" @focus="leaderOpen = true" @blur="leaderOpen = false" />
             <Transition
               enter-active-class="transition-all duration-150 ease-out"
               enter-from-class="opacity-0 -translate-y-1"
@@ -330,20 +316,12 @@ const formatDate = (dateValue?: any) => {
           </div>
         </SheetField>
         <SheetField label="ჯგუფი">
-          <input
-            v-model="form.group_name"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.group_name" />
         </SheetField>
       </div>
 
       <SheetField label="მედია ლინკი">
-        <input
-          v-model="form.media_url"
-          type="text"
-          class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-        />
+        <AppInput v-model="form.media_url" />
       </SheetField>
 
       <SheetField label="დამატებითი ინფორმაცია">
