@@ -165,7 +165,7 @@ const blankForm = () => ({
   title: "",
   content: "",
   tag: TAG_URGENT,
-  author: fullName.value || "ანონიმი",
+  author: fullName.value,
   author_image_url: profileImg.value || "",
   date: new Date(),
 });
