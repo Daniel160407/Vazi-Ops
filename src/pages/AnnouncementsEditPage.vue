@@ -21,6 +21,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, announcements } = storeToRefs(useGlobalStore());
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } =
@@ -356,16 +357,7 @@ const handleDelete = (id: string) => {
           :required="true"
           :error="submitted && !form.title ? 'სათაური აუცილებელია' : ''"
         >
-          <input
-            v-model="form.title"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="
-              submitted && !form.title
-                ? 'border-red-500/60 bg-red-500/5'
-                : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-            "
-          />
+          <AppInput v-model="form.title" :error="submitted && !form.title" />
         </SheetField>
 
         <SheetField

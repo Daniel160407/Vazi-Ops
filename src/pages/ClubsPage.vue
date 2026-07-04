@@ -13,6 +13,7 @@ import SearchInput from "../components/UI/SearchInput.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
+import AppInput from "../components/UI/AppInput.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
@@ -239,25 +240,13 @@ const accentBorder = (n: number) => {
 
       <div v-else class="flex flex-col gap-3">
         <SheetField label="ბავშვის სახელი და გვარი">
-          <input
-            v-model="childFullName"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="childFullName" />
         </SheetField>
         <SheetField label="ლიდერის სახელი და გვარი">
-          <input
-            v-model="leaderName"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="leaderName" />
         </SheetField>
         <SheetField label="ჯგუფის სახელი">
-          <input
-            v-model="groupName"
-            type="text"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="groupName" />
         </SheetField>
       </div>
 

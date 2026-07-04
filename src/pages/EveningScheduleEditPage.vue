@@ -10,6 +10,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, eveningScheduleItems, appUsers } =
   storeToRefs(useGlobalStore());
@@ -330,16 +331,7 @@ const handleDelete = (id: string) => {
             submitted && !form.scene_name ? 'ნომრის დასახელება აუცილებელია' : ''
           "
         >
-          <input
-            v-model="form.scene_name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="
-              submitted && !form.scene_name
-                ? 'border-red-500/60 bg-red-500/5'
-                : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-            "
-          />
+          <AppInput v-model="form.scene_name" :error="submitted && !form.scene_name" />
         </SheetField>
 
         <template v-if="mode === 'child'">
@@ -350,16 +342,7 @@ const handleDelete = (id: string) => {
               submitted && !form.performer_full_name ? 'სახელი აუცილებელია' : ''
             "
           >
-            <input
-              v-model="form.performer_full_name"
-              type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="
-                submitted && !form.performer_full_name
-                  ? 'border-red-500/60 bg-red-500/5'
-                  : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'
-              "
-            />
+            <AppInput v-model="form.performer_full_name" :error="submitted && !form.performer_full_name" />
           </SheetField>
 
           <SheetField
@@ -368,15 +351,7 @@ const handleDelete = (id: string) => {
             :error="submitted && !form.leader_full_name ? 'ლიდერი აუცილებელია' : ''"
           >
             <div class="relative">
-              <input
-                v-model="form.leader_full_name"
-                type="text"
-                autocomplete="off"
-                class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-                :class="submitted && !form.leader_full_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-                @focus="leaderOpen = true"
-                @blur="leaderOpen = false"
-              />
+              <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @focus="leaderOpen = true" @blur="leaderOpen = false" />
               <Transition
                 enter-active-class="transition-all duration-150 ease-out"
                 enter-from-class="opacity-0 -translate-y-1"
@@ -413,22 +388,12 @@ const handleDelete = (id: string) => {
             :required="true"
             :error="submitted && !form.group_name ? 'ჯგუფი აუცილებელია' : ''"
           >
-            <input
-              v-model="form.group_name"
-              type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="submitted && !form.group_name ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
+            <AppInput v-model="form.group_name" :error="submitted && !form.group_name" />
           </SheetField>
         </template>
 
         <SheetField label="მედია ლინკი">
-          <input
-            v-model="form.media_url"
-            type="url"
-            placeholder="YouTube / Drive"
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.media_url" type="url" placeholder="YouTube / Drive" />
         </SheetField>
 
         <SheetField label="კომენტარი">

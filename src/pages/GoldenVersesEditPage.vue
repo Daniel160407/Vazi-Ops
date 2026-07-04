@@ -12,6 +12,7 @@ import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, goldenVerses } = storeToRefs(useGlobalStore());
 const { loading, addGoldenVerse, updateGoldenVerse, deleteGoldenVerse } = useGoldenVersesCrud();
@@ -141,13 +142,7 @@ const formatDate = (value?: any) => {
         </SheetField>
 
         <SheetField label="ადგილი" :required="true" :error="submitted && !form.reference ? 'წყარო აუცილებელია' : ''">
-          <input
-            v-model="form.reference"
-            type="text"
-            placeholder="მაგ: იოანე 3:16"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="submitted && !form.reference ? 'border-red-500/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+          <AppInput v-model="form.reference" placeholder="მაგ: იოანე 3:16" :error="submitted && !form.reference" />
         </SheetField>
       </div>
 

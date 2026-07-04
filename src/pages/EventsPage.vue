@@ -12,6 +12,7 @@ import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
+import AppInput from "../components/UI/AppInput.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
 const { fullName, userGroupName } = useAuth();
@@ -229,50 +230,24 @@ const handleRegister = async () => {
     <BottomSheet :visible="sheetVisible" title="ნომრის ჩაწერა" @close="closeSheet">
       <div class="flex flex-col gap-4">
         <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !form.performer_full_name ? 'სავალდებულოა' : ''">
-          <input
-            v-model="form.performer_full_name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
-            :class="submitted && !form.performer_full_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+          <AppInput v-model="form.performer_full_name" :error="submitted && !form.performer_full_name" />
         </SheetField>
 
         <SheetField label="ლიდერის სახელი და გვარი" :required="true" :error="submitted && !form.leader_full_name ? 'სავალდებულოა' : ''">
-          <input
-            v-model="form.leader_full_name"
-            type="text"
-            class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-            :class="submitted && !form.leader_full_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-          />
+          <AppInput v-model="form.leader_full_name" :error="submitted && !form.leader_full_name" />
         </SheetField>
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ჯგუფის სახელი" :required="true" :error="submitted && !form.group_name ? 'სავალდებულოა' : ''">
-            <input
-              v-model="form.group_name"
-              type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 outline-none transition-colors"
-              :class="submitted && !form.group_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
+            <AppInput v-model="form.group_name" :error="submitted && !form.group_name" />
           </SheetField>
           <SheetField label="ნომრის სახელი" :required="true" :error="submitted && !form.scene_name ? 'სავალდებულოა' : ''">
-            <input
-              v-model="form.scene_name"
-              type="text"
-              placeholder="სიმღერა, ცეკვა..."
-              class="w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
-              :class="submitted && !form.scene_name ? 'border-red-600/60 bg-red-500/5' : 'border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60'"
-            />
+            <AppInput v-model="form.scene_name" placeholder="სიმღერა, ცეკვა..." :error="submitted && !form.scene_name" />
           </SheetField>
         </div>
 
         <SheetField label="მედია ლინკი">
-          <input
-            v-model="form.media_url"
-            type="url"
-            placeholder="YouTube, Google Drive..."
-            class="w-full rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-700/60"
-          />
+          <AppInput v-model="form.media_url" type="url" placeholder="YouTube, Google Drive..." />
         </SheetField>
 
         <SheetField label="დამატებითი კომენტარი">
