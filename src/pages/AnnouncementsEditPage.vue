@@ -232,7 +232,7 @@ const handleDelete = (id: string) => {
         <p
           class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"
         >
-          განცხადებები რაოდენობა
+          განცხადებების რაოდენობა
         </p>
         <p class="text-3xl font-bold text-white">{{ announcements.length }}</p>
       </div>

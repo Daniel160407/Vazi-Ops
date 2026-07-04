@@ -21,7 +21,7 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
       <div class="mb-5 grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            სულ ნომერი
+            ნომერების რაოდენობა
           </p>
           <p class="text-3xl font-bold text-white">{{ eveningScheduleItems.length }}</p>
         </div>

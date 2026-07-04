@@ -75,7 +75,7 @@ const adminItems = [
   { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
   { label: "ოქროს მუხ.", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ADMIN_ANNOUNCEMENTS_ROUTE },
-  { label: "მომხმარებლები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
+  { label: "ადამიანები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
 ];
 </script>
 
