@@ -12,7 +12,7 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
-const { loading: loadingStore, eveningScheduleItems, appUsers } =
+const { loading: loadingStore, eveningScheduleItems, appUsers, groups } =
   storeToRefs(useGlobalStore());
 const { fullName, userGroupName } = useAuth();
 const {
@@ -94,6 +94,21 @@ const leaderSuggestions = computed(() => {
 const selectLeader = (name: string) => {
   form.value.leader_full_name = name;
   leaderOpen.value = false;
+};
+
+const childOpen = ref(false);
+
+const childSuggestions = computed(() => {
+  const leader = form.value.leader_full_name.trim();
+  const q = form.value.performer_full_name.toLowerCase().trim();
+  const matchedGroup = groups.value.find((g) => g.leader === leader);
+  if (!matchedGroup) return [];
+  return matchedGroup.children.filter((c) => !q || c.toLowerCase().includes(q));
+});
+
+const selectChild = (name: string) => {
+  form.value.performer_full_name = name;
+  childOpen.value = false;
 };
 
 const sheetVisible = ref(false);
@@ -338,11 +353,35 @@ const handleDelete = (id: string) => {
           <SheetField
             label="ბავშვის სახელი და გვარი"
             :required="true"
-            :error="
-              submitted && !form.performer_full_name ? 'სახელი აუცილებელია' : ''
-            "
+            :error="submitted && !form.performer_full_name ? 'სახელი აუცილებელია' : ''"
           >
-            <AppInput v-model="form.performer_full_name" :error="submitted && !form.performer_full_name" />
+            <div class="relative">
+              <AppInput v-model="form.performer_full_name" autocomplete="off" :error="submitted && !form.performer_full_name" @focus="childOpen = true" @blur="childOpen = false" />
+              <Transition
+                enter-active-class="transition-all duration-150 ease-out"
+                enter-from-class="opacity-0 -translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition-all duration-100 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-1"
+              >
+                <ul
+                  v-if="childOpen && childSuggestions.length"
+                  class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
+                  style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
+                  @mousedown.prevent
+                >
+                  <li
+                    v-for="child in childSuggestions"
+                    :key="child"
+                    class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
+                    @click="selectChild(child)"
+                  >
+                    <span class="text-sm text-slate-200">{{ child }}</span>
+                  </li>
+                </ul>
+              </Transition>
+            </div>
           </SheetField>
 
           <SheetField
