@@ -68,6 +68,7 @@ const routes = [
   { path: ADMIN_ANNOUNCEMENTS_ROUTE, component: AnnouncementsEditPage },
   { path: ADMIN_USERS_ROUTE, component: UsersEditPage },
   { path: ADMIN_TABLE_ROUTE, component: TableEditPage },
+  { path: "/:pathMatch(.*)*", redirect: GROUPS_ROUTE },
 ];
 
 const router = createRouter({
