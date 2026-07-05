@@ -20,7 +20,7 @@ const globalStore = useGlobalStore();
 const toast = useToast();
 const { loading: loadingStore, clubs, clubRegistration, groups, appUsers } = storeToRefs(globalStore);
 const { fullName, userGroupName } = useAuth();
-const { registerInClub, changeClubBooking, loading } = useClubsCrud();
+const { registerInClub, loading } = useClubsCrud();
 const { fetchUserBookings } = useClubBookingsCrud();
 
 const search = ref("");
@@ -45,8 +45,6 @@ const childFullName = ref("");
 const leaderName = ref("");
 const groupName = ref("");
 const userBookings = ref<ClubBooking[]>([]);
-const selectionMode = ref<"register" | "switch">("register");
-const bookingToReplaceId = ref<string | null>(null);
 
 const leaderOpen = ref(false);
 
@@ -86,9 +84,7 @@ const openSheet = (club: Club) => {
   leaderName.value = fullName.value;
   groupName.value = userGroupName.value;
   sheetVisible.value = true;
-  selectionMode.value = "register";
   userBookings.value = [];
-  bookingToReplaceId.value = null;
 };
 
 const closeSheet = () => {
@@ -96,9 +92,7 @@ const closeSheet = () => {
   childFullName.value = "";
   leaderName.value = "";
   groupName.value = "";
-  selectionMode.value = "register";
   userBookings.value = [];
-  bookingToReplaceId.value = null;
 };
 
 const handleConfirmRegister = async () => {
@@ -111,45 +105,24 @@ const handleConfirmRegister = async () => {
 
   const { first, last } = splitName(childFullName.value);
 
-  if (selectionMode.value === "register") {
-    const existing = await fetchUserBookings(first, last, leaderName.value, groupName.value);
-    userBookings.value = existing;
+  const existing = await fetchUserBookings(first, last, leaderName.value, groupName.value);
+  userBookings.value = existing;
 
-    if (selectedClub.value.time) {
-      const hasSameTime = existing.some((booking) => {
-        const clubForBooking = clubs.value.find((c) => c.id === booking.club_id);
-        return clubForBooking?.time === selectedClub.value!.time;
-      });
-      if (hasSameTime) {
-        toast.add({ severity: "warn", summary: "დრო დაკავებულია", detail: "უკვე გაქვს სხვა წრე ამ დროს.", life: 6000 });
-        return;
-      }
-    }
-
-    if (existing.length < 2) {
-      await registerInClub(selectedClub.value, {
-        child_first_name: first, child_last_name: last,
-        leader_name: leaderName.value, group_name: groupName.value,
-      });
-      closeSheet();
+  if (selectedClub.value.time) {
+    const hasSameTime = existing.some((booking) => {
+      const clubForBooking = clubs.value.find((c) => c.id === booking.club_id);
+      return clubForBooking?.time === selectedClub.value!.time;
+    });
+    if (hasSameTime) {
+      toast.add({ severity: "warn", summary: "დრო დაკავებულია", detail: "უკვე გაქვს სხვა წრე ამ დროს.", life: 6000 });
       return;
     }
-
-    selectionMode.value = "switch";
-    bookingToReplaceId.value = existing[0]?.id ?? null;
-    toast.add({ severity: "info", summary: "უკვე დაჯავშნილია 2 წრე", detail: "აირჩიე რომელი გინდა შეცვალო.", life: 3000 });
-    return;
   }
 
-  if (!bookingToReplaceId.value) {
-    toast.add({ severity: "warn", summary: "აირჩიე შესაცვლელი წრე", life: 3000 });
-    return;
-  }
-
-  const oldBooking = userBookings.value.find((b) => b.id === bookingToReplaceId.value);
-  if (!oldBooking) return;
-
-  await changeClubBooking(oldBooking, selectedClub.value);
+  await registerInClub(selectedClub.value, {
+    child_first_name: first, child_last_name: last,
+    leader_name: leaderName.value, group_name: groupName.value,
+  });
   closeSheet();
 };
 
@@ -238,7 +211,7 @@ const accentBorder = (n: number) => {
 
     <BottomSheet
       :visible="sheetVisible"
-      :title="selectionMode === 'switch' ? 'შეცვლე წრე' : 'ჩაეწერე წრეში'"
+      title="ჩაეწერე წრეში"
       @close="closeSheet"
     >
       <div v-if="selectedClub" class="mb-5 flex items-center gap-2 rounded-xl bg-blue-500/10 px-3 py-2.5">
@@ -247,25 +220,7 @@ const accentBorder = (n: number) => {
         <span class="ml-auto text-xs text-slate-500">{{ formatTime(selectedClub.time) }}</span>
       </div>
 
-      <div v-if="selectionMode === 'switch'" class="mb-5">
-        <p class="mb-3 text-sm text-slate-400">გაქვს 2 წრე. აირჩიე რომელი გინდა შეცვალო:</p>
-        <div class="flex flex-col gap-2">
-          <AppButton
-            v-for="booking in userBookings"
-            :key="booking.id"
-            variant="plain"
-            class="flex items-center gap-3 rounded-xl border p-3 text-left transition-all"
-            :class="bookingToReplaceId === booking.id ? 'border-blue-600 bg-blue-600/15 text-blue-300' : 'border-blue-900/30 bg-[#0d1829] text-slate-400'"
-            @click="bookingToReplaceId = booking.id"
-          >
-            <i class="pi pi-sparkles text-sm" />
-            <span class="text-sm font-medium">{{ booking.club_name }}</span>
-            <i v-if="bookingToReplaceId === booking.id" class="pi pi-check ml-auto text-sm text-blue-400" />
-          </AppButton>
-        </div>
-      </div>
-
-      <div v-else class="flex flex-col gap-3">
+      <div class="flex flex-col gap-3">
         <SheetField label="ბავშვის სახელი და გვარი">
           <div class="relative">
             <AppInput v-model="childFullName" autocomplete="off" @focus="childOpen = true" @blur="childOpen = false" />
@@ -334,9 +289,8 @@ const accentBorder = (n: number) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <AppButton v-if="selectionMode === 'switch'" variant="ghost" icon="pi-arrow-left" @click="selectionMode = 'register'" />
         <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleConfirmRegister">
-          {{ selectionMode === "switch" ? "შეცვლა" : "ჩაწერა" }}
+          ჩაწერა
         </AppButton>
       </div>
     </BottomSheet>
