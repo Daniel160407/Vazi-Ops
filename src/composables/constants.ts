@@ -13,7 +13,7 @@ export const ADMIN_EVENING_SCHEDULE_ROUTE = "/admin/evening-schedule";
 export const ADMIN_EVENTS_ROUTE = "/admin/events";
 export const ADMIN_GOLDEN_VERSES_ROUTE = "/admin/verses";
 export const ADMIN_ANNOUNCEMENTS_ROUTE = "/admin/announcements";
-export const ADMIN_USERS_ROUTE = "/admin/users";
+export const ADMIN_USERS_ROUTE = "/admin/management";
 export const ADMIN_TABLE_ROUTE = "/admin/table";
 
 export const GROUPS_LABEL = "ჯგუფები";
@@ -61,6 +61,7 @@ export const DEADLINE_DB = "deadline";
 export const GOLDEN_VERSES_DB = "verses";
 export const ANNOUNCEMENTS_DB = "announcements";
 export const TABLE_DB = "table_data";
+export const PAGE_VISIBILITY_DB = "page_visibility";
 
 export const GENDER_MALE = "male";
 export const GENDER_FEMALE = "female";

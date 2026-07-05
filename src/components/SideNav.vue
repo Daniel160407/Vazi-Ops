@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import AppButton from "./UI/AppButton.vue";
 import { useAuth } from "../composables/useAuth";
+import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
 import {
   GROUPS_ROUTE,
   CLUBS_ROUTE,
@@ -25,6 +27,7 @@ import {
 const router = useRouter();
 const route = useRoute();
 const { user, isAdmin, signInWithGoogle, logout } = useAuth();
+const { isVisible: isPageVisible } = usePageVisibilityCrud();
 
 const isActive = (path: string) => route.path === path;
 const navigate = (path: string) => router.push(path);
@@ -34,15 +37,21 @@ const handleAdminNav = async (path: string) => {
   if (user.value && isAdmin.value) router.push(path);
 };
 
-const mainItems = [
-  { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE },
-  { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE },
-  { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE },
-  { label: "ნომრები", icon: "pi pi-ticket", path: EVENTS_ROUTE },
-  { label: "საღამოს განრიგი", icon: "pi pi-moon", path: EVENING_SCHEDULE_ROUTE },
-  { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE },
-  { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE },
+const allMainItems = [
+  { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE, key: "announcements" },
+  { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE, key: "groups" },
+  { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE, key: "clubs" },
+  { label: "ნომრები", icon: "pi pi-ticket", path: EVENTS_ROUTE, key: "events" },
+  { label: "საღამოს განრიგი", icon: "pi pi-moon", path: EVENING_SCHEDULE_ROUTE, key: "evening_schedule" },
+  { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE, key: "day_schedule" },
+  { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE, key: "golden_verses" },
 ];
+
+const mainItems = computed(() =>
+  isAdmin.value
+    ? allMainItems
+    : allMainItems.filter((item) => isPageVisible(item.key))
+);
 
 const adminItems = [
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ADMIN_ANNOUNCEMENTS_ROUTE },
@@ -54,7 +63,7 @@ const adminItems = [
   { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
   { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
   { label: "ქულები", icon: "pi pi-table", path: ADMIN_TABLE_ROUTE },
-  { label: "ადამიანები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
+  { label: "მართვა", icon: "pi pi-cog", path: ADMIN_USERS_ROUTE },
 ];
 </script>
 

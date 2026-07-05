@@ -106,3 +106,8 @@ export interface TableData {
   row_labels: string[];
   cells: string[][];
 }
+
+export interface PageVisibility {
+  id: string;
+  is_visible: boolean;
+}

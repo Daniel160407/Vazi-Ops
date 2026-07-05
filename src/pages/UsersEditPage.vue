@@ -3,6 +3,7 @@ import { ref, reactive } from "vue";
 import { useConfirm } from "primevue";
 import { useUsersCrud } from "../composables/useUsersCrud";
 import { useImgBB } from "../composables/useImgBB";
+import { usePageVisibilityCrud, PAGE_DEFINITIONS } from "../composables/usePageVisibilityCrud";
 import { UserRole } from "../type/interfaces";
 import type { AppUser } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
@@ -13,6 +14,16 @@ import AppInput from "../components/UI/AppInput.vue";
 
 const { appUsers, loading, addUser, updateUser, updateUserRole, deleteUser } =
   useUsersCrud();
+const { isVisible, toggleVisibility } = usePageVisibilityCrud();
+const togglingPage = ref<string | null>(null);
+const visibilityOpen = ref(false);
+
+const handleTogglePage = async (key: string) => {
+  if (togglingPage.value) return;
+  togglingPage.value = key;
+  await toggleVisibility(key);
+  togglingPage.value = null;
+};
 const {
   selectedImage,
   imagePreview,
@@ -148,6 +159,53 @@ const userCount = () =>
             მომხმარებლები
           </p>
           <p class="text-3xl font-bold text-white">{{ userCount() }}</p>
+        </div>
+      </div>
+
+      <div class="mb-5 overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]">
+        <button
+          class="flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-white/5"
+          @click="visibilityOpen = !visibilityOpen"
+        >
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-900/30">
+              <i class="pi pi-eye text-sm text-blue-400" />
+            </div>
+            <span class="text-sm font-medium text-slate-200">გვერდების ხილვადობა</span>
+          </div>
+          <i
+            class="pi pi-chevron-down text-xs text-slate-500 transition-transform duration-200"
+            :class="visibilityOpen ? 'rotate-180' : ''"
+          />
+        </button>
+
+        <div v-if="visibilityOpen" class="border-t border-blue-900/20">
+          <div
+            v-for="page in PAGE_DEFINITIONS"
+            :key="page.key"
+            class="flex items-center justify-between px-4 py-3 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-blue-900/20"
+          >
+            <div class="flex items-center gap-3">
+              <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-900/20">
+                <i :class="page.icon" class="text-xs text-blue-400" />
+              </div>
+              <span class="text-sm text-slate-300">{{ page.label }}</span>
+            </div>
+            <button
+              class="relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none"
+              :class="[
+                isVisible(page.key) ? 'bg-blue-600' : 'bg-slate-700',
+                togglingPage === page.key ? 'opacity-50' : '',
+              ]"
+              :disabled="togglingPage === page.key"
+              @click="handleTogglePage(page.key)"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
+                :class="isVisible(page.key) ? 'translate-x-5' : 'translate-x-0'"
+              />
+            </button>
+          </div>
         </div>
       </div>
 

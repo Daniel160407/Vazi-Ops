@@ -13,6 +13,7 @@ import type {
   Announcement,
   AppUser,
   TableData,
+  PageVisibility,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -26,6 +27,7 @@ import {
   ANNOUNCEMENTS_DB,
   USERS_DB,
   TABLE_DB,
+  PAGE_VISIBILITY_DB,
 } from "../composables/constants";
 import type {
   FirestoreError,
@@ -49,6 +51,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const tableData = ref<TableData | null>(null);
   const tableDataLoaded = ref(false);
   const appUsers = ref<AppUser[]>([]);
+  const pageVisibilities = ref<PageVisibility[]>([]);
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
@@ -141,6 +144,14 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const fetchAppUsers = () =>
     subscribe("users", USERS_DB, (data) => (appUsers.value = data as AppUser[]));
 
+  const pageVisibilitiesLoaded = ref(false);
+
+  const fetchPageVisibilities = () =>
+    subscribe("pageVisibilities", PAGE_VISIBILITY_DB, (data) => {
+      pageVisibilities.value = data as PageVisibility[];
+      pageVisibilitiesLoaded.value = true;
+    });
+
   const fetchGroups = () =>
     subscribe("groups", GROUPS_DB, (data) => (groups.value = data as Group[]));
   const fetchSchedules = () =>
@@ -222,6 +233,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const setData = () => {
     fetchTableData();
     fetchAppUsers();
+    fetchPageVisibilities();
     fetchGroups();
     fetchClubs();
     fetchClubBookings();
@@ -238,6 +250,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
     tableData,
     tableDataLoaded,
     appUsers,
+    pageVisibilities,
+    pageVisibilitiesLoaded,
+    fetchPageVisibilities,
     groups,
     clubs,
     clubBookings,
