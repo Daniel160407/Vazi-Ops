@@ -19,6 +19,7 @@ import {
   ADMIN_GOLDEN_VERSES_ROUTE,
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
+  ADMIN_TABLE_ROUTE,
 } from "../composables/constants";
 
 const router = useRouter();
@@ -52,7 +53,8 @@ const adminItems = [
   { label: "საღამოს პრ.", icon: "pi pi-moon", path: ADMIN_EVENING_SCHEDULE_ROUTE },
   { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
   { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
-  { label: "მომხმარებლები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
+  { label: "ქულები", icon: "pi pi-table", path: ADMIN_TABLE_ROUTE },
+  { label: "ადამიანები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
 ];
 </script>
 

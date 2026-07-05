@@ -17,6 +17,7 @@ import {
   ANNOUNCEMENTS_ROUTE,
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
+  ADMIN_TABLE_ROUTE,
 } from "./constants";
 import { useAuth } from "./useAuth";
 import GroupsPage from "../pages/GroupsPage.vue";
@@ -35,6 +36,7 @@ import GoldenVersesEditPage from "../pages/GoldenVersesEditPage.vue";
 import AnnouncementsPage from "../pages/AnnouncementsPage.vue";
 import AnnouncementsEditPage from "../pages/AnnouncementsEditPage.vue";
 import UsersEditPage from "../pages/UsersEditPage.vue";
+import TableEditPage from "../pages/TableEditPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
@@ -54,6 +56,7 @@ const routes = [
   { path: ADMIN_GOLDEN_VERSES_ROUTE, component: GoldenVersesEditPage },
   { path: ADMIN_ANNOUNCEMENTS_ROUTE, component: AnnouncementsEditPage },
   { path: ADMIN_USERS_ROUTE, component: UsersEditPage },
+  { path: ADMIN_TABLE_ROUTE, component: TableEditPage },
 ];
 
 const router = createRouter({

@@ -12,6 +12,7 @@ import type {
   GoldenVerse,
   Announcement,
   AppUser,
+  TableData,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -24,6 +25,7 @@ import {
   GOLDEN_VERSES_DB,
   ANNOUNCEMENTS_DB,
   USERS_DB,
+  TABLE_DB,
 } from "../composables/constants";
 import type {
   FirestoreError,
@@ -44,6 +46,8 @@ import { useToast } from "primevue";
 export const useGlobalStore = defineStore("globalStore", () => {
   const toast = useToast();
 
+  const tableData = ref<TableData | null>(null);
+  const tableDataLoaded = ref(false);
   const appUsers = ref<AppUser[]>([]);
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
@@ -174,6 +178,26 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchTableData = () => {
+    if (subscriptions["tableData"]) return;
+    loadingCount.value++;
+    subscriptions["tableData"] = onSnapshot(doc(db, TABLE_DB, "main"), (snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        tableData.value = {
+          id: snap.id,
+          headers: d.headers,
+          row_labels: d.row_labels,
+          cells: (d.cells as Array<{ values: string[] }>).map((r) => r.values),
+        } as TableData;
+      } else {
+        tableData.value = null;
+      }
+      tableDataLoaded.value = true;
+      if (loadingCount.value > 0) loadingCount.value--;
+    });
+  };
+
   const fetchClubRegistration = () => {
     if (subscriptions["clubRegistration"]) return;
     subscriptions["clubRegistration"] = onSnapshot(doc(db, CLUB_BOOKINGS_DB, "registration"), (snap) => {
@@ -196,6 +220,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   const setData = () => {
+    fetchTableData();
     fetchAppUsers();
     fetchGroups();
     fetchClubs();
@@ -210,6 +235,8 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   return {
+    tableData,
+    tableDataLoaded,
     appUsers,
     groups,
     clubs,
