@@ -5,11 +5,11 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { EVENTS_DB, DEADLINE_DB } from "./constants";
 import { computed, ref } from "vue";
-import type { Event as AppEvent } from "../type/interfaces";
-import { useGlobalStore } from "../stores/GlobalStore";
+import type { Event as AppEvent } from "@/type/interfaces";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import { storeToRefs } from "pinia";
 import { useToast } from "primevue";
 

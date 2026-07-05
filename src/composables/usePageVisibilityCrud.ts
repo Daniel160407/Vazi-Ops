@@ -1,7 +1,7 @@
 import { storeToRefs } from "pinia";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../firebase";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { db } from "@/firebase";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import { PAGE_VISIBILITY_DB } from "./constants";
 
 export const PAGE_DEFINITIONS = [

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import logo from "../assets/images/logo.png";
-import { useAuth } from "../composables/useAuth";
-import { GROUPS_ROUTE } from "../composables/constants";
+import logo from "@/assets/images/logo.png";
+import { useAuth } from "@/composables/useAuth";
+import { GROUPS_ROUTE } from "@/composables/constants";
 
 const { user, avatarUrl, signInWithGoogle, logout } = useAuth();
 const router = useRouter();

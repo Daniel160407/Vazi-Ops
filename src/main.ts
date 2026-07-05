@@ -2,13 +2,13 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 import ConfirmationService from "primevue/confirmationservice";
-import router from "./composables/router";
-import Noir from "./presets/Noir";
+import router from "@/composables/router";
+import Noir from "@/presets/Noir";
 
 import "./style.css";
 import "primeicons/primeicons.css";
 
-import App from "./App.vue";
+import App from "@/App.vue";
 import { ToastService, Tooltip } from "primevue";
 
 const app = createApp(App);

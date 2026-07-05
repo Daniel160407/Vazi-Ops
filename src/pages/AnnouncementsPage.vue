@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import {
   TAG_ACTIVITY,
   TAG_DINING,
@@ -12,9 +12,9 @@ import {
   TAG_NOTEWORTHY,
   TAG_SCHEDULE,
   TAG_URGENT,
-} from "../composables/constants";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import AppButton from "../components/UI/AppButton.vue";
+} from "@/composables/constants";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import AppButton from "@/components/UI/AppButton.vue";
 
 const { loading, announcements } = storeToRefs(useGlobalStore());
 

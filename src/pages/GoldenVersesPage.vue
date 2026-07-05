@@ -2,8 +2,8 @@
 import { storeToRefs } from "pinia";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
-import { useGlobalStore } from "../stores/GlobalStore";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
 
 const { loading, goldenVerses } = storeToRefs(useGlobalStore());
 

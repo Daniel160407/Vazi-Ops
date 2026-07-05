@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
 
 const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
 </script>

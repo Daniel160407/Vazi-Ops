@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
-import { GENDER_MALE, GENDER_FEMALE } from "../composables/constants";
-import type { Group } from "../type/interfaces";
-import { useGroupsCrud } from "../composables/useGroupsCrud";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { GENDER_MALE, GENDER_FEMALE } from "@/composables/constants";
+import type { Group } from "@/type/interfaces";
+import { useGroupsCrud } from "@/composables/useGroupsCrud";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import { useConfirm } from "primevue";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import BottomSheet from "../components/UI/BottomSheet.vue";
-import SearchInput from "../components/UI/SearchInput.vue";
-import SheetField from "../components/UI/SheetField.vue";
-import AppButton from "../components/UI/AppButton.vue";
-import AppInput from "../components/UI/AppInput.vue";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import BottomSheet from "@/components/UI/BottomSheet.vue";
+import SearchInput from "@/components/UI/SearchInput.vue";
+import SheetField from "@/components/UI/SheetField.vue";
+import AppButton from "@/components/UI/AppButton.vue";
+import AppInput from "@/components/UI/AppInput.vue";
 
 const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
 const { appUsers } = storeToRefs(useGlobalStore());

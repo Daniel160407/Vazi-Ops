@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import { useConfirm } from "primevue";
-import { useUsersCrud } from "../composables/useUsersCrud";
-import { useImgBB } from "../composables/useImgBB";
-import { usePageVisibilityCrud, PAGE_DEFINITIONS } from "../composables/usePageVisibilityCrud";
-import { UserRole } from "../type/interfaces";
-import type { AppUser } from "../type/interfaces";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import BottomSheet from "../components/UI/BottomSheet.vue";
-import SheetField from "../components/UI/SheetField.vue";
-import AppButton from "../components/UI/AppButton.vue";
-import AppInput from "../components/UI/AppInput.vue";
+import { useUsersCrud } from "@/composables/useUsersCrud";
+import { useImgBB } from "@/composables/useImgBB";
+import { usePageVisibilityCrud, PAGE_DEFINITIONS } from "@/composables/usePageVisibilityCrud";
+import { UserRole } from "@/type/interfaces";
+import type { AppUser } from "@/type/interfaces";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import BottomSheet from "@/components/UI/BottomSheet.vue";
+import SheetField from "@/components/UI/SheetField.vue";
+import AppButton from "@/components/UI/AppButton.vue";
+import AppInput from "@/components/UI/AppInput.vue";
 
 const { appUsers, loading, addUser, updateUser, updateUserRole, deleteUser } =
   useUsersCrud();

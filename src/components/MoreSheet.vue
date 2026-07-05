@@ -2,8 +2,8 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import AppButton from "./UI/AppButton.vue";
-import { useAuth } from "../composables/useAuth";
-import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
+import { useAuth } from "@/composables/useAuth";
+import { usePageVisibilityCrud } from "@/composables/usePageVisibilityCrud";
 import {
   ANNOUNCEMENTS_ROUTE,
   DAY_SCHEDULE_ROUTE,
@@ -18,7 +18,7 @@ import {
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
   ADMIN_TABLE_ROUTE,
-} from "../composables/constants";
+} from "@/composables/constants";
 
 const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();

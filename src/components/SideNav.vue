@@ -2,8 +2,8 @@
 import { computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import AppButton from "./UI/AppButton.vue";
-import { useAuth } from "../composables/useAuth";
-import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
+import { useAuth } from "@/composables/useAuth";
+import { usePageVisibilityCrud } from "@/composables/usePageVisibilityCrud";
 import {
   GROUPS_ROUTE,
   CLUBS_ROUTE,
@@ -22,7 +22,7 @@ import {
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
   ADMIN_TABLE_ROUTE,
-} from "../composables/constants";
+} from "@/composables/constants";
 
 const router = useRouter();
 const route = useRoute();
@@ -73,7 +73,7 @@ const adminItems = [
     style="box-shadow: 4px 0 24px 0 rgba(0,10,40,0.5)"
   >
     <div class="flex items-center gap-3 px-5 py-6 border-b border-blue-900/20">
-      <img src="../assets/images/logo.png" class="h-8 w-8 object-contain" />
+      <img src="@/assets/images/logo.png" class="h-8 w-8 object-contain" />
       <span class="text-base font-semibold tracking-tight text-white">ბანაკი "ვაზი"</span>
     </div>
 

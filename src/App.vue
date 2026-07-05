@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Toast, ConfirmDialog } from "primevue";
-import { useGlobalStore } from "./stores/GlobalStore";
-import BottomNav from "./components/BottomNav.vue";
-import MoreSheet from "./components/MoreSheet.vue";
-import SideNav from "./components/SideNav.vue";
-import AppHeader from "./components/AppHeader.vue";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import BottomNav from "@/components/BottomNav.vue";
+import MoreSheet from "@/components/MoreSheet.vue";
+import SideNav from "@/components/SideNav.vue";
+import AppHeader from "@/components/AppHeader.vue";
 
 const { setData } = useGlobalStore();
 setData();

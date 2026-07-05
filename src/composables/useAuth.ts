@@ -1,5 +1,5 @@
 import { ref, computed } from "vue";
-import { auth, db, googleProvider } from "../../firebase";
+import { auth, db, googleProvider } from "@/firebase";
 import {
   signInWithPopup,
   signOut,
@@ -16,9 +16,9 @@ import {
   where,
 } from "firebase/firestore";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import { USERS_DB } from "./constants";
-import { UserRole } from "../type/interfaces";
+import { UserRole } from "@/type/interfaces";
 
 const user = ref<User | null>(null);
 const role = ref<UserRole | null>(null);

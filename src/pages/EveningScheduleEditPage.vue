@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
-import { useSchedulesCrud } from "../composables/useSchedulesCrud";
-import { useAuth } from "../composables/useAuth";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import { useSchedulesCrud } from "@/composables/useSchedulesCrud";
+import { useAuth } from "@/composables/useAuth";
 import { useConfirm } from "primevue";
-import type { EveningScheduleItem } from "../type/interfaces";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import BottomSheet from "../components/UI/BottomSheet.vue";
-import SheetField from "../components/UI/SheetField.vue";
-import AppButton from "../components/UI/AppButton.vue";
-import AppInput from "../components/UI/AppInput.vue";
+import type { EveningScheduleItem } from "@/type/interfaces";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import BottomSheet from "@/components/UI/BottomSheet.vue";
+import SheetField from "@/components/UI/SheetField.vue";
+import AppButton from "@/components/UI/AppButton.vue";
+import AppInput from "@/components/UI/AppInput.vue";
 
 const { loading: loadingStore, eveningScheduleItems, appUsers, groups } =
   storeToRefs(useGlobalStore());

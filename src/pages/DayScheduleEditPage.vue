@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
-import { DAY_SCHEDULE_CATEGORY } from "../composables/constants";
-import { useImgBB } from "../composables/useImgBB";
-import AppButton from "../components/UI/AppButton.vue";
-import { useSchedulesCrud } from "../composables/useSchedulesCrud";
-import type { Schedule } from "../type/interfaces";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import { DAY_SCHEDULE_CATEGORY } from "@/composables/constants";
+import { useImgBB } from "@/composables/useImgBB";
+import AppButton from "@/components/UI/AppButton.vue";
+import { useSchedulesCrud } from "@/composables/useSchedulesCrud";
+import type { Schedule } from "@/type/interfaces";
 
 const { schedules } = storeToRefs(useGlobalStore());
 const { saveSchedule, loading: savingSchedule } = useSchedulesCrud();

@@ -5,9 +5,9 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { GOLDEN_VERSES_DB } from "./constants";
-import type { GoldenVerse } from "../type/interfaces";
+import type { GoldenVerse } from "@/type/interfaces";
 import { useToast } from "primevue";
 import { ref } from "vue";
 

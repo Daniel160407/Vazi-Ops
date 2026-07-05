@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { GENDER_MALE } from "../composables/constants";
-import { useGroupsCrud } from "../composables/useGroupsCrud";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import SearchInput from "../components/UI/SearchInput.vue";
-import AppButton from "../components/UI/AppButton.vue";
+import { GENDER_MALE } from "@/composables/constants";
+import { useGroupsCrud } from "@/composables/useGroupsCrud";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import SearchInput from "@/components/UI/SearchInput.vue";
+import AppButton from "@/components/UI/AppButton.vue";
 
 const { loading, groups } = useGroupsCrud();
 

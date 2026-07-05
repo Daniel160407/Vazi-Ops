@@ -20,7 +20,7 @@ import {
   ADMIN_TABLE_ROUTE,
 } from "./constants";
 import { useAuth } from "./useAuth";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { useGlobalStore } from "@/stores/GlobalStore";
 
 const routeToPageKey: Record<string, string> = {
   [GROUPS_ROUTE]: "groups",
@@ -31,23 +31,23 @@ const routeToPageKey: Record<string, string> = {
   [GOLDEN_VERSES_ROUTE]: "golden_verses",
   [ANNOUNCEMENTS_ROUTE]: "announcements",
 };
-import GroupsPage from "../pages/GroupsPage.vue";
-import ClubsPage from "../pages/ClubsPage.vue";
-import GroupsEditPage from "../pages/GroupsEditPage.vue";
-import ClubsEditPage from "../pages/ClubsEditPage.vue";
-import ClubBookingsPage from "../pages/ClubBookingsPage.vue";
-import DaySchedulePage from "../pages/DaySchedulePage.vue";
-import DayScheduleEditPage from "../pages/DayScheduleEditPage.vue";
-import EveningSchedulePage from "../pages/EveningSchedulePage.vue";
-import EveningScheduleEditPage from "../pages/EveningScheduleEditPage.vue";
-import EventsPage from "../pages/EventsPage.vue";
-import EventsEditPage from "../pages/EventsEditPage.vue";
-import GoldenVersesPage from "../pages/GoldenVersesPage.vue";
-import GoldenVersesEditPage from "../pages/GoldenVersesEditPage.vue";
-import AnnouncementsPage from "../pages/AnnouncementsPage.vue";
-import AnnouncementsEditPage from "../pages/AnnouncementsEditPage.vue";
-import AppManagementPage from "../pages/AppManagementPage.vue";
-import TableEditPage from "../pages/TableEditPage.vue";
+import GroupsPage from "@/pages/GroupsPage.vue";
+import ClubsPage from "@/pages/ClubsPage.vue";
+import GroupsEditPage from "@/pages/GroupsEditPage.vue";
+import ClubsEditPage from "@/pages/ClubsEditPage.vue";
+import ClubBookingsPage from "@/pages/ClubBookingsPage.vue";
+import DaySchedulePage from "@/pages/DaySchedulePage.vue";
+import DayScheduleEditPage from "@/pages/DayScheduleEditPage.vue";
+import EveningSchedulePage from "@/pages/EveningSchedulePage.vue";
+import EveningScheduleEditPage from "@/pages/EveningScheduleEditPage.vue";
+import EventsPage from "@/pages/EventsPage.vue";
+import EventsEditPage from "@/pages/EventsEditPage.vue";
+import GoldenVersesPage from "@/pages/GoldenVersesPage.vue";
+import GoldenVersesEditPage from "@/pages/GoldenVersesEditPage.vue";
+import AnnouncementsPage from "@/pages/AnnouncementsPage.vue";
+import AnnouncementsEditPage from "@/pages/AnnouncementsEditPage.vue";
+import AppManagementPage from "@/pages/AppManagementPage.vue";
+import TableEditPage from "@/pages/TableEditPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },

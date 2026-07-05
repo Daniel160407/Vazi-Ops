@@ -8,9 +8,9 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
-import { db } from "../../firebase";
-import { CLUBS_DB, CLUB_BOOKINGS_DB } from "../composables/constants";
-import type { Club, ClubBooking, ClubRegistration } from "../type/interfaces";
+import { db } from "@/firebase";
+import { CLUBS_DB, CLUB_BOOKINGS_DB } from "@/composables/constants";
+import type { Club, ClubBooking, ClubRegistration } from "@/type/interfaces";
 import { useToast } from "primevue";
 
 export function useClubsCrud() {

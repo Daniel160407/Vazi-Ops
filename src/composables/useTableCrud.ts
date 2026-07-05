@@ -1,11 +1,11 @@
 import { ref, computed } from "vue";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { TABLE_DB } from "./constants";
 import { useToast } from "primevue";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
-import type { TableData } from "../type/interfaces";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import type { TableData } from "@/type/interfaces";
 
 export const useTableCrud = () => {
   const toast = useToast();

@@ -14,7 +14,7 @@ import type {
   AppUser,
   TableData,
   PageVisibility,
-} from "../type/interfaces";
+} from "@/type/interfaces";
 import {
   GROUPS_DB,
   CLUBS_DB,
@@ -28,7 +28,7 @@ import {
   USERS_DB,
   TABLE_DB,
   PAGE_VISIBILITY_DB,
-} from "../composables/constants";
+} from "@/composables/constants";
 import type {
   FirestoreError,
   Query,
@@ -42,7 +42,7 @@ import {
   query,
   type DocumentData,
 } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { useToast } from "primevue";
 
 export const useGlobalStore = defineStore("globalStore", () => {

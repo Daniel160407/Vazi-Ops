@@ -9,11 +9,11 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { db } from "../../firebase";
-import { CLUB_BOOKINGS_DB, CLUBS_DB } from "../composables/constants";
-import type { Club, ClubBooking } from "../type/interfaces";
+import { db } from "@/firebase";
+import { CLUB_BOOKINGS_DB, CLUBS_DB } from "@/composables/constants";
+import type { Club, ClubBooking } from "@/type/interfaces";
 import { useToast } from "primevue";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import { storeToRefs } from "pinia";
 
 export function useClubBookingsCrud() {

@@ -11,12 +11,12 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-import type { EveningScheduleItem, Schedule } from "../type/interfaces";
-import { db } from "../../firebase";
+import type { EveningScheduleItem, Schedule } from "@/type/interfaces";
+import { db } from "@/firebase";
 import { EVENING_SCHEDULE_DB, SCHEDULES_DB } from "./constants";
 import { useToast } from "primevue";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { useGlobalStore } from "@/stores/GlobalStore";
 
 export const useSchedulesCrud = () => {
   const toast = useToast();

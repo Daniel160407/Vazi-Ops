@@ -1,5 +1,5 @@
 import { useToast } from "primevue";
-import type { Announcement } from "../type/interfaces";
+import type { Announcement } from "@/type/interfaces";
 import { ref } from "vue";
 import {
   addDoc,
@@ -8,7 +8,7 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { ANNOUNCEMENTS_DB } from "./constants";
 
 export const useAnnouncementsCrud = () => {

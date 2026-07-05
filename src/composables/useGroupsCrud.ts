@@ -6,11 +6,11 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "../../firebase";
-import { GROUPS_DB } from "../composables/constants";
-import type { Group } from "../type/interfaces";
+import { db } from "@/firebase";
+import { GROUPS_DB } from "@/composables/constants";
+import type { Group } from "@/type/interfaces";
 import { useToast } from "primevue";
-import { useGlobalStore } from "../stores/GlobalStore";
+import { useGlobalStore } from "@/stores/GlobalStore";
 import { storeToRefs } from "pinia";
 
 export function useGroupsCrud() {

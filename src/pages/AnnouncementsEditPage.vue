@@ -4,9 +4,9 @@ import { storeToRefs } from "pinia";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
 import { useConfirm } from "primevue";
-import { useGlobalStore } from "../stores/GlobalStore";
-import { useAnnouncementsCrud } from "../composables/useAnnouncementsCrud";
-import { useAuth } from "../composables/useAuth";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import { useAnnouncementsCrud } from "@/composables/useAnnouncementsCrud";
+import { useAuth } from "@/composables/useAuth";
 import {
   TAG_ACTIVITY,
   TAG_DINING,
@@ -15,13 +15,13 @@ import {
   TAG_NOTEWORTHY,
   TAG_SCHEDULE,
   TAG_URGENT,
-} from "../composables/constants";
-import type { Announcement } from "../type/interfaces";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import BottomSheet from "../components/UI/BottomSheet.vue";
-import SheetField from "../components/UI/SheetField.vue";
-import AppButton from "../components/UI/AppButton.vue";
-import AppInput from "../components/UI/AppInput.vue";
+} from "@/composables/constants";
+import type { Announcement } from "@/type/interfaces";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import BottomSheet from "@/components/UI/BottomSheet.vue";
+import SheetField from "@/components/UI/SheetField.vue";
+import AppButton from "@/components/UI/AppButton.vue";
+import AppInput from "@/components/UI/AppInput.vue";
 
 const { loading: loadingStore, announcements } = storeToRefs(useGlobalStore());
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } =

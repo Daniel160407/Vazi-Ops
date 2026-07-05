@@ -2,14 +2,14 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import AppButton from "./UI/AppButton.vue";
-import { useAuth } from "../composables/useAuth";
-import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
+import { useAuth } from "@/composables/useAuth";
+import { usePageVisibilityCrud } from "@/composables/usePageVisibilityCrud";
 import {
   GROUPS_ROUTE,
   CLUBS_ROUTE,
   EVENTS_ROUTE,
   EVENING_SCHEDULE_ROUTE,
-} from "../composables/constants";
+} from "@/composables/constants";
 
 defineEmits<{ openMore: [] }>();
 

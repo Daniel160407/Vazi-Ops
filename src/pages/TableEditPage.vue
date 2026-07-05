@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { useTableCrud } from "../composables/useTableCrud";
-import AppButton from "../components/UI/AppButton.vue";
-import AppInput from "../components/UI/AppInput.vue";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
+import { useTableCrud } from "@/composables/useTableCrud";
+import AppButton from "@/components/UI/AppButton.vue";
+import AppInput from "@/components/UI/AppInput.vue";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
 
 const { tableData, tableDataLoaded, saving, loading, saveTable } =
   useTableCrud();

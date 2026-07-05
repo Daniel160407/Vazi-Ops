@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useGlobalStore } from "../stores/GlobalStore";
-import { DAY_SCHEDULE_CATEGORY } from "../composables/constants";
-import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
-import AppButton from "../components/UI/AppButton.vue";
+import { useGlobalStore } from "@/stores/GlobalStore";
+import { DAY_SCHEDULE_CATEGORY } from "@/composables/constants";
+import LoadingSpinner from "@/components/UI/LoadingSpinner.vue";
+import AppButton from "@/components/UI/AppButton.vue";
 
 const { loading, schedules } = storeToRefs(useGlobalStore());
 const imageUrl = ref("");
