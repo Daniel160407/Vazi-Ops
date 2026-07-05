@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import AppButton from "./UI/AppButton.vue";
+import { useAuth } from "../composables/useAuth";
+import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
 import {
   GROUPS_ROUTE,
   CLUBS_ROUTE,
@@ -13,16 +15,24 @@ defineEmits<{ openMore: [] }>();
 
 const router = useRouter();
 const route = useRoute();
+const { isAdmin } = useAuth();
+const { isVisible: isPageVisible } = usePageVisibilityCrud();
 
 const isVisible = ref(true);
 const lastScrollPosition = ref(0);
 
-const navItems = [
-  { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE },
-  { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE },
-  { label: "ნომრები", icon: "pi pi-ticket", path: EVENTS_ROUTE },
-  { label: "საღამო", icon: "pi pi-moon", path: EVENING_SCHEDULE_ROUTE },
+const allNavItems = [
+  { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE, key: "groups" },
+  { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE, key: "clubs" },
+  { label: "ნომრები", icon: "pi pi-ticket", path: EVENTS_ROUTE, key: "events" },
+  { label: "საღამო", icon: "pi pi-moon", path: EVENING_SCHEDULE_ROUTE, key: "evening_schedule" },
 ];
+
+const navItems = computed(() =>
+  isAdmin.value
+    ? allNavItems
+    : allNavItems.filter((item) => isPageVisible(item.key))
+);
 
 const isActive = (path: string) => route.path === path;
 

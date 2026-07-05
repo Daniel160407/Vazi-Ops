@@ -12,6 +12,8 @@ import type {
   GoldenVerse,
   Announcement,
   AppUser,
+  TableData,
+  PageVisibility,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -24,6 +26,8 @@ import {
   GOLDEN_VERSES_DB,
   ANNOUNCEMENTS_DB,
   USERS_DB,
+  TABLE_DB,
+  PAGE_VISIBILITY_DB,
 } from "../composables/constants";
 import type {
   FirestoreError,
@@ -44,7 +48,10 @@ import { useToast } from "primevue";
 export const useGlobalStore = defineStore("globalStore", () => {
   const toast = useToast();
 
+  const tableData = ref<TableData | null>(null);
+  const tableDataLoaded = ref(false);
   const appUsers = ref<AppUser[]>([]);
+  const pageVisibilities = ref<PageVisibility[]>([]);
   const groups = ref<Group[]>([]);
   const clubs = ref<Club[]>([]);
   const clubBookings = ref<ClubBooking[]>([]);
@@ -137,6 +144,14 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const fetchAppUsers = () =>
     subscribe("users", USERS_DB, (data) => (appUsers.value = data as AppUser[]));
 
+  const pageVisibilitiesLoaded = ref(false);
+
+  const fetchPageVisibilities = () =>
+    subscribe("pageVisibilities", PAGE_VISIBILITY_DB, (data) => {
+      pageVisibilities.value = data as PageVisibility[];
+      pageVisibilitiesLoaded.value = true;
+    });
+
   const fetchGroups = () =>
     subscribe("groups", GROUPS_DB, (data) => (groups.value = data as Group[]));
   const fetchSchedules = () =>
@@ -174,6 +189,26 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchTableData = () => {
+    if (subscriptions["tableData"]) return;
+    loadingCount.value++;
+    subscriptions["tableData"] = onSnapshot(doc(db, TABLE_DB, "main"), (snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        tableData.value = {
+          id: snap.id,
+          headers: d.headers,
+          row_labels: d.row_labels,
+          cells: (d.cells as Array<{ values: string[] }>).map((r) => r.values),
+        } as TableData;
+      } else {
+        tableData.value = null;
+      }
+      tableDataLoaded.value = true;
+      if (loadingCount.value > 0) loadingCount.value--;
+    });
+  };
+
   const fetchClubRegistration = () => {
     if (subscriptions["clubRegistration"]) return;
     subscriptions["clubRegistration"] = onSnapshot(doc(db, CLUB_BOOKINGS_DB, "registration"), (snap) => {
@@ -196,7 +231,9 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   const setData = () => {
+    fetchTableData();
     fetchAppUsers();
+    fetchPageVisibilities();
     fetchGroups();
     fetchClubs();
     fetchClubBookings();
@@ -210,7 +247,12 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   return {
+    tableData,
+    tableDataLoaded,
     appUsers,
+    pageVisibilities,
+    pageVisibilitiesLoaded,
+    fetchPageVisibilities,
     groups,
     clubs,
     clubBookings,

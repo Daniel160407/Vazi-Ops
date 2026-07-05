@@ -17,8 +17,20 @@ import {
   ANNOUNCEMENTS_ROUTE,
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
+  ADMIN_TABLE_ROUTE,
 } from "./constants";
 import { useAuth } from "./useAuth";
+import { useGlobalStore } from "../stores/GlobalStore";
+
+const routeToPageKey: Record<string, string> = {
+  [GROUPS_ROUTE]: "groups",
+  [CLUBS_ROUTE]: "clubs",
+  [DAY_SCHEDULE_ROUTE]: "day_schedule",
+  [EVENING_SCHEDULE_ROUTE]: "evening_schedule",
+  [EVENTS_ROUTE]: "events",
+  [GOLDEN_VERSES_ROUTE]: "golden_verses",
+  [ANNOUNCEMENTS_ROUTE]: "announcements",
+};
 import GroupsPage from "../pages/GroupsPage.vue";
 import ClubsPage from "../pages/ClubsPage.vue";
 import GroupsEditPage from "../pages/GroupsEditPage.vue";
@@ -34,7 +46,8 @@ import GoldenVersesPage from "../pages/GoldenVersesPage.vue";
 import GoldenVersesEditPage from "../pages/GoldenVersesEditPage.vue";
 import AnnouncementsPage from "../pages/AnnouncementsPage.vue";
 import AnnouncementsEditPage from "../pages/AnnouncementsEditPage.vue";
-import UsersEditPage from "../pages/UsersEditPage.vue";
+import AppManagementPage from "../pages/AppManagementPage.vue";
+import TableEditPage from "../pages/TableEditPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
@@ -53,7 +66,9 @@ const routes = [
   { path: ADMIN_EVENTS_ROUTE, component: EventsEditPage },
   { path: ADMIN_GOLDEN_VERSES_ROUTE, component: GoldenVersesEditPage },
   { path: ADMIN_ANNOUNCEMENTS_ROUTE, component: AnnouncementsEditPage },
-  { path: ADMIN_USERS_ROUTE, component: UsersEditPage },
+  { path: ADMIN_USERS_ROUTE, component: AppManagementPage },
+  { path: ADMIN_TABLE_ROUTE, component: TableEditPage },
+  { path: "/:pathMatch(.*)*", redirect: GROUPS_ROUTE },
 ];
 
 const router = createRouter({
@@ -74,11 +89,59 @@ function waitForAuth(): Promise<void> {
   });
 }
 
+function waitForPageVisibilities(): Promise<void> {
+  const store = useGlobalStore();
+  store.fetchPageVisibilities();
+  if (store.pageVisibilitiesLoaded) return Promise.resolve();
+  return new Promise((resolve) => {
+    const stop = watch(() => store.pageVisibilitiesLoaded, (val) => {
+      if (val) {
+        stop();
+        resolve();
+      }
+    });
+  });
+}
+
+const publicPageOrder = [
+  { key: "announcements", path: ANNOUNCEMENTS_ROUTE },
+  { key: "groups", path: GROUPS_ROUTE },
+  { key: "clubs", path: CLUBS_ROUTE },
+  { key: "events", path: EVENTS_ROUTE },
+  { key: "evening_schedule", path: EVENING_SCHEDULE_ROUTE },
+  { key: "day_schedule", path: DAY_SCHEDULE_ROUTE },
+  { key: "golden_verses", path: GOLDEN_VERSES_ROUTE },
+];
+
+function firstVisiblePath(store: ReturnType<typeof useGlobalStore>): string {
+  for (const p of publicPageOrder) {
+    const pv = store.pageVisibilities.find((v) => v.id === p.key);
+    if (!pv || pv.is_visible) return p.path;
+  }
+  return "/";
+}
+
 router.beforeEach(async (to) => {
-  if (!to.path.startsWith("/admin")) return true;
+  if (to.path.startsWith("/admin")) {
+    await waitForAuth();
+    const { isAdmin } = useAuth();
+    if (!isAdmin.value) return ANNOUNCEMENTS_ROUTE;
+    return true;
+  }
+
+  const pageKey = routeToPageKey[to.path];
+  if (!pageKey) return true;
+
   await waitForAuth();
   const { isAdmin } = useAuth();
-  if (!isAdmin.value) return ANNOUNCEMENTS_ROUTE;
+  if (isAdmin.value) return true;
+
+  await waitForPageVisibilities();
+  const store = useGlobalStore();
+  const pv = store.pageVisibilities.find((p) => p.id === pageKey);
+  const visible = pv ? pv.is_visible : true;
+  if (!visible) return firstVisiblePath(store);
+
   return true;
 });
 

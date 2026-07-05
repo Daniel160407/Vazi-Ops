@@ -15,7 +15,13 @@ const props = withDefaults(
       | "filter"
       | "segment"
       | "link"
-      | "plain";
+      | "plain"
+      | "table-add"
+      | "table-remove"
+      | "table-remove-column"
+      | "table-remove-row"
+      | "table-add-column"
+      | "table-add-row";
     icon?: string;
     disabled?: boolean;
     active?: boolean;
@@ -78,6 +84,21 @@ const classes = computed((): string => {
     case "link":
       return `${c} ${t} flex items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300`;
 
+    case "table-add":
+      return `${c} ${t} flex w-full items-center justify-center text-slate-600 hover:text-blue-400`;
+
+    case "table-remove":
+      return `${c} ${t} flex shrink-0 items-center justify-center rounded text-slate-700 opacity-0 hover:bg-rose-500/10 hover:text-rose-400`;
+
+    case "table-remove-column":
+      return `${c} ${t} mr-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-rose-400 p-2`;
+
+    case "table-remove-row":
+      return `${c} ${t} flex w-full shrink-0 items-center justify-center rounded py-2.5 text-xs  text-rose-400 p-2`;
+
+    case "table-add-row":
+      return `${c} ${t} flex w-full items-center justify-center gap-2 py-2.5 text-xs text-slate-600 hover:bg-blue-500/5 hover:text-blue-400`;
+
     case "plain":
     default:
       return c;
@@ -92,6 +113,12 @@ const iconSize = computed((): string => {
     case "icon-delete":
       return "text-[10px]";
     case "icon-close":
+      return "text-xs";
+    case "table-remove":
+      return "text-[9px]";
+    case "table-add-column":
+      return "text-xs w-10";
+    case "table-add-row":
       return "text-xs";
     default:
       return "text-sm";

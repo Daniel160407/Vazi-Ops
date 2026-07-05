@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import AppButton from "./UI/AppButton.vue";
 import { useAuth } from "../composables/useAuth";
+import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
 import {
   ANNOUNCEMENTS_ROUTE,
   DAY_SCHEDULE_ROUTE,
@@ -16,6 +17,7 @@ import {
   ADMIN_GOLDEN_VERSES_ROUTE,
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
+  ADMIN_TABLE_ROUTE,
 } from "../composables/constants";
 
 const props = defineProps<{ visible: boolean }>();
@@ -23,6 +25,7 @@ const emit = defineEmits<{ close: [] }>();
 
 const router = useRouter();
 const { user, isAdmin } = useAuth();
+const { isVisible: isPageVisible } = usePageVisibilityCrud();
 
 const navigate = (path: string) => {
   router.push(path);
@@ -60,11 +63,17 @@ const onTouchEnd = () => {
   dragY.value = 0;
 };
 
-const mainItems = [
-  { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE },
-  { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE },
-  { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE },
+const allMainItems = [
+  { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE, key: "announcements" },
+  { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE, key: "day_schedule" },
+  { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE, key: "golden_verses" },
 ];
+
+const mainItems = computed(() =>
+  isAdmin.value
+    ? allMainItems
+    : allMainItems.filter((item) => isPageVisible(item.key))
+);
 
 const adminItems = [
   { label: "ჯგუფები", icon: "pi pi-users", path: ADMIN_GROUPS_ROUTE },
@@ -75,7 +84,8 @@ const adminItems = [
   { label: "ნომრები", icon: "pi pi-ticket", path: ADMIN_EVENTS_ROUTE },
   { label: "ოქროს მუხ.", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ADMIN_ANNOUNCEMENTS_ROUTE },
-  { label: "ადამიანები", icon: "pi pi-users", path: ADMIN_USERS_ROUTE },
+  { label: "ქულები", icon: "pi pi-table", path: ADMIN_TABLE_ROUTE },
+  { label: "მართვა", icon: "pi pi-cog", path: ADMIN_USERS_ROUTE },
 ];
 </script>
 

@@ -99,3 +99,15 @@ export interface Announcement {
   author: string;
   author_image_url: string;
 }
+
+export interface TableData {
+  id?: string;
+  headers: string[];
+  row_labels: string[];
+  cells: string[][];
+}
+
+export interface PageVisibility {
+  id: string;
+  is_visible: boolean;
+}
