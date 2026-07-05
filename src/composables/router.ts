@@ -46,7 +46,7 @@ import GoldenVersesPage from "../pages/GoldenVersesPage.vue";
 import GoldenVersesEditPage from "../pages/GoldenVersesEditPage.vue";
 import AnnouncementsPage from "../pages/AnnouncementsPage.vue";
 import AnnouncementsEditPage from "../pages/AnnouncementsEditPage.vue";
-import UsersEditPage from "../pages/UsersEditPage.vue";
+import AppManagementPage from "../pages/AppManagementPage.vue";
 import TableEditPage from "../pages/TableEditPage.vue";
 
 const routes = [
@@ -66,7 +66,7 @@ const routes = [
   { path: ADMIN_EVENTS_ROUTE, component: EventsEditPage },
   { path: ADMIN_GOLDEN_VERSES_ROUTE, component: GoldenVersesEditPage },
   { path: ADMIN_ANNOUNCEMENTS_ROUTE, component: AnnouncementsEditPage },
-  { path: ADMIN_USERS_ROUTE, component: UsersEditPage },
+  { path: ADMIN_USERS_ROUTE, component: AppManagementPage },
   { path: ADMIN_TABLE_ROUTE, component: TableEditPage },
   { path: "/:pathMatch(.*)*", redirect: GROUPS_ROUTE },
 ];

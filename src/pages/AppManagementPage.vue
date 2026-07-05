@@ -179,34 +179,36 @@ const userCount = () =>
           />
         </button>
 
-        <div v-if="visibilityOpen" class="border-t border-blue-900/20">
-          <div
-            v-for="page in PAGE_DEFINITIONS"
-            :key="page.key"
-            class="flex items-center justify-between px-4 py-3 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-blue-900/20"
-          >
-            <div class="flex items-center gap-3">
-              <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-900/20">
-                <i :class="page.icon" class="text-xs text-blue-400" />
-              </div>
-              <span class="text-sm text-slate-300">{{ page.label }}</span>
-            </div>
-            <button
-              class="relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none"
-              :class="[
-                isVisible(page.key) ? 'bg-blue-600' : 'bg-slate-700',
-                togglingPage === page.key ? 'opacity-50' : '',
-              ]"
-              :disabled="togglingPage === page.key"
-              @click="handleTogglePage(page.key)"
+        <Transition name="visibility-dropdown">
+          <div v-if="visibilityOpen" class="border-t border-blue-900/20">
+            <div
+              v-for="page in PAGE_DEFINITIONS"
+              :key="page.key"
+              class="flex items-center justify-between px-4 py-3 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-blue-900/20"
             >
-              <span
-                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
-                :class="isVisible(page.key) ? 'translate-x-5' : 'translate-x-0'"
-              />
-            </button>
+              <div class="flex items-center gap-3">
+                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-900/20">
+                  <i :class="page.icon" class="text-xs text-blue-400" />
+                </div>
+                <span class="text-sm text-slate-300">{{ page.label }}</span>
+              </div>
+              <button
+                class="relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none"
+                :class="[
+                  isVisible(page.key) ? 'bg-blue-600' : 'bg-slate-700',
+                  togglingPage === page.key ? 'opacity-50' : '',
+                ]"
+                :disabled="togglingPage === page.key"
+                @click="handleTogglePage(page.key)"
+              >
+                <span
+                  class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
+                  :class="isVisible(page.key) ? 'translate-x-5' : 'translate-x-0'"
+                />
+              </button>
+            </div>
           </div>
-        </div>
+        </Transition>
       </div>
 
       <div v-if="appUsers.length === 0" class="py-16 text-center">
@@ -397,3 +399,24 @@ const userCount = () =>
     </BottomSheet>
   </div>
 </template>
+
+<style scoped>
+.visibility-dropdown-enter-active {
+  transition: max-height 0.28s ease, opacity 0.28s ease;
+  overflow: hidden;
+  max-height: 600px;
+}
+.visibility-dropdown-leave-active {
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+  overflow: hidden;
+  max-height: 600px;
+}
+.visibility-dropdown-enter-from {
+  max-height: 0;
+  opacity: 0;
+}
+.visibility-dropdown-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+</style>
