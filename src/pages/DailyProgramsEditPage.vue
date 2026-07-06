@@ -43,11 +43,15 @@ const handleSave = async () => {
   submitted.value = true;
   if (!content.value || content.value === "<p><br></p>") return;
   isSubmitting.value = true;
+  const cleanContent = content.value
+    .replace(/&nbsp;/g, " ")
+    .replace(/<undefined>/g, "<p>")
+    .replace(/<\/undefined>/g, "</p>");
   try {
     if (isEditing.value && currentId.value) {
-      await updateDailyProgram(currentId.value, content.value);
+      await updateDailyProgram(currentId.value, cleanContent);
     } else {
-      await addDailyProgram(content.value);
+      await addDailyProgram(cleanContent);
     }
     sheetVisible.value = false;
   } finally {
