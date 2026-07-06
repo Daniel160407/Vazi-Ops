@@ -30,7 +30,7 @@ const { loading, dailyPrograms } = storeToRefs(useGlobalStore());
           class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] p-4"
         >
           <div
-            class="wrap-break-word whitespace-pre-wrap [word-break:normal] text-sm leading-relaxed text-slate-300"
+            class="daily-program-content text-sm leading-relaxed text-slate-300"
             v-html="program.content"
           />
         </article>
