@@ -102,7 +102,10 @@ export function useAuth() {
     avatarUrl,
     isAdmin: computed(() => role.value === UserRole.ADMIN),
     isLoggedIn: computed(() => !!user.value),
-    fullName: computed(() => user.value?.displayName ?? ""),
+    fullName: computed(() => {
+      if (!user.value?.email) return "";
+      return appUsers.value.find((u) => u.email === user.value!.email)?.name ?? "";
+    }),
     userGroupName,
     profileImg: computed(() => user.value?.photoURL),
     loading,
