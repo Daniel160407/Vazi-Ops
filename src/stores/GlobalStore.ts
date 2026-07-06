@@ -224,7 +224,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   };
 
   const fetchDailyPrograms = () => {
-    const q = query(collection(db, DAILY_PROGRAMS_DB), orderBy("created_at", "desc"));
+    const q = query(collection(db, DAILY_PROGRAMS_DB), orderBy("created_at", "asc"));
     subscribe(
       "dailyPrograms",
       DAILY_PROGRAMS_DB,
