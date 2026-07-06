@@ -18,6 +18,8 @@ import {
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
   ADMIN_TABLE_ROUTE,
+  DAILY_PROGRAMS_ROUTE,
+  ADMIN_DAILY_PROGRAMS_ROUTE,
 } from "../composables/constants";
 
 const props = defineProps<{ visible: boolean }>();
@@ -67,6 +69,7 @@ const allMainItems = [
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE, key: "announcements" },
   { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE, key: "day_schedule" },
   { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE, key: "golden_verses" },
+  { label: "დღის პროგრამები", icon: "pi pi-list", path: DAILY_PROGRAMS_ROUTE, key: "daily_programs" },
 ];
 
 const mainItems = computed(() =>
@@ -85,6 +88,7 @@ const adminItems = [
   { label: "ოქროს მუხ.", icon: "pi pi-lightbulb", path: ADMIN_GOLDEN_VERSES_ROUTE },
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ADMIN_ANNOUNCEMENTS_ROUTE },
   { label: "ქულები", icon: "pi pi-table", path: ADMIN_TABLE_ROUTE },
+  { label: "დღ. პროგრამები", icon: "pi pi-list", path: ADMIN_DAILY_PROGRAMS_ROUTE },
   { label: "მართვა", icon: "pi pi-cog", path: ADMIN_USERS_ROUTE },
 ];
 </script>

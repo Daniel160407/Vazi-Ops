@@ -14,6 +14,7 @@ import type {
   AppUser,
   TableData,
   PageVisibility,
+  DailyProgram,
 } from "../type/interfaces";
 import {
   GROUPS_DB,
@@ -28,6 +29,7 @@ import {
   USERS_DB,
   TABLE_DB,
   PAGE_VISIBILITY_DB,
+  DAILY_PROGRAMS_DB,
 } from "../composables/constants";
 import type {
   FirestoreError,
@@ -62,6 +64,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
   const deadline = ref<Deadline | null>(null);
   const goldenVerses = ref<GoldenVerse[]>([]);
   const announcements = ref<Announcement[]>([]);
+  const dailyPrograms = ref<DailyProgram[]>([]);
 
   const loadingCount = ref<number>(0);
   const loading = computed(() => loadingCount.value > 0);
@@ -220,6 +223,20 @@ export const useGlobalStore = defineStore("globalStore", () => {
     });
   };
 
+  const fetchDailyPrograms = () => {
+    const q = query(collection(db, DAILY_PROGRAMS_DB), orderBy("created_at", "desc"));
+    subscribe(
+      "dailyPrograms",
+      DAILY_PROGRAMS_DB,
+      (data) =>
+        (dailyPrograms.value = data.map((d) => ({
+          ...d,
+          created_at: d.created_at?.toDate ? d.created_at.toDate() : new Date(d.created_at),
+        })) as DailyProgram[]),
+      q
+    );
+  };
+
   const fetchGoldenVerses = () => {
     const q = query(collection(db, GOLDEN_VERSES_DB), orderBy("day", "asc"));
     subscribe(
@@ -244,6 +261,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     fetchDeadline();
     fetchGoldenVerses();
     fetchAnnouncements();
+    fetchDailyPrograms();
   };
 
   return {
@@ -263,6 +281,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
     deadline,
     goldenVerses,
     announcements,
+    dailyPrograms,
     loading,
     setData,
   };

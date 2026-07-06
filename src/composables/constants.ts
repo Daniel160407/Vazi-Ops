@@ -15,6 +15,8 @@ export const ADMIN_GOLDEN_VERSES_ROUTE = "/admin/verses";
 export const ADMIN_ANNOUNCEMENTS_ROUTE = "/admin/announcements";
 export const ADMIN_USERS_ROUTE = "/admin/management";
 export const ADMIN_TABLE_ROUTE = "/admin/table";
+export const DAILY_PROGRAMS_ROUTE = "/daily-programs";
+export const ADMIN_DAILY_PROGRAMS_ROUTE = "/admin/daily-programs";
 
 export const GROUPS_LABEL = "ჯგუფები";
 export const CLUBS_LABEL = "წრეები";
@@ -32,6 +34,8 @@ export const ADMIN_EVENTS_LABEL = "ნომრები";
 export const ADMIN_ANNOUNCEMENTS_LABEL = "განცხადებები";
 export const ADMIN_USERS_LABEL = "მომხმარებლები";
 export const ADMIN_TABLE_LABEL = "ქულები";
+export const DAILY_PROGRAMS_LABEL = "დღის პროგრამები";
+export const ADMIN_DAILY_PROGRAMS_LABEL = "დღის პროგრამები";
 export const SCHEDULE_LABEL = "განრიგი";
 export const ACTIVITIES_LABEL = "აქტივობები";
 
@@ -47,6 +51,7 @@ export const ADMIN_ICON = "pi pi-user";
 export const SCHEDULE_ICON = "pi pi-calendar";
 export const ADMIN_SCHEDULE_ICON = "pi pi-clock";
 export const ACTIVITIES_ICON = "pi pi-sparkles";
+export const DAILY_PROGRAMS_ICON = "pi pi-list";
 export const ADMIN_ACTIVITIES_ICON = "pi pi-briefcase";
 
 export const GROUPS_DB = "groups";
@@ -61,6 +66,7 @@ export const DEADLINE_DB = "deadline";
 export const GOLDEN_VERSES_DB = "verses";
 export const ANNOUNCEMENTS_DB = "announcements";
 export const TABLE_DB = "table_data";
+export const DAILY_PROGRAMS_DB = "daily_programs";
 export const PAGE_VISIBILITY_DB = "page_visibility";
 
 export const GENDER_MALE = "male";

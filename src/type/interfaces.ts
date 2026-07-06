@@ -111,3 +111,9 @@ export interface PageVisibility {
   id: string;
   is_visible: boolean;
 }
+
+export interface DailyProgram {
+  id: string;
+  content: string;
+  created_at: Date;
+}

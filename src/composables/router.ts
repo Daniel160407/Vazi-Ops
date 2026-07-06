@@ -18,6 +18,8 @@ import {
   ADMIN_ANNOUNCEMENTS_ROUTE,
   ADMIN_USERS_ROUTE,
   ADMIN_TABLE_ROUTE,
+  DAILY_PROGRAMS_ROUTE,
+  ADMIN_DAILY_PROGRAMS_ROUTE,
 } from "./constants";
 import { useAuth } from "./useAuth";
 import { useGlobalStore } from "../stores/GlobalStore";
@@ -48,6 +50,8 @@ import AnnouncementsPage from "../pages/AnnouncementsPage.vue";
 import AnnouncementsEditPage from "../pages/AnnouncementsEditPage.vue";
 import AppManagementPage from "../pages/AppManagementPage.vue";
 import TableEditPage from "../pages/TableEditPage.vue";
+import DailyProgramsPage from "../pages/DailyProgramsPage.vue";
+import DailyProgramsEditPage from "../pages/DailyProgramsEditPage.vue";
 
 const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
@@ -68,6 +72,8 @@ const routes = [
   { path: ADMIN_ANNOUNCEMENTS_ROUTE, component: AnnouncementsEditPage },
   { path: ADMIN_USERS_ROUTE, component: AppManagementPage },
   { path: ADMIN_TABLE_ROUTE, component: TableEditPage },
+  { path: DAILY_PROGRAMS_ROUTE, component: DailyProgramsPage },
+  { path: ADMIN_DAILY_PROGRAMS_ROUTE, component: DailyProgramsEditPage },
   { path: "/:pathMatch(.*)*", redirect: GROUPS_ROUTE },
 ];
 
