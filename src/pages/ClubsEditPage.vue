@@ -46,14 +46,14 @@ const handleSave = async () => {
   sheetVisible.value = false;
 };
 
-const handleDelete = () => {
+const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ წრის წაშლა გინდა?",
     header: "წაშლა",
     acceptProps: { label: "წაშლა", severity: "danger" },
     rejectProps: { label: "გაუქმება", severity: "secondary" },
     accept: async () => {
-      await deleteClub((form.value as Club).id);
+      await deleteClub(id);
       sheetVisible.value = false;
     },
   });
@@ -134,31 +134,36 @@ const accentBorder = (n: number) => {
       </p>
 
       <div class="flex flex-col gap-3">
-        <AppButton
+        <div
           v-for="club in filtered"
           :key="club.id"
-          variant="plain"
-          class="w-full overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-700/30 hover:bg-[#0f1f36]"
+          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829]"
           :class="accentBorder(club.places_quantity)"
-          @click="openEdit(club)"
         >
-          <div class="mb-3 flex items-start justify-between gap-2">
-            <h3 class="text-base font-bold leading-tight text-white">{{ club.name }}</h3>
-            <span class="shrink-0 rounded-lg border px-2.5 py-1 text-xs font-bold" :class="placesBg(club.places_quantity)">
-              {{ club.places_quantity <= 0 ? "სავსეა" : `${club.places_quantity} ადგილი` }}
-            </span>
-          </div>
+          <AppButton
+            variant="plain"
+            class="w-full p-4 text-left transition-all duration-150 hover:border-blue-700/30 hover:bg-[#0f1f36]"
+            @click="openEdit(club)"
+          >
+            <div class="mb-3 flex items-start justify-between gap-2">
+              <h3 class="text-base font-bold leading-tight text-white">{{ club.name }}</h3>
+              <span class="shrink-0 rounded-lg border px-2.5 py-1 text-xs font-bold" :class="placesBg(club.places_quantity)">
+                {{ club.places_quantity <= 0 ? "სავსეა" : `${club.places_quantity} ადგილი` }}
+              </span>
+            </div>
 
-          <div class="mb-3 flex flex-col gap-2">
-            <InfoRow icon="pi-user"><span class="text-sm text-slate-400">{{ club.teacher || "—" }}</span></InfoRow>
-            <InfoRow icon="pi-map-marker"><span class="text-sm text-slate-400">{{ club.place || "—" }}</span></InfoRow>
-            <InfoRow icon="pi-clock"><span class="text-sm text-slate-400">{{ formatTime(club.time) }}</span></InfoRow>
-          </div>
+            <div class="flex flex-col gap-2">
+              <InfoRow icon="pi-user"><span class="text-sm text-slate-400">{{ club.teacher || "—" }}</span></InfoRow>
+              <InfoRow icon="pi-map-marker"><span class="text-sm text-slate-400">{{ club.place || "—" }}</span></InfoRow>
+              <InfoRow icon="pi-clock"><span class="text-sm text-slate-400">{{ formatTime(club.time) }}</span></InfoRow>
+            </div>
+          </AppButton>
 
-          <div class="flex items-center justify-end border-t border-blue-900/20 pt-2.5">
-            <i class="pi pi-pencil text-xs text-slate-600" />
+          <div class="flex items-center justify-end gap-1 border-t border-blue-900/20 px-4 py-2.5">
+            <AppButton variant="icon-edit" icon="pi-pencil" @click="openEdit(club)" />
+            <AppButton variant="icon-delete" icon="pi-trash" @click="handleDelete(club.id)" />
           </div>
-        </AppButton>
+        </div>
       </div>
     </div>
 
@@ -209,7 +214,7 @@ const accentBorder = (n: number) => {
       </div>
 
       <div class="mt-5 flex gap-3">
-        <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete">წაშლა</AppButton>
+        <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete((form as Club).id)">წაშლა</AppButton>
         <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isAdding ? "დამატება" : "შენახვა" }}
         </AppButton>

@@ -63,14 +63,14 @@ const handleSave = async () => {
   sheetVisible.value = false;
 };
 
-const handleDelete = () => {
+const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ ჯგუფის წაშლა გინდა?",
     header: "წაშლა",
     acceptProps: { label: "წაშლა", severity: "danger" },
     rejectProps: { label: "გაუქმება", severity: "secondary" },
     accept: async () => {
-      await deleteGroup((form.value as Group).id);
+      await deleteGroup(id);
       sheetVisible.value = false;
     },
   });
@@ -163,8 +163,9 @@ const totalMembers = computed(() =>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ასაკი</p>
                 <p class="text-sm font-semibold text-slate-300">{{ group.age || "—" }}</p>
               </div>
-              <div class="ml-auto flex items-end">
-                <i class="pi pi-pencil text-xs text-slate-600" />
+              <div class="ml-auto flex items-end gap-1">
+                <AppButton variant="icon-edit" icon="pi-pencil" @click.stop="openEdit(group)" />
+                <AppButton variant="icon-delete" icon="pi-trash" @click.stop="handleDelete(group.id)" />
               </div>
             </div>
           </AppButton>
@@ -301,7 +302,7 @@ const totalMembers = computed(() =>
       </div>
 
       <div class="mt-5 flex gap-3">
-        <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete">წაშლა</AppButton>
+        <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete((form as Group).id)">წაშლა</AppButton>
         <AppButton variant="primary" icon="pi-check" class="flex-1" @click="handleSave">
           {{ isAdding ? "დამატება" : "შენახვა" }}
         </AppButton>
