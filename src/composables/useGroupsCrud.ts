@@ -18,7 +18,7 @@ export function useGroupsCrud() {
   const { loading: loadingStore, groups } = storeToRefs(useGlobalStore());
 
   const saving = ref(false);
-  const loading = computed(() => loadingStore && saving);
+  const loading = computed(() => loadingStore.value || saving.value);
 
   const addGroup = async (group: Omit<Group, "id">) => {
     saving.value = true;
