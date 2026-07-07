@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Toast, ConfirmDialog } from "primevue";
+import { Toast } from "primevue";
+import AppConfirmDialog from "./components/UI/AppConfirmDialog.vue";
 import { useGlobalStore } from "./stores/GlobalStore";
 import BottomNav from "./components/BottomNav.vue";
 import MoreSheet from "./components/MoreSheet.vue";
@@ -33,8 +34,8 @@ const showMore = ref(false);
     <MoreSheet :visible="showMore" @close="showMore = false" />
 
     <Toast
-      class="right-0 left-0 mx-auto w-full max-w-[100vw] px-2 [&_.p-toast-message]:max-w-full [&_.p-toast-message]:rounded-xl [&_.p-toast-message]:wrap-break-word [&_.p-toast-message]:whitespace-normal"
+      class="right-0 left-0 mx-auto w-full max-w-[100vw] px-2 lg:left-56 [&_.p-toast-message]:max-w-full [&_.p-toast-message]:rounded-xl [&_.p-toast-message]:wrap-break-word [&_.p-toast-message]:whitespace-normal"
     />
-    <ConfirmDialog class="mx-2" />
+    <AppConfirmDialog />
   </div>
 </template>

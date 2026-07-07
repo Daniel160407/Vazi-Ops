@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { format } from "date-fns";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import DatePicker from "primevue/datepicker";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useClubsCrud } from "../composables/useClubsCrud";
@@ -17,7 +17,7 @@ import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, clubs, clubRegistration } = storeToRefs(useGlobalStore());
 const { addClub, updateClub, deleteClub, toggleRegistration, loading } = useClubsCrud();
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const sheetVisible = ref(false);
 const isAdding = ref(false);
@@ -50,8 +50,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ წრის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary" },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteClub(id);
       sheetVisible.value = false;

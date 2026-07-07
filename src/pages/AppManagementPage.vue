@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import { useUsersCrud } from "../composables/useUsersCrud";
 import { useImgBB } from "../composables/useImgBB";
 import { usePageVisibilityCrud, PAGE_DEFINITIONS } from "../composables/usePageVisibilityCrud";
@@ -42,7 +42,7 @@ const toggleRole = async (u: AppUser) => {
   await updateUserRole(u.id, newRole);
   togglingId.value = null;
 };
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const roleOptions = [UserRole.ADMIN, UserRole.USER];
 
@@ -121,8 +121,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ მომხმარებლის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteUser(id);
       sheetVisible.value = false;

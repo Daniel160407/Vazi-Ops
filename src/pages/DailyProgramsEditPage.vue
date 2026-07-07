@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import Editor from "primevue/editor";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useDailyProgramsCrud } from "../composables/useDailyProgramsCrud";
@@ -12,7 +12,7 @@ import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, dailyPrograms } = storeToRefs(useGlobalStore());
 const { loading: saving, addDailyProgram, updateDailyProgram, deleteDailyProgram } = useDailyProgramsCrud();
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const loading = computed(() => saving.value || loadingStore.value);
 
@@ -63,8 +63,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ პროგრამის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteDailyProgram(id);
       sheetVisible.value = false;

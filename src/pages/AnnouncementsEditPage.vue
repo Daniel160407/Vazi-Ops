@@ -3,7 +3,7 @@ import { ref, reactive } from "vue";
 import { storeToRefs } from "pinia";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useAnnouncementsCrud } from "../composables/useAnnouncementsCrud";
 import { useAuth } from "../composables/useAuth";
@@ -27,7 +27,7 @@ const { loading: loadingStore, announcements } = storeToRefs(useGlobalStore());
 const { addAnnouncement, updateAnnouncement, deleteAnnouncement } =
   useAnnouncementsCrud();
 const { fullName, profileImg } = useAuth();
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const tagOptions = [
   TAG_URGENT,
@@ -201,8 +201,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ განცხადების წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteAnnouncement(id);
       sheetVisible.value = false;

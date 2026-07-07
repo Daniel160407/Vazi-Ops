@@ -4,7 +4,7 @@ import { storeToRefs } from "pinia";
 import { ka } from "date-fns/locale";
 import { format } from "date-fns";
 import DatePicker from "primevue/datepicker";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useEventsCrud } from "../composables/useEventsCrud";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
@@ -21,7 +21,7 @@ const globalStore = useGlobalStore();
 const { loading: loadingStore, deadline, events, appUsers, groups } = storeToRefs(globalStore);
 const { loading, updateEvent, updateEventStatus, deleteEvent, updateDeadline } = useEventsCrud();
 const { addEveningSchedule } = useSchedulesCrud();
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 const newDeadlineDate = ref<Date | null>(null);
 
 watch(deadline, (val) => {
@@ -41,8 +41,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ ნომრის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => { await deleteEvent(id); },
   });
 };
