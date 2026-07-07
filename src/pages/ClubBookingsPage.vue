@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { format } from "date-fns";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
 import { useGlobalStore } from "../stores/GlobalStore";
 import type { ClubBooking } from "../type/interfaces";
@@ -15,7 +15,7 @@ import AppInput from "../components/UI/AppInput.vue";
 
 const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubBookingsCrud();
 const { loading: loadingStore, appUsers, clubs, groups } = storeToRefs(useGlobalStore());
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const leaderOpen = ref(false);
 const clubOpen = ref(false);
@@ -124,8 +124,8 @@ const handleDelete = (booking: ClubBooking) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ გინდა რეგისტრაციის წაშლა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteBooking(booking.id);
       sheetVisible.value = false;

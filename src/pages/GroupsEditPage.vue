@@ -5,7 +5,7 @@ import { GENDER_MALE, GENDER_FEMALE } from "../composables/constants";
 import type { Group } from "../type/interfaces";
 import { useGroupsCrud } from "../composables/useGroupsCrud";
 import { useGlobalStore } from "../stores/GlobalStore";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
@@ -27,10 +27,11 @@ const selectLeader = (name: string) => {
   form.value.leader = name;
   leaderOpen.value = false;
 };
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const sheetVisible = ref(false);
 const isAdding = ref(false);
+const saving = ref(false);
 
 const blankGroup = (): Omit<Group, "id"> => ({
   name: "", leader: "", age: "", cottage_num: 0, gender: GENDER_MALE, children: [],
@@ -57,9 +58,11 @@ const parseChildren = () =>
   childrenString.value.split(",").map((s) => s.trim()).filter(Boolean);
 
 const handleSave = async () => {
+  saving.value = true;
   form.value.children = parseChildren();
   if (isAdding.value) await addGroup(form.value as Omit<Group, "id">);
   else await updateGroup(form.value as Group);
+  saving.value = false;
   sheetVisible.value = false;
 };
 
@@ -67,8 +70,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ ჯგუფის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary" },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteGroup(id);
       sheetVisible.value = false;
@@ -303,7 +306,7 @@ const totalMembers = computed(() =>
 
       <div class="mt-5 flex gap-3">
         <AppButton v-if="!isAdding" variant="danger" icon="pi-trash" @click="handleDelete((form as Group).id)">წაშლა</AppButton>
-        <AppButton variant="primary" icon="pi-check" class="flex-1" @click="handleSave">
+        <AppButton variant="primary" icon="pi-check" class="flex-1" :disabled="saving" @click="handleSave">
           {{ isAdding ? "დამატება" : "შენახვა" }}
         </AppButton>
       </div>

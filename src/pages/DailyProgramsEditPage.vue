@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import Editor from "primevue/editor";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useDailyProgramsCrud } from "../composables/useDailyProgramsCrud";
@@ -12,7 +12,7 @@ import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, dailyPrograms } = storeToRefs(useGlobalStore());
 const { loading: saving, addDailyProgram, updateDailyProgram, deleteDailyProgram } = useDailyProgramsCrud();
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const loading = computed(() => saving.value || loadingStore.value);
 
@@ -63,8 +63,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ პროგრამის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteDailyProgram(id);
       sheetVisible.value = false;
@@ -94,7 +94,7 @@ const handleDelete = (id: string) => {
         <article
           v-for="program in dailyPrograms"
           :key="program.id"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] p-4"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4"
         >
           <div class="mb-3 flex items-center justify-end gap-2">
             <AppButton variant="icon-edit" icon="pi-pencil" @click="openEdit(program)" />

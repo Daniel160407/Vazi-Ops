@@ -4,7 +4,7 @@ import { storeToRefs } from "pinia";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
 import { useAuth } from "../composables/useAuth";
-import { useConfirm } from "primevue";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import type { EveningScheduleItem } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
@@ -22,7 +22,7 @@ const {
   deleteEveningSchedule,
   loading,
 } = useSchedulesCrud();
-const confirm = useConfirm();
+const confirm = useAppConfirm();
 
 const localItems = ref<EveningScheduleItem[]>([]);
 
@@ -188,8 +188,8 @@ const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ ნომრის წაშლა გინდა?",
     header: "წაშლა",
-    acceptProps: { label: "წაშლა", severity: "danger" },
-    rejectProps: { label: "გაუქმება", severity: "secondary", outlined: true },
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
     accept: async () => {
       await deleteEveningSchedule(id);
       sheetVisible.value = false;
@@ -238,7 +238,7 @@ const handleDelete = (id: string) => {
           :key="item.id || index"
           draggable="true"
           :data-drag-index="index"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] transition-all duration-150"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] transition-all duration-150"
           :class="dragIndex === index ? 'scale-[0.98] opacity-50' : ''"
           @dragstart="onDragStart(index)"
           @dragover="onDragOver($event, index)"
