@@ -44,7 +44,7 @@ const { loading, eveningScheduleItems } = storeToRefs(useGlobalStore());
         <div
           v-for="(item, index) in eveningScheduleItems"
           :key="item.id || index"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] p-4"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4"
         >
           <div class="flex items-start gap-3">
             <div

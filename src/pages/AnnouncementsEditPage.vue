@@ -88,18 +88,6 @@ const tagMeta = (
   );
 };
 
-const accentBorder = (tag: string) => {
-  const map: Record<string, string> = {
-    [TAG_URGENT]: "border-l-red-500/60",
-    [TAG_SCHEDULE]: "border-l-blue-500/40",
-    [TAG_DINING]: "border-l-amber-500/50",
-    [TAG_GATHERING]: "border-l-purple-500/50",
-    [TAG_ACTIVITY]: "border-l-emerald-500/50",
-    [TAG_HEALTH]: "border-l-teal-500/50",
-    [TAG_NOTEWORTHY]: "border-l-cyan-500/50",
-  };
-  return map[tag] ?? "border-l-slate-500/40";
-};
 
 const cardTagMeta = (tag: string): { cls: string; icon: string } => {
   const map: Record<string, { cls: string; icon: string }> = {
@@ -246,8 +234,7 @@ const handleDelete = (id: string) => {
         <article
           v-for="a in announcements"
           :key="a.id"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829]"
-          :class="accentBorder(a.tag)"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]"
         >
           <div class="p-4">
             <div class="mb-3 flex items-center justify-between gap-2">

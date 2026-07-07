@@ -59,8 +59,6 @@ const roleMeta = (role: UserRole) =>
         label: "მომხმარებელი",
       };
 
-const accentBorder = (role: UserRole) =>
-  role === UserRole.ADMIN ? "border-l-blue-500/60" : "border-l-emerald-500/50";
 
 const sheetVisible = ref(false);
 const isEditing = ref(false);
@@ -220,8 +218,7 @@ const userCount = () =>
         <article
           v-for="u in appUsers"
           :key="u.id"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829]"
-          :class="accentBorder(u.role)"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]"
         >
           <div class="p-4">
             <div

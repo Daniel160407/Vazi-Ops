@@ -238,7 +238,7 @@ const handleDelete = (id: string) => {
           :key="item.id || index"
           draggable="true"
           :data-drag-index="index"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] transition-all duration-150"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] transition-all duration-150"
           :class="dragIndex === index ? 'scale-[0.98] opacity-50' : ''"
           @dragstart="onDragStart(index)"
           @dragover="onDragOver($event, index)"

@@ -27,7 +27,7 @@ const { loading, dailyPrograms } = storeToRefs(useGlobalStore());
         <article
           v-for="program in dailyPrograms"
           :key="program.id"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 border-l-blue-500/40 bg-[#0d1829] p-4"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4"
         >
           <div
             class="daily-program-content text-sm leading-relaxed text-slate-300"

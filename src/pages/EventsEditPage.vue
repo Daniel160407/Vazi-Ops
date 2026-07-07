@@ -117,11 +117,6 @@ const statusMeta = (status: string) => {
   return { label: "მოლოდინში", cls: "bg-amber-500/15 text-amber-400 border-amber-500/25" };
 };
 
-const accentBorder = (status: string) => {
-  if (status === REQUEST_ACCEPTED) return "border-l-emerald-500/50";
-  if (status === REQUEST_REJECTED) return "border-l-red-500/50";
-  return "border-l-amber-500/50";
-};
 
 const formatDate = (dateValue?: any) => {
   if (!dateValue) return "—";
@@ -202,8 +197,7 @@ const formatDate = (dateValue?: any) => {
         <div
           v-for="event in filteredEvents"
           :key="event.id"
-          class="overflow-hidden rounded-2xl border border-l-4 border-blue-900/20 bg-[#0d1829]"
-          :class="accentBorder(event.request_status)"
+          class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]"
         >
           <div class="p-4">
             <div class="mb-3 flex items-start justify-between gap-2">
