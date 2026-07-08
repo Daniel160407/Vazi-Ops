@@ -37,6 +37,11 @@ const navItems = computed(() =>
 const isActive = (path: string) => route.path === path;
 
 const handleScroll = () => {
+  const pageIsScrollable = document.documentElement.scrollHeight > window.innerHeight;
+  if (!pageIsScrollable) {
+    isVisible.value = true;
+    return;
+  }
   const currentScrollPosition =
     window.pageYOffset || document.documentElement.scrollTop;
   if (Math.abs(lastScrollPosition.value - currentScrollPosition) < 60) {
