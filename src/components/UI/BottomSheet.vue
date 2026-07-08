@@ -102,4 +102,6 @@ onUnmounted(() => {
 .sheet-enter-active { transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
 .sheet-leave-active { transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
 .sheet-enter-from, .sheet-leave-to { transform: translateY(100%); }
+
+:deep(input), :deep(textarea), :deep(select) { font-size: 16px; }
 </style>
