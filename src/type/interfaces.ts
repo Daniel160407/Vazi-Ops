@@ -21,6 +21,7 @@ export interface Group {
   cottage_num: number;
   gender: string;
   children: string[];
+  music?: string;
 }
 
 export interface Club {

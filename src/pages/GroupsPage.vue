@@ -108,6 +108,13 @@ const toggle = (id: string) => {
                   {{ group.children.length }} ბავშვი
                 </p>
               </div>
+              <div v-if="group.music">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">მუსიკა</p>
+                <a :href="group.music" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-semibold text-blue-400 hover:text-blue-300" @click.stop>
+                  <i class="pi pi-music text-xs" />
+                  გახსნა
+                </a>
+              </div>
               <div class="ml-auto flex items-end">
                 <i
                   class="pi text-slate-600 text-xs transition-transform duration-200"

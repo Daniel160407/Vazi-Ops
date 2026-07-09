@@ -34,7 +34,7 @@ const isAdding = ref(false);
 const saving = ref(false);
 
 const blankGroup = (): Omit<Group, "id"> => ({
-  name: "", leader: "", age: "", cottage_num: 0, gender: GENDER_MALE, children: [],
+  name: "", leader: "", age: "", cottage_num: 0, gender: GENDER_MALE, children: [], music: "",
 });
 
 const form = ref<Group | Omit<Group, "id">>(blankGroup());
@@ -292,6 +292,10 @@ const totalMembers = computed(() =>
               გოგოები
             </AppButton>
           </div>
+        </SheetField>
+
+        <SheetField label="მუსიკა (URL)">
+          <AppInput v-model="form.music" type="url" placeholder="https://..." />
         </SheetField>
 
         <SheetField label="ბავშვები">
