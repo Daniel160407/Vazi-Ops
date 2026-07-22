@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { storeToRefs } from "pinia";
 import { Toast } from "primevue";
 import AppConfirmDialog from "./components/UI/AppConfirmDialog.vue";
+import LoadingSpinner from "./components/UI/LoadingSpinner.vue";
 import { useGlobalStore } from "./stores/GlobalStore";
 import BottomNav from "./components/BottomNav.vue";
 import MoreSheet from "./components/MoreSheet.vue";
 import SideNav from "./components/SideNav.vue";
 import AppHeader from "./components/AppHeader.vue";
 
-const { setData } = useGlobalStore();
-setData();
+const store = useGlobalStore();
+const { loading } = storeToRefs(store);
+store.setData();
 
 const showMore = ref(false);
 </script>
@@ -22,7 +25,8 @@ const showMore = ref(false);
       <AppHeader />
 
       <div class="w-full max-w-2xl px-4 pb-24 lg:px-8 lg:pb-10 lg:pt-10">
-        <router-view v-slot="{ Component }">
+        <LoadingSpinner v-if="loading" />
+        <router-view v-else v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
           </transition>

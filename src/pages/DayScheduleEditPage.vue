@@ -5,10 +5,11 @@ import { useGlobalStore } from "../stores/GlobalStore";
 import { DAY_SCHEDULE_CATEGORY } from "../composables/constants";
 import { useImgBB } from "../composables/useImgBB";
 import AppButton from "../components/UI/AppButton.vue";
+import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
 import type { Schedule } from "../type/interfaces";
 
-const { schedules } = storeToRefs(useGlobalStore());
+const { schedules, loading: loadingStore } = storeToRefs(useGlobalStore());
 const { saveSchedule, loading: savingSchedule } = useSchedulesCrud();
 const {
   handleImageSelect,
@@ -49,6 +50,9 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
 
 <template>
   <div class="pb-4">
+    <LoadingSpinner v-if="loadingStore && schedules.length === 0" />
+
+    <template v-else>
     <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
       <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
         დღის
@@ -117,5 +121,6 @@ const isBusy = computed(() => uploadingImage.value || savingSchedule.value);
         </AppButton>
       </div>
     </div>
+    </template>
   </div>
 </template>

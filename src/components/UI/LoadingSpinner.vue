@@ -9,7 +9,14 @@ import { ProgressSpinner } from "primevue";
       fill="transparent"
       animation-duration=".5s"
       aria-label="Loading"
-      class="h-15! w-15!"
+      class="loading-spinner h-15! w-15!"
     />
   </div>
 </template>
+
+<style scoped>
+.loading-spinner :deep(.p-progressspinner-circle) {
+  stroke: #3b82f6 !important;
+  animation: p-progressspinner-dash 1.5s ease-in-out infinite !important;
+}
+</style>
