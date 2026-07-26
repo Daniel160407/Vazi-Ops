@@ -166,6 +166,13 @@ const totalMembers = computed(() =>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">ასაკი</p>
                 <p class="text-sm font-semibold text-slate-300">{{ group.age || "—" }}</p>
               </div>
+              <div v-if="group.music">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">მუსიკა</p>
+                <a :href="group.music" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-semibold text-blue-400 hover:text-blue-300" @click.stop>
+                  <i class="pi pi-music text-xs" />
+                  გახსნა
+                </a>
+              </div>
               <div class="ml-auto flex items-end gap-1">
                 <AppButton variant="icon-edit" icon="pi-pencil" @click.stop="openEdit(group)" />
                 <AppButton variant="icon-delete" icon="pi-trash" @click.stop="handleDelete(group.id)" />
