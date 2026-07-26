@@ -89,3 +89,5 @@ export const TAG_HEALTH = "ჯანმრთელობა";
 
 export const MAX_IMAGE_SIZE_MB = 5;
 export const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
+export const MAX_CLUBS_PER_CHILD = 2;

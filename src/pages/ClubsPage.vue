@@ -8,6 +8,7 @@ import { useClubsCrud } from "../composables/useClubsCrud";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
 import { useAuth } from "../composables/useAuth";
 import type { Club, ClubBooking } from "../type/interfaces";
+import { MAX_CLUBS_PER_CHILD } from "../composables/constants";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
@@ -20,7 +21,7 @@ const globalStore = useGlobalStore();
 const toast = useToast();
 const { loading: loadingStore, clubs, clubRegistration, groups, appUsers } = storeToRefs(globalStore);
 const { fullName, userGroupName } = useAuth();
-const { registerInClub, loading } = useClubsCrud();
+const { registerInClub, changeClubBooking, loading } = useClubsCrud();
 const { fetchUserBookings } = useClubBookingsCrud();
 
 const search = ref("");
@@ -45,6 +46,9 @@ const childFullName = ref("");
 const leaderName = ref("");
 const groupName = ref("");
 const userBookings = ref<ClubBooking[]>([]);
+const replaceVisible = ref(false);
+const replaceOptions = ref<ClubBooking[]>([]);
+const replaceReason = ref<"max" | "time">("max");
 
 const leaderOpen = ref(false);
 
@@ -89,6 +93,8 @@ const openSheet = (club: Club) => {
 
 const closeSheet = () => {
   sheetVisible.value = false;
+  replaceVisible.value = false;
+  replaceOptions.value = [];
   childFullName.value = "";
   leaderName.value = "";
   groupName.value = "";
@@ -108,21 +114,42 @@ const handleConfirmRegister = async () => {
   const existing = await fetchUserBookings(first, last, leaderName.value, groupName.value);
   userBookings.value = existing;
 
+  if (existing.some((booking) => booking.club_id === selectedClub.value!.id)) {
+    toast.add({ severity: "warn", summary: "უკვე ჩაწერილია", detail: "ეს ბავშვი უკვე ჩაწერილია ამ წრეში.", life: 6000 });
+    return;
+  }
+
   if (selectedClub.value.time) {
-    const hasSameTime = existing.some((booking) => {
+    const selectedTime = formatTime(selectedClub.value.time);
+    const sameTimeBookings = existing.filter((booking) => {
       const clubForBooking = clubs.value.find((c) => c.id === booking.club_id);
-      return clubForBooking?.time === selectedClub.value!.time;
+      return clubForBooking?.time && formatTime(clubForBooking.time) === selectedTime;
     });
-    if (hasSameTime) {
-      toast.add({ severity: "warn", summary: "დრო დაკავებულია", detail: "უკვე გაქვს სხვა წრე ამ დროს.", life: 6000 });
+    if (sameTimeBookings.length) {
+      replaceReason.value = "time";
+      replaceOptions.value = sameTimeBookings;
+      replaceVisible.value = true;
       return;
     }
+  }
+
+  if (existing.length >= MAX_CLUBS_PER_CHILD) {
+    replaceReason.value = "max";
+    replaceOptions.value = existing;
+    replaceVisible.value = true;
+    return;
   }
 
   await registerInClub(selectedClub.value, {
     child_first_name: first, child_last_name: last,
     leader_name: leaderName.value, group_name: groupName.value,
   });
+  closeSheet();
+};
+
+const handleReplace = async (oldBooking: ClubBooking) => {
+  if (!selectedClub.value) return;
+  await changeClubBooking(oldBooking, selectedClub.value);
   closeSheet();
 };
 
@@ -204,7 +231,7 @@ const placesBg = (n: number) => {
     </div>
 
     <BottomSheet
-      :visible="sheetVisible"
+      :visible="sheetVisible && !replaceVisible"
       title="ჩაეწერე წრეში"
       @close="closeSheet"
     >
@@ -286,6 +313,38 @@ const placesBg = (n: number) => {
         <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleConfirmRegister">
           ჩაწერა
         </AppButton>
+      </div>
+    </BottomSheet>
+
+    <BottomSheet
+      :visible="replaceVisible"
+      title="აირჩიე შესაცვლელი წრე"
+      @close="replaceVisible = false"
+    >
+      <p v-if="replaceReason === 'time'" class="mb-4 text-sm leading-relaxed text-slate-400">
+        ამ ბავშვს უკვე აქვს არჩეული წრე ამ დროს ({{ formatTime(selectedClub?.time) }}). აირჩიე რომელი შეიცვალოს
+        <span v-if="selectedClub" class="font-semibold text-blue-300">{{ selectedClub.name }}</span>-ით.
+      </p>
+      <p v-else class="mb-4 text-sm leading-relaxed text-slate-400">
+        ამ ბავშვს უკვე აქვს არჩეული {{ MAX_CLUBS_PER_CHILD }} წრე. აირჩიე რომელი შეიცვალოს
+        <span v-if="selectedClub" class="font-semibold text-blue-300">{{ selectedClub.name }}</span>-ით.
+      </p>
+
+      <div class="flex flex-col gap-3">
+        <button
+          v-for="booking in replaceOptions"
+          :key="booking.id"
+          type="button"
+          :disabled="loading"
+          class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4 text-left transition-all duration-150 hover:border-blue-500/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          @click="handleReplace(booking)"
+        >
+          <div class="min-w-0">
+            <p class="truncate text-sm font-bold text-white">{{ booking.club_name }}</p>
+            <p class="mt-0.5 text-xs text-slate-500">{{ formatTime(clubs.find((c) => c.id === booking.club_id)?.time) }}</p>
+          </div>
+          <i class="pi pi-arrow-right-arrow-left shrink-0 text-sm text-blue-400" />
+        </button>
       </div>
     </BottomSheet>
   </div>
