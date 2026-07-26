@@ -28,7 +28,7 @@ import {
 
 const router = useRouter();
 const route = useRoute();
-const { user, isAdmin, signInWithGoogle, logout } = useAuth();
+const { user, isAdmin, isTeacher, signInWithGoogle, logout } = useAuth();
 const { isVisible: isPageVisible } = usePageVisibilityCrud();
 
 const isActive = (path: string) => route.path === path;
@@ -36,7 +36,7 @@ const navigate = (path: string) => router.push(path);
 
 const handleAdminNav = async (path: string) => {
   if (!user.value) await signInWithGoogle();
-  if (user.value && isAdmin.value) router.push(path);
+  if (user.value && (isAdmin.value || isTeacher.value)) router.push(path);
 };
 
 const allMainItems = [
@@ -69,6 +69,12 @@ const adminItems = [
   { label: "დღ. პროგრამები", icon: "pi pi-list", path: ADMIN_DAILY_PROGRAMS_ROUTE },
   { label: "მართვა", icon: "pi pi-cog", path: ADMIN_USERS_ROUTE },
 ];
+
+const visibleAdminItems = computed(() =>
+  isTeacher.value
+    ? adminItems.filter((item) => item.path === ADMIN_CLUB_BOOKINGS_ROUTE)
+    : adminItems
+);
 </script>
 
 <template>
@@ -110,9 +116,9 @@ const adminItems = [
         <div class="h-px flex-1 bg-blue-900/20" />
       </div>
 
-      <template v-if="user && isAdmin">
+      <template v-if="user && (isAdmin || isTeacher)">
         <AppButton
-          v-for="item in adminItems"
+          v-for="item in visibleAdminItems"
           :key="item.path"
           variant="plain"
           class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
@@ -156,7 +162,7 @@ const adminItems = [
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate text-xs font-medium text-slate-300">{{ user.displayName }}</p>
-          <p class="text-[10px] text-slate-600">{{ isAdmin ? 'ადმინი' : 'მომხმარებელი' }}</p>
+          <p class="text-[10px] text-slate-600">{{ isAdmin ? 'ადმინი' : isTeacher ? 'მასწავლებელი' : 'მომხმარებელი' }}</p>
         </div>
         <AppButton
           variant="plain"

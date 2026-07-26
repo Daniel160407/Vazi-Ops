@@ -101,6 +101,7 @@ export function useAuth() {
     role,
     avatarUrl,
     isAdmin: computed(() => role.value === UserRole.ADMIN),
+    isTeacher: computed(() => role.value === UserRole.TEACHER),
     isLoggedIn: computed(() => !!user.value),
     fullName: computed(() => {
       if (!user.value?.email) return "";

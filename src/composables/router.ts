@@ -130,9 +130,11 @@ function firstVisiblePath(store: ReturnType<typeof useGlobalStore>): string {
 router.beforeEach(async (to) => {
   if (to.path.startsWith("/admin")) {
     await waitForAuth();
-    const { isAdmin } = useAuth();
-    if (!isAdmin.value) return ANNOUNCEMENTS_ROUTE;
-    return true;
+    const { isAdmin, isTeacher } = useAuth();
+    if (isAdmin.value) return true;
+    if (isTeacher.value && to.path === ADMIN_CLUB_BOOKINGS_ROUTE) return true;
+    if (isTeacher.value) return ADMIN_CLUB_BOOKINGS_ROUTE;
+    return ANNOUNCEMENTS_ROUTE;
   }
 
   const pageKey = routeToPageKey[to.path];

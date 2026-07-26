@@ -35,29 +35,37 @@ const {
 
 const togglingId = ref<string | null>(null);
 
+const roleOptions = [UserRole.ADMIN, UserRole.TEACHER, UserRole.USER];
+
 const toggleRole = async (u: AppUser) => {
   if (togglingId.value) return;
   togglingId.value = u.id;
-  const newRole = u.role === UserRole.ADMIN ? UserRole.USER : UserRole.ADMIN;
+  const currentIndex = roleOptions.indexOf(u.role);
+  const newRole = roleOptions[(currentIndex + 1) % roleOptions.length]!;
   await updateUserRole(u.id, newRole);
   togglingId.value = null;
 };
 const confirm = useAppConfirm();
 
-const roleOptions = [UserRole.ADMIN, UserRole.USER];
-
-const roleMeta = (role: UserRole) =>
-  role === UserRole.ADMIN
-    ? {
-        cls: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-        icon: "pi-shield",
-        label: "ადმინი",
-      }
-    : {
-        cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-        icon: "pi-user",
-        label: "მომხმარებელი",
-      };
+const roleMeta = (role: UserRole) => {
+  if (role === UserRole.ADMIN)
+    return {
+      cls: "bg-blue-500/15 text-blue-400 border-blue-500/25",
+      icon: "pi-shield",
+      label: "ადმინი",
+    };
+  if (role === UserRole.TEACHER)
+    return {
+      cls: "bg-amber-500/15 text-amber-400 border-amber-500/25",
+      icon: "pi-briefcase",
+      label: "მასწავლებელი",
+    };
+  return {
+    cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+    icon: "pi-user",
+    label: "მომხმარებელი",
+  };
+};
 
 
 const sheetVisible = ref(false);
@@ -132,6 +140,8 @@ const handleDelete = (id: string) => {
 
 const adminCount = () =>
   appUsers.value.filter((u) => u.role === UserRole.ADMIN).length;
+const teacherCount = () =>
+  appUsers.value.filter((u) => u.role === UserRole.TEACHER).length;
 const userCount = () =>
   appUsers.value.filter((u) => u.role === UserRole.USER).length;
 </script>
@@ -141,7 +151,7 @@ const userCount = () =>
     <LoadingSpinner v-if="loading && appUsers.length === 0" />
 
     <div v-else>
-      <div class="mb-5 grid grid-cols-2 gap-3">
+      <div class="mb-5 grid grid-cols-3 gap-3">
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p
             class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"
@@ -149,6 +159,14 @@ const userCount = () =>
             ადმინები
           </p>
           <p class="text-3xl font-bold text-white">{{ adminCount() }}</p>
+        </div>
+        <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p
+            class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"
+          >
+            მასწავლებლები
+          </p>
+          <p class="text-3xl font-bold text-white">{{ teacherCount() }}</p>
         </div>
         <div class="rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
           <p
@@ -254,7 +272,7 @@ const userCount = () =>
                     roleMeta(u.role).cls,
                     togglingId === u.id
                       ? 'opacity-50'
-                      : 'hover:opacity-80 active:opacity-60',
+                      : 'cursor-pointer hover:opacity-80 active:opacity-60',
                   ]"
                   :disabled="togglingId === u.id"
                   @click="toggleRole(u)"
