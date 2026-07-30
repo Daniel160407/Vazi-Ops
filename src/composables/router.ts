@@ -4,6 +4,7 @@ import {
   ADMIN_GROUPS_ROUTE,
   ADMIN_CLUBS_ROUTE,
   ADMIN_CLUB_BOOKINGS_ROUTE,
+  CLUB_BOOKINGS_ROUTE,
   GROUPS_ROUTE,
   CLUBS_ROUTE,
   DAY_SCHEDULE_ROUTE,
@@ -27,6 +28,7 @@ import { useGlobalStore } from "../stores/GlobalStore";
 const routeToPageKey: Record<string, string> = {
   [GROUPS_ROUTE]: "groups",
   [CLUBS_ROUTE]: "clubs",
+  [CLUB_BOOKINGS_ROUTE]: "club_bookings",
   [DAY_SCHEDULE_ROUTE]: "day_schedule",
   [EVENING_SCHEDULE_ROUTE]: "evening_schedule",
   [EVENTS_ROUTE]: "events",
@@ -38,6 +40,7 @@ import ClubsPage from "../pages/ClubsPage.vue";
 import GroupsEditPage from "../pages/GroupsEditPage.vue";
 import ClubsEditPage from "../pages/ClubsEditPage.vue";
 import ClubBookingsPage from "../pages/ClubBookingsPage.vue";
+import ClubBookingsEditPage from "../pages/ClubBookingsEditPage.vue";
 import DaySchedulePage from "../pages/DaySchedulePage.vue";
 import DayScheduleEditPage from "../pages/DayScheduleEditPage.vue";
 import EveningSchedulePage from "../pages/EveningSchedulePage.vue";
@@ -57,6 +60,7 @@ const routes = [
   { path: "/", redirect: GROUPS_ROUTE },
   { path: GROUPS_ROUTE, component: GroupsPage },
   { path: CLUBS_ROUTE, component: ClubsPage },
+  { path: CLUB_BOOKINGS_ROUTE, component: ClubBookingsPage },
   { path: DAY_SCHEDULE_ROUTE, component: DaySchedulePage },
   { path: EVENING_SCHEDULE_ROUTE, component: EveningSchedulePage },
   { path: EVENTS_ROUTE, component: EventsPage },
@@ -64,7 +68,7 @@ const routes = [
   { path: ANNOUNCEMENTS_ROUTE, component: AnnouncementsPage },
   { path: ADMIN_GROUPS_ROUTE, component: GroupsEditPage },
   { path: ADMIN_CLUBS_ROUTE, component: ClubsEditPage },
-  { path: ADMIN_CLUB_BOOKINGS_ROUTE, component: ClubBookingsPage },
+  { path: ADMIN_CLUB_BOOKINGS_ROUTE, component: ClubBookingsEditPage },
   { path: ADMIN_DAY_SCHEDULE_ROUTE, component: DayScheduleEditPage },
   { path: ADMIN_EVENING_SCHEDULE_ROUTE, component: EveningScheduleEditPage },
   { path: ADMIN_EVENTS_ROUTE, component: EventsEditPage },
@@ -130,10 +134,8 @@ function firstVisiblePath(store: ReturnType<typeof useGlobalStore>): string {
 router.beforeEach(async (to) => {
   if (to.path.startsWith("/admin")) {
     await waitForAuth();
-    const { isAdmin, isTeacher } = useAuth();
+    const { isAdmin } = useAuth();
     if (isAdmin.value) return true;
-    if (isTeacher.value && to.path === ADMIN_CLUB_BOOKINGS_ROUTE) return true;
-    if (isTeacher.value) return ADMIN_CLUB_BOOKINGS_ROUTE;
     return ANNOUNCEMENTS_ROUTE;
   }
 

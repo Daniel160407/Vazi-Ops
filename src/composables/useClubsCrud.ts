@@ -13,6 +13,20 @@ import { CLUBS_DB, CLUB_BOOKINGS_DB } from "../composables/constants";
 import type { Club, ClubBooking, ClubRegistration } from "../type/interfaces";
 import { useToast } from "primevue";
 
+const serializeSlots = (club: Partial<Club>) =>
+  (club.slots ?? []).map((s) => ({
+    id: s.id,
+    time: s.time ? new Date(s.time) : null,
+    places_quantity: Number(s.places_quantity) || 0,
+  }));
+
+const rawSlots = (data: any): any[] => {
+  if (Array.isArray(data.slots) && data.slots.length) {
+    return data.slots.map((s: any) => ({ ...s }));
+  }
+  return [{ id: "legacy", time: data.time ?? null, places_quantity: data.places_quantity ?? 0 }];
+};
+
 export function useClubsCrud() {
   const toast = useToast();
   const loading = ref(false);
@@ -50,7 +64,14 @@ export function useClubsCrud() {
   const addClub = async (club: Omit<Club, "id">) => {
     return await handleAsyncOperation(
       async () => {
-        const docRef = await addDoc(collection(db, CLUBS_DB), club);
+        const payload = {
+          name: club.name,
+          teacher: club.teacher,
+          place: club.place,
+          additional_info: club.additional_info,
+          slots: serializeSlots(club),
+        };
+        const docRef = await addDoc(collection(db, CLUBS_DB), payload);
         showToast("success", "წრე შენახულია");
         return docRef.id;
       },
@@ -65,14 +86,13 @@ export function useClubsCrud() {
     await handleAsyncOperation(
       async () => {
         const clubRef = doc(db, CLUBS_DB, club.id);
-        const { id, ...clubData } = club;
-
-        const dataToUpdate = {
-          ...clubData,
-          time: clubData.time ? new Date(clubData.time) : null,
-        };
-
-        await updateDoc(clubRef, dataToUpdate);
+        await updateDoc(clubRef, {
+          name: club.name,
+          teacher: club.teacher,
+          place: club.place,
+          additional_info: club.additional_info,
+          slots: serializeSlots(club),
+        });
         showToast("success", "წრე განახლებულია");
       },
       "მოხდა შეცდომა",
@@ -93,12 +113,14 @@ export function useClubsCrud() {
 
   const registerInClub = async (
     club: Club,
+    slotId: string,
     data: Pick<
       ClubBooking,
       "child_first_name" | "child_last_name" | "leader_name" | "group_name"
-    >
-  ) => {
-    if (!club.id) return;
+    >,
+    silent = false
+  ): Promise<boolean> => {
+    if (!club.id || !slotId) return false;
 
     loading.value = true;
     try {
@@ -108,25 +130,32 @@ export function useClubsCrud() {
 
         if (!clubSnap.exists()) throw new Error("CLUB_NOT_FOUND");
 
-        const clubData = clubSnap.data() as Club;
-        if (!clubData.places_quantity || clubData.places_quantity <= 0) {
+        const clubData = clubSnap.data();
+        const slots = rawSlots(clubData);
+        const idx = slots.findIndex((s) => s.id === slotId);
+        if (idx === -1) throw new Error("SLOT_NOT_FOUND");
+
+        const slot = slots[idx];
+        if (!slot.places_quantity || slot.places_quantity <= 0) {
           throw new Error("NO_PLACES_LEFT");
         }
 
-        transaction.update(clubRef, {
-          places_quantity: clubData.places_quantity - 1,
-        });
+        slots[idx] = { ...slot, places_quantity: slot.places_quantity - 1 };
+        transaction.update(clubRef, { slots });
 
         const bookingRef = doc(collection(db, CLUB_BOOKINGS_DB));
         transaction.set(bookingRef, {
           ...data,
           club_id: club.id,
           club_name: club.name,
+          slot_id: slotId,
+          slot_time: slot.time ?? null,
           created_at: new Date(),
         });
       });
 
-      showToast("success", "შენ წარმატებით ჩაეწერე ამ წრეზე");
+      if (!silent) showToast("success", "შენ წარმატებით ჩაეწერე ამ წრეზე");
+      return true;
     } catch (err: any) {
       console.error(err);
       if (err?.message === "NO_PLACES_LEFT") {
@@ -138,13 +167,21 @@ export function useClubsCrud() {
       } else {
         showToast("error", "მოხდა შეცდომა", "დარეგისტრირება ვერ მოხერხდა");
       }
+      return false;
     } finally {
       loading.value = false;
     }
   };
 
-  const changeClubBooking = async (oldBooking: ClubBooking, newClub: Club) => {
-    if (!oldBooking.id || !oldBooking.club_id || !newClub.id) return;
+  const changeClubBooking = async (
+    oldBooking: ClubBooking,
+    newClub: Club,
+    newSlotId: string
+  ) => {
+    if (!oldBooking.id || !oldBooking.club_id || !newClub.id || !newSlotId) return;
+
+    const oldSlotId = oldBooking.slot_id ?? "legacy";
+    const sameClub = oldBooking.club_id === newClub.id;
 
     loading.value = true;
     try {
@@ -155,34 +192,67 @@ export function useClubsCrud() {
 
         const [oldClubSnap, newClubSnap, bookingSnap] = await Promise.all([
           transaction.get(oldClubRef),
-          transaction.get(newClubRef),
+          sameClub ? Promise.resolve(null) : transaction.get(newClubRef),
           transaction.get(bookingRef),
         ]);
 
-        if (
-          !oldClubSnap.exists() ||
-          !newClubSnap.exists() ||
-          !bookingSnap.exists()
-        ) {
+        if (!oldClubSnap.exists() || !bookingSnap.exists()) {
           throw new Error("NOT_FOUND");
         }
+        if (!sameClub && !newClubSnap!.exists()) throw new Error("NOT_FOUND");
 
-        const oldClubData = oldClubSnap.data() as Club;
-        const newClubData = newClubSnap.data() as Club;
-
-        if (!newClubData.places_quantity || newClubData.places_quantity <= 0) {
-          throw new Error("NO_PLACES_LEFT");
+        if (sameClub) {
+          const slots = rawSlots(oldClubSnap.data());
+          const newIdx = slots.findIndex((s) => s.id === newSlotId);
+          if (newIdx === -1) throw new Error("SLOT_NOT_FOUND");
+          if (!slots[newIdx].places_quantity || slots[newIdx].places_quantity <= 0) {
+            throw new Error("NO_PLACES_LEFT");
+          }
+          const oldIdx = slots.findIndex((s) => s.id === oldSlotId);
+          if (oldIdx !== -1) {
+            slots[oldIdx] = {
+              ...slots[oldIdx],
+              places_quantity: (slots[oldIdx].places_quantity ?? 0) + 1,
+            };
+          }
+          slots[newIdx] = {
+            ...slots[newIdx],
+            places_quantity: slots[newIdx].places_quantity - 1,
+          };
+          transaction.update(oldClubRef, { slots });
+        } else {
+          const oldSlots = rawSlots(oldClubSnap.data());
+          const newSlots = rawSlots(newClubSnap!.data());
+          const newIdx = newSlots.findIndex((s) => s.id === newSlotId);
+          if (newIdx === -1) throw new Error("SLOT_NOT_FOUND");
+          if (!newSlots[newIdx].places_quantity || newSlots[newIdx].places_quantity <= 0) {
+            throw new Error("NO_PLACES_LEFT");
+          }
+          const oldIdx = oldSlots.findIndex((s) => s.id === oldSlotId);
+          if (oldIdx !== -1) {
+            oldSlots[oldIdx] = {
+              ...oldSlots[oldIdx],
+              places_quantity: (oldSlots[oldIdx].places_quantity ?? 0) + 1,
+            };
+          }
+          newSlots[newIdx] = {
+            ...newSlots[newIdx],
+            places_quantity: newSlots[newIdx].places_quantity - 1,
+          };
+          transaction.update(oldClubRef, { slots: oldSlots });
+          transaction.update(newClubRef, { slots: newSlots });
         }
 
-        transaction.update(oldClubRef, {
-          places_quantity: (oldClubData.places_quantity ?? 0) + 1,
-        });
-        transaction.update(newClubRef, {
-          places_quantity: newClubData.places_quantity - 1,
-        });
+        const newSlotTime = (sameClub
+          ? rawSlots(oldClubSnap.data())
+          : rawSlots(newClubSnap!.data())
+        ).find((s) => s.id === newSlotId)?.time ?? null;
+
         transaction.update(bookingRef, {
           club_id: newClub.id,
           club_name: newClub.name,
+          slot_id: newSlotId,
+          slot_time: newSlotTime,
         });
       });
 

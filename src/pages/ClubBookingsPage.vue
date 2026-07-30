@@ -2,141 +2,79 @@
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { format } from "date-fns";
-import { useAppConfirm } from "../composables/useAppConfirm";
+import { useAuth } from "../composables/useAuth";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
 import { useGlobalStore } from "../stores/GlobalStore";
 import type { ClubBooking } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
-import BottomSheet from "../components/UI/BottomSheet.vue";
-import SheetField from "../components/UI/SheetField.vue";
-import AppButton from "../components/UI/AppButton.vue";
-import AppInput from "../components/UI/AppInput.vue";
 
-const { bookings, loading, addBooking, updateBooking, deleteBooking } = useClubBookingsCrud();
-const { loading: loadingStore, appUsers, clubs, groups } = storeToRefs(useGlobalStore());
-const confirm = useAppConfirm();
-
-const leaderOpen = ref(false);
-const clubOpen = ref(false);
-
-const leaderSuggestions = computed(() => {
-  const q = (form.value.leader_name ?? "").toLowerCase().trim();
-  return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
-});
-
-const clubSuggestions = computed(() => {
-  const q = (form.value.club_name ?? "").toLowerCase().trim();
-  return clubs.value.filter((c) => c.name.toLowerCase().includes(q));
-});
-
-const selectLeader = (name: string) => {
-  form.value.leader_name = name;
-  const group = groups.value.find((g) => g.leader === name);
-  if (group) form.value.group_name = group.name;
-  leaderOpen.value = false;
-};
-
-const selectClub = (id: string, name: string) => {
-  form.value.club_id = id;
-  form.value.club_name = name;
-  clubOpen.value = false;
-};
+const { bookings } = useClubBookingsCrud();
+const { loading: loadingStore, clubs } = storeToRefs(useGlobalStore());
+const { fullName, userGroupName } = useAuth();
 
 const search = ref("");
+const onlyMine = ref(false);
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase().trim();
-  if (!q) return bookings.value;
-  return bookings.value.filter(
-    (b) =>
+  const myGroup = userGroupName.value.trim();
+  const myName = fullName.value.trim();
+  return bookings.value.filter((b) => {
+    if (onlyMine.value && b.group_name !== myGroup && b.leader_name !== myName) {
+      return false;
+    }
+    if (!q) return true;
+    return (
       b.child_first_name.toLowerCase().includes(q) ||
       b.child_last_name.toLowerCase().includes(q) ||
       b.club_name.toLowerCase().includes(q) ||
       b.leader_name.toLowerCase().includes(q) ||
-      b.group_name.toLowerCase().includes(q),
-  );
+      b.group_name.toLowerCase().includes(q)
+    );
+  });
 });
 
+const formatTime = (value?: Date | string | null) => {
+  if (!value) return "";
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? "" : format(date, "HH:mm");
+};
+
+const rowTime = (b: ClubBooking) =>
+  formatTime(b.slot_time ?? clubs.value.find((c) => c.id === b.club_id)?.time) || "—";
+
 const groupedByClub = computed(() => {
-  const groups = new Map<string, ClubBooking[]>();
+  const groups = new Map<string, { name: string; times: string[]; rows: ClubBooking[] }>();
   filtered.value.forEach((b) => {
-    const key = b.club_name || "უცნობი წრე";
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(b);
+    const name = b.club_name || "უცნობი წრე";
+    const club = clubs.value.find((c) => c.id === b.club_id);
+    const time = formatTime(b.slot_time ?? club?.time);
+    const key = b.club_id || name;
+    if (!groups.has(key)) groups.set(key, { name, times: [], rows: [] });
+    const group = groups.get(key)!;
+    group.rows.push(b);
+    if (time && !group.times.includes(time)) group.times.push(time);
   });
+  groups.forEach((g) => g.times.sort());
   return groups;
 });
 
 const uniqueClubs = computed(() => groupedByClub.value.size);
 
-const sheetVisible = ref(false);
-const isEditing = ref(false);
-const submitted = ref(false);
-const childFullName = ref("");
+const timeFilters = ref<Record<string, string>>({});
 
-const splitName = (full: string) => {
-  const parts = full.trim().split(/\s+/);
-  return { first: parts[0] ?? "", last: parts.slice(1).join(" ") };
+const toggleTimeFilter = (key: string, time: string) => {
+  const next = { ...timeFilters.value };
+  if (next[key] === time) delete next[key];
+  else next[key] = time;
+  timeFilters.value = next;
 };
 
-const blankForm = (): Partial<ClubBooking> => ({
-  club_id: "", club_name: "", child_first_name: "", child_last_name: "", leader_name: "", group_name: "",
-});
-
-const form = ref<Partial<ClubBooking>>(blankForm());
-
-const openAdd = () => {
-  isEditing.value = false;
-  form.value = blankForm();
-  childFullName.value = "";
-  submitted.value = false;
-  sheetVisible.value = true;
-};
-
-const openEdit = (booking: ClubBooking) => {
-  isEditing.value = true;
-  form.value = { ...booking };
-  childFullName.value = `${booking.child_first_name} ${booking.child_last_name}`.trim();
-  submitted.value = false;
-  sheetVisible.value = true;
-};
-
-const handleSave = async () => {
-  submitted.value = true;
-  if (!form.value.club_name || !childFullName.value.trim()) return;
-
-  const { first, last } = splitName(childFullName.value);
-  form.value.child_first_name = first;
-  form.value.child_last_name = last;
-
-  if (isEditing.value && form.value.id) {
-    await updateBooking(form.value as ClubBooking);
-  } else {
-    const { id, created_at, ...payload } = form.value;
-    await addBooking(payload as Omit<ClubBooking, "id" | "created_at">);
-  }
-
-  sheetVisible.value = false;
-};
-
-const handleDelete = (booking: ClubBooking) => {
-  confirm.require({
-    message: "დარწმუნებული ხარ, რომ გინდა რეგისტრაციის წაშლა?",
-    header: "წაშლა",
-    acceptLabel: "წაშლა",
-    rejectLabel: "გაუქმება",
-    accept: async () => {
-      await deleteBooking(booking.id);
-      sheetVisible.value = false;
-    },
-  });
-};
-
-const formatDate = (value?: Date | string) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  return isNaN(date.getTime()) ? "—" : format(date, "dd.MM.yy HH:mm");
+const rowsFor = (key: string, rows: ClubBooking[]) => {
+  const t = timeFilters.value[key];
+  if (t) return rows.filter((r) => rowTime(r) === t);
+  return [...rows].sort((a, b) => rowTime(a).localeCompare(rowTime(b)));
 };
 </script>
 
@@ -158,23 +96,51 @@ const formatDate = (value?: Date | string) => {
         </div>
       </div>
 
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <label class="flex cursor-pointer items-center gap-2.5 rounded-2xl border border-blue-900/20 bg-[#0d1829] px-4 py-2.5">
+          <input v-model="onlyMine" type="checkbox" class="sr-only" />
+          <span
+            class="flex h-5 w-5 items-center justify-center rounded-md border transition-all duration-150"
+            :class="onlyMine ? 'border-blue-500 bg-blue-600' : 'border-blue-900/50 bg-transparent'"
+          >
+            <i v-if="onlyMine" class="pi pi-check text-[10px] text-white" />
+          </span>
+          <span class="text-sm font-semibold text-slate-300">მხოლოდ ჩემი ბავშვები</span>
+        </label>
+      </div>
+
       <p v-if="filtered.length === 0" class="py-10 text-center text-sm text-slate-600">
         რეგისტრაცია ვერ მოიძებნა
       </p>
 
       <div class="flex flex-col gap-4">
         <div
-          v-for="[clubName, rows] in groupedByClub"
-          :key="clubName"
+          v-for="[key, group] in groupedByClub"
+          :key="key"
           class="overflow-hidden rounded-2xl border border-blue-900/20 bg-[#0d1829]"
         >
           <div class="flex items-center justify-between border-b border-blue-900/20 bg-blue-500/5 px-4 py-3">
             <div class="flex items-center gap-2.5">
               <span class="h-4 w-0.75 rounded-full bg-blue-500" />
-              <span class="font-bold text-white">{{ clubName }}</span>
+              <span class="font-bold text-white">{{ group.name }}</span>
+              <div v-if="group.times.length > 1" class="flex items-center gap-1.5">
+                <button
+                  v-for="t in group.times"
+                  :key="t"
+                  type="button"
+                  class="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold transition-colors"
+                  :class="timeFilters[key] === t ? 'bg-blue-600 text-white' : 'bg-blue-900/30 text-slate-400 hover:text-slate-200'"
+                  @click="toggleTimeFilter(key, t)"
+                >
+                  <i class="pi pi-clock text-[10px]" />{{ t }}
+                </button>
+              </div>
+              <span v-else-if="group.times.length" class="flex items-center gap-1 text-xs font-semibold text-slate-500">
+                <i class="pi pi-clock text-[10px]" />{{ group.times[0] }}
+              </span>
             </div>
             <span class="rounded-lg border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400">
-              {{ rows.length }}
+              {{ group.rows.length }}
             </span>
           </div>
 
@@ -186,13 +152,12 @@ const formatDate = (value?: Date | string) => {
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ბავშვი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ლიდერი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ჯგუფი</th>
-                  <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">თარიღი</th>
-                  <th class="px-4 py-2.5" />
+                  <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">დრო</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="(row, i) in rows"
+                  v-for="(row, i) in rowsFor(key, group.rows)"
                   :key="row.id"
                   class="border-b border-blue-900/10 transition-colors last:border-b-0 hover:bg-blue-500/5"
                 >
@@ -200,12 +165,10 @@ const formatDate = (value?: Date | string) => {
                   <td class="px-4 py-3 font-semibold text-slate-200">{{ row.child_first_name }} {{ row.child_last_name }}</td>
                   <td class="px-4 py-3 text-slate-400">{{ row.leader_name || "—" }}</td>
                   <td class="px-4 py-3 text-slate-400">{{ row.group_name || "—" }}</td>
-                  <td class="px-4 py-3 text-xs text-slate-600">{{ formatDate(row.created_at) }}</td>
                   <td class="px-4 py-3">
-                    <div class="flex items-center justify-end gap-1.5">
-                      <AppButton variant="icon-edit" icon="pi-pencil" @click="openEdit(row)" />
-                      <AppButton variant="icon-delete" icon="pi-trash" @click="handleDelete(row)" />
-                    </div>
+                    <span class="inline-flex items-center gap-1 rounded-md bg-blue-900/30 px-2 py-0.5 text-xs font-semibold text-slate-300">
+                      <i class="pi pi-clock text-[10px]" />{{ rowTime(row) }}
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -214,97 +177,5 @@ const formatDate = (value?: Date | string) => {
         </div>
       </div>
     </div>
-
-    <AppButton variant="fab" icon="pi-plus" @click="openAdd" />
-
-    <BottomSheet
-      :visible="sheetVisible"
-      :title="isEditing ? 'რეგისტრაციის რედაქტირება' : 'ახალი რეგისტრაცია'"
-      @close="sheetVisible = false"
-    >
-      <div class="flex flex-col gap-4">
-        <SheetField label="წრე" :required="true" :error="submitted && !form.club_name ? 'წრის სახელი აუცილებელია' : ''">
-          <div class="relative">
-            <AppInput v-model="form.club_name" autocomplete="off" :error="submitted && !form.club_name" @focus="clubOpen = true" @blur="clubOpen = false" />
-            <Transition
-              enter-active-class="transition-all duration-150 ease-out"
-              enter-from-class="opacity-0 -translate-y-1"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition-all duration-100 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-1"
-            >
-              <ul
-                v-if="clubOpen && clubSuggestions.length"
-                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
-                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
-                @mousedown.prevent
-              >
-                <li
-                  v-for="club in clubSuggestions"
-                  :key="club.id"
-                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
-                  @click="selectClub(club.id, club.name)"
-                >
-                  <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-900/30">
-                    <i class="pi pi-sparkles text-[10px] text-blue-400" />
-                  </div>
-                  <span class="text-sm text-slate-200">{{ club.name }}</span>
-                </li>
-              </ul>
-            </Transition>
-          </div>
-        </SheetField>
-
-        <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !childFullName.trim() ? 'სახელი და გვარი აუცილებელია' : ''">
-          <AppInput v-model="childFullName" :error="submitted && !childFullName.trim()" />
-        </SheetField>
-
-        <SheetField label="ლიდერი">
-          <div class="relative">
-            <AppInput v-model="form.leader_name" autocomplete="off" @focus="leaderOpen = true" @blur="leaderOpen = false" />
-            <Transition
-              enter-active-class="transition-all duration-150 ease-out"
-              enter-from-class="opacity-0 -translate-y-1"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition-all duration-100 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-1"
-            >
-              <ul
-                v-if="leaderOpen && leaderSuggestions.length"
-                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
-                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
-                @mousedown.prevent
-              >
-                <li
-                  v-for="u in leaderSuggestions"
-                  :key="u.id"
-                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
-                  @click="selectLeader(u.name)"
-                >
-                  <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
-                    <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />
-                    <span v-else>{{ u.name.charAt(0).toUpperCase() }}</span>
-                  </div>
-                  <span class="text-sm text-slate-200">{{ u.name }}</span>
-                </li>
-              </ul>
-            </Transition>
-          </div>
-        </SheetField>
-
-        <SheetField label="ჯგუფი">
-          <AppInput v-model="form.group_name" />
-        </SheetField>
-      </div>
-
-      <div class="mt-5 flex gap-3">
-        <AppButton v-if="isEditing" variant="danger" icon="pi-trash" @click="handleDelete(form as ClubBooking)">წაშლა</AppButton>
-        <AppButton variant="primary" :disabled="loading" icon="pi-check" class="flex-1" @click="handleSave">
-          {{ isEditing ? "შენახვა" : "დამატება" }}
-        </AppButton>
-      </div>
-    </BottomSheet>
   </div>
 </template>

@@ -5,7 +5,7 @@ import { useGlobalStore } from "../stores/GlobalStore";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
 import { useAuth } from "../composables/useAuth";
 import { useAppConfirm } from "../composables/useAppConfirm";
-import type { EveningScheduleItem } from "../type/interfaces";
+import type { AppUser, EveningScheduleItem } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
 import SheetField from "../components/UI/SheetField.vue";
@@ -14,7 +14,7 @@ import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, eveningScheduleItems, appUsers, groups } =
   storeToRefs(useGlobalStore());
-const { fullName, userGroupName } = useAuth();
+const { fullName, userId, userGroupName } = useAuth();
 const {
   updateScheduleOrder,
   addEveningSchedule,
@@ -85,14 +85,16 @@ const onTouchEnd = () => {
 };
 
 const leaderOpen = ref(false);
+const leaderId = ref("");
 
 const leaderSuggestions = computed(() => {
   const q = form.value.leader_full_name.toLowerCase().trim();
   return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
 });
 
-const selectLeader = (name: string) => {
-  form.value.leader_full_name = name;
+const selectLeader = (leader: AppUser) => {
+  form.value.leader_full_name = leader.name;
+  leaderId.value = leader.id;
   leaderOpen.value = false;
 };
 
@@ -101,7 +103,9 @@ const childOpen = ref(false);
 const childSuggestions = computed(() => {
   const leader = form.value.leader_full_name.trim();
   const q = form.value.performer_full_name.toLowerCase().trim();
-  const matchedGroup = groups.value.find((g) => g.leader === leader);
+  const matchedGroup = groups.value.find(
+    (g) => (leaderId.value && g.leader_id === leaderId.value) || g.leader === leader,
+  );
   if (!matchedGroup) return [];
   return matchedGroup.children.filter((c) => !q || c.toLowerCase().includes(q));
 });
@@ -133,6 +137,7 @@ const openAdd = () => {
   editingId.value = null;
   mode.value = "general";
   form.value = { ...blankForm(), leader_full_name: fullName.value, group_name: userGroupName.value };
+  leaderId.value = userId.value;
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -140,6 +145,7 @@ const openAdd = () => {
 const openEdit = (item: EveningScheduleItem) => {
   isEditing.value = true;
   editingId.value = item.id ?? null;
+  leaderId.value = "";
   mode.value = item.performer_full_name ? "child" : "general";
   form.value = {
     performer_full_name: item.performer_full_name ?? "",
@@ -390,7 +396,7 @@ const handleDelete = (id: string) => {
             :error="submitted && !form.leader_full_name ? 'ლიდერი აუცილებელია' : ''"
           >
             <div class="relative">
-              <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @focus="leaderOpen = true" @blur="leaderOpen = false" />
+              <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @input="leaderId = ''" @focus="leaderOpen = true" @blur="leaderOpen = false" />
               <Transition
                 enter-active-class="transition-all duration-150 ease-out"
                 enter-from-class="opacity-0 -translate-y-1"
@@ -409,7 +415,7 @@ const handleDelete = (id: string) => {
                     v-for="u in leaderSuggestions"
                     :key="u.id"
                     class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
-                    @click="selectLeader(u.name)"
+                    @click="selectLeader(u)"
                   >
                     <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
                       <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />

@@ -9,7 +9,7 @@ import { useGlobalStore } from "../stores/GlobalStore";
 import { useEventsCrud } from "../composables/useEventsCrud";
 import { useSchedulesCrud } from "../composables/useSchedulesCrud";
 import { REQUEST_PENDING, REQUEST_ACCEPTED, REQUEST_REJECTED } from "../composables/constants";
-import type { EveningScheduleItem, Event } from "../type/interfaces";
+import type { AppUser, EveningScheduleItem, Event } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
@@ -69,11 +69,13 @@ const leaderSuggestions = computed(() => {
   return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
 });
 
-const selectLeader = (name: string) => {
+const selectLeader = (leader: AppUser) => {
   if (!form.value) return;
-  form.value.leader_full_name = name;
-  const group = groups.value.find((g) => g.leader === name);
-  if (group) form.value.group_name = group.name;
+  form.value.leader_full_name = leader.name;
+  const group = groups.value.find(
+    (g) => g.leader_id === leader.id || g.leader === leader.name,
+  );
+  form.value.group_name = group?.name ?? "";
   leaderOpen.value = false;
 };
 
@@ -297,7 +299,7 @@ const formatDate = (dateValue?: any) => {
                   v-for="u in leaderSuggestions"
                   :key="u.id"
                   class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
-                  @click="selectLeader(u.name)"
+                  @click="selectLeader(u)"
                 >
                   <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
                     <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />

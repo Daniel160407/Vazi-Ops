@@ -24,6 +24,7 @@ const props = withDefaults(
       | "table-add-row";
     icon?: string;
     disabled?: boolean;
+    loading?: boolean;
     active?: boolean;
     size?: "sm" | "md";
     rounded?: "xl" | "2xl";
@@ -31,6 +32,7 @@ const props = withDefaults(
   {
     variant: "primary",
     disabled: false,
+    loading: false,
     active: false,
     size: "sm",
     rounded: "xl",
@@ -127,8 +129,9 @@ const iconSize = computed((): string => {
 </script>
 
 <template>
-  <button :disabled="disabled" :class="classes">
-    <i v-if="icon" :class="`pi ${icon} ${iconSize}`" />
+  <button :disabled="disabled || loading" :class="classes">
+    <i v-if="loading" :class="`pi pi-spinner pi-spin ${iconSize}`" />
+    <i v-else-if="icon" :class="`pi ${icon} ${iconSize}`" />
     <slot />
   </button>
 </template>

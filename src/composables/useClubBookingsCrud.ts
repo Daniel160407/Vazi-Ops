@@ -4,14 +4,16 @@ import {
   addDoc,
   updateDoc,
   doc,
+  getDoc,
   runTransaction,
+  writeBatch,
   query,
   where,
   getDocs,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { CLUB_BOOKINGS_DB, CLUBS_DB } from "../composables/constants";
-import type { Club, ClubBooking } from "../type/interfaces";
+import type { ClubBooking } from "../type/interfaces";
 import { useToast } from "primevue";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { storeToRefs } from "pinia";
@@ -118,10 +120,15 @@ export function useClubBookingsCrud() {
           const clubSnap = await transaction.get(clubRef);
 
           if (clubSnap.exists()) {
-            const clubData = clubSnap.data() as Club;
-            transaction.update(clubRef, {
-              places_quantity: (clubData.places_quantity ?? 0) + 1,
-            });
+            const clubData = clubSnap.data() as any;
+            const slots: any[] = Array.isArray(clubData.slots) && clubData.slots.length
+              ? clubData.slots.map((s: any) => ({ ...s }))
+              : [{ id: "legacy", time: clubData.time ?? null, places_quantity: clubData.places_quantity ?? 0 }];
+            const idx = slots.findIndex((s) => s.id === (bookingData.slot_id ?? "legacy"));
+            if (idx !== -1) {
+              slots[idx] = { ...slots[idx], places_quantity: (slots[idx].places_quantity ?? 0) + 1 };
+              transaction.update(clubRef, { slots });
+            }
           }
         }
 
@@ -146,6 +153,72 @@ export function useClubBookingsCrud() {
     }
   };
 
+  const deleteAllBookings = async () => {
+    const all = clubBookings.value.filter((b) => b.id);
+    if (!all.length) return;
+
+    loading.value = true;
+    try {
+      const restore = new Map<string, Map<string, number>>();
+      all.forEach((b) => {
+        if (!b.club_id) return;
+        const slotKey = b.slot_id ?? "legacy";
+        if (!restore.has(b.club_id)) restore.set(b.club_id, new Map());
+        const slotCounts = restore.get(b.club_id)!;
+        slotCounts.set(slotKey, (slotCounts.get(slotKey) ?? 0) + 1);
+      });
+
+      for (const [clubId, slotCounts] of restore) {
+        const clubRef = doc(db, CLUBS_DB, clubId);
+        const clubSnap = await getDoc(clubRef);
+        if (!clubSnap.exists()) continue;
+
+        const clubData = clubSnap.data() as any;
+        const slots: any[] = Array.isArray(clubData.slots) && clubData.slots.length
+          ? clubData.slots.map((s: any) => ({ ...s }))
+          : [{ id: "legacy", time: clubData.time ?? null, places_quantity: clubData.places_quantity ?? 0 }];
+
+        slotCounts.forEach((count, slotId) => {
+          const idx = slots.findIndex((s) => s.id === slotId);
+          if (idx !== -1) {
+            slots[idx] = { ...slots[idx], places_quantity: (slots[idx].places_quantity ?? 0) + count };
+          }
+        });
+
+        await updateDoc(clubRef, { slots });
+      }
+
+      let batch = writeBatch(db);
+      let ops = 0;
+      for (const b of all) {
+        batch.delete(doc(db, CLUB_BOOKINGS_DB, b.id));
+        ops++;
+        if (ops === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          ops = 0;
+        }
+      }
+      if (ops > 0) await batch.commit();
+
+      toast.add({
+        severity: "success",
+        summary: "ყველა რეგისტრაცია წაიშალა",
+        life: 3000,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "რეგისტრაციები ვერ წაიშალა",
+        life: 3000,
+      });
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     bookings: clubBookings,
     loading,
@@ -153,5 +226,6 @@ export function useClubBookingsCrud() {
     addBooking,
     updateBooking,
     deleteBooking,
+    deleteAllBookings,
   };
 }

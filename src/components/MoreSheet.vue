@@ -6,6 +6,7 @@ import { useAuth } from "../composables/useAuth";
 import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
 import {
   ANNOUNCEMENTS_ROUTE,
+  CLUB_BOOKINGS_ROUTE,
   DAY_SCHEDULE_ROUTE,
   GOLDEN_VERSES_ROUTE,
   ADMIN_GROUPS_ROUTE,
@@ -26,7 +27,7 @@ const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const router = useRouter();
-const { user, isAdmin, isTeacher } = useAuth();
+const { user, isAdmin } = useAuth();
 const { isVisible: isPageVisible } = usePageVisibilityCrud();
 
 const navigate = (path: string) => {
@@ -35,7 +36,7 @@ const navigate = (path: string) => {
 };
 
 const handleAdminNav = (path: string) => {
-  if (user.value && (isAdmin.value || isTeacher.value)) {
+  if (user.value && isAdmin.value) {
     router.push(path);
     emit("close");
   }
@@ -67,6 +68,7 @@ const onTouchEnd = () => {
 
 const allMainItems = [
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE, key: "announcements" },
+  { label: "წრეების რეგ.", icon: "pi pi-list-check", path: CLUB_BOOKINGS_ROUTE, key: "club_bookings" },
   { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE, key: "day_schedule" },
   { label: "ოქროს მუხლები", icon: "pi pi-lightbulb", path: GOLDEN_VERSES_ROUTE, key: "golden_verses" },
   { label: "დღის პროგრამები", icon: "pi pi-list", path: DAILY_PROGRAMS_ROUTE, key: "daily_programs" },
@@ -91,12 +93,6 @@ const adminItems = [
   { label: "დღ. პროგრამები", icon: "pi pi-list", path: ADMIN_DAILY_PROGRAMS_ROUTE },
   { label: "მართვა", icon: "pi pi-cog", path: ADMIN_USERS_ROUTE },
 ];
-
-const visibleAdminItems = computed(() =>
-  isTeacher.value
-    ? adminItems.filter((item) => item.path === ADMIN_CLUB_BOOKINGS_ROUTE)
-    : adminItems
-);
 </script>
 
 <template>
@@ -151,7 +147,7 @@ const visibleAdminItems = computed(() =>
           </AppButton>
         </div>
 
-        <template v-if="user && (isAdmin || isTeacher)">
+        <template v-if="user && isAdmin">
           <div class="mb-3 flex items-center gap-2">
             <i class="pi pi-lock text-[11px] text-blue-500/70" />
             <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -161,7 +157,7 @@ const visibleAdminItems = computed(() =>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <AppButton
-              v-for="item in visibleAdminItems"
+              v-for="item in adminItems"
               :key="item.path"
               variant="plain"
               class="group flex items-center gap-3 rounded-2xl border border-blue-900/20 bg-[#0a1220] p-4 text-left transition-all duration-150 hover:border-blue-700/40 hover:bg-[#0d1829]"

@@ -110,12 +110,22 @@ export const useGlobalStore = defineStore("globalStore", () => {
     );
   };
 
+  const toDate = (value: any) =>
+    value?.toDate ? value.toDate() : value ? new Date(value) : null;
+
+  const minutesOfDay = (d: Date | null) =>
+    d ? d.getHours() * 60 + d.getMinutes() : Infinity;
+
   const fetchClubs = () => {
     subscribe("clubs", CLUBS_DB, (data) => {
-      clubs.value = data.map((d) => ({
-        ...d,
-        time: d.time?.toDate ? d.time.toDate() : new Date(d.time),
-      })) as Club[];
+      clubs.value = data.map((d) => {
+        const legacyTime = toDate(d.time);
+        const slots = (Array.isArray(d.slots) && d.slots.length
+          ? d.slots.map((s: any) => ({ ...s, time: toDate(s.time) }))
+          : [{ id: "legacy", time: legacyTime, places_quantity: d.places_quantity ?? 0 }]
+        ).sort((a: any, b: any) => minutesOfDay(a.time) - minutesOfDay(b.time));
+        return { ...d, time: legacyTime, slots };
+      }) as Club[];
     });
   };
 
@@ -137,6 +147,7 @@ export const useGlobalStore = defineStore("globalStore", () => {
         .filter((d) => d.id !== "registration")
         .map((d) => ({
           ...d,
+          slot_time: toDate(d.slot_time),
           created_at: d.created_at?.toDate
             ? d.created_at.toDate()
             : new Date(d.created_at),

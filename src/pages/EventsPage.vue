@@ -8,7 +8,7 @@ import { useAuth } from "../composables/useAuth";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useToast } from "primevue";
 import { REQUEST_PENDING, REQUEST_ACCEPTED, REQUEST_REJECTED } from "../composables/constants";
-import type { Event as AppEvent } from "../type/interfaces";
+import type { AppUser, Event as AppEvent } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
 import BottomSheet from "../components/UI/BottomSheet.vue";
@@ -17,19 +17,21 @@ import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
-const { fullName, userGroupName } = useAuth();
+const { fullName, userId, userGroupName } = useAuth();
 const { groups, appUsers } = storeToRefs(useGlobalStore());
 const toast = useToast();
 
 const leaderOpen = ref(false);
+const leaderId = ref("");
 
 const leaderSuggestions = computed(() => {
   const q = (form.value.leader_full_name ?? "").toLowerCase().trim();
   return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
 });
 
-const selectLeader = (name: string) => {
-  form.value.leader_full_name = name;
+const selectLeader = (leader: AppUser) => {
+  form.value.leader_full_name = leader.name;
+  leaderId.value = leader.id;
   leaderOpen.value = false;
 };
 
@@ -41,7 +43,9 @@ let timer: number | null = null;
 const childSuggestions = computed(() => {
   const leader = (form.value.leader_full_name ?? "").trim();
   const q = (form.value.performer_full_name ?? "").toLowerCase().trim();
-  const matchedGroup = groups.value.find((g) => g.leader === leader);
+  const matchedGroup = groups.value.find(
+    (g) => (leaderId.value && g.leader_id === leaderId.value) || g.leader === leader,
+  );
   if (!matchedGroup) return [];
   return matchedGroup.children.filter((c) => !q || c.toLowerCase().includes(q));
 });
@@ -114,6 +118,7 @@ const form = ref(getEmptyForm());
 
 const openSheet = () => {
   form.value = getEmptyForm();
+  leaderId.value = userId.value;
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -291,7 +296,7 @@ onUnmounted(() => {
 
         <SheetField label="ლიდერის სახელი და გვარი" :required="true" :error="submitted && !form.leader_full_name ? 'სავალდებულოა' : ''">
           <div class="relative">
-            <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @focus="leaderOpen = true" @blur="leaderOpen = false" />
+            <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @input="leaderId = ''" @focus="leaderOpen = true" @blur="leaderOpen = false" />
             <Transition
               enter-active-class="transition-all duration-150 ease-out"
               enter-from-class="opacity-0 -translate-y-1"
@@ -310,7 +315,7 @@ onUnmounted(() => {
                   v-for="u in leaderSuggestions"
                   :key="u.id"
                   class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
-                  @click="selectLeader(u.name)"
+                  @click="selectLeader(u)"
                 >
                   <div class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-900/40 text-xs font-bold text-blue-300">
                     <img v-if="u.avatar_url" :src="u.avatar_url" class="h-full w-full object-cover" />

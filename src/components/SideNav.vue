@@ -7,6 +7,7 @@ import { usePageVisibilityCrud } from "../composables/usePageVisibilityCrud";
 import {
   GROUPS_ROUTE,
   CLUBS_ROUTE,
+  CLUB_BOOKINGS_ROUTE,
   EVENTS_ROUTE,
   EVENING_SCHEDULE_ROUTE,
   ANNOUNCEMENTS_ROUTE,
@@ -28,7 +29,7 @@ import {
 
 const router = useRouter();
 const route = useRoute();
-const { user, isAdmin, isTeacher, signInWithGoogle, logout } = useAuth();
+const { user, isAdmin, signInWithGoogle, logout } = useAuth();
 const { isVisible: isPageVisible } = usePageVisibilityCrud();
 
 const isActive = (path: string) => route.path === path;
@@ -36,13 +37,14 @@ const navigate = (path: string) => router.push(path);
 
 const handleAdminNav = async (path: string) => {
   if (!user.value) await signInWithGoogle();
-  if (user.value && (isAdmin.value || isTeacher.value)) router.push(path);
+  if (user.value && isAdmin.value) router.push(path);
 };
 
 const allMainItems = [
   { label: "განცხადებები", icon: "pi pi-megaphone", path: ANNOUNCEMENTS_ROUTE, key: "announcements" },
   { label: "ჯგუფები", icon: "pi pi-users", path: GROUPS_ROUTE, key: "groups" },
   { label: "წრეები", icon: "pi pi-sparkles", path: CLUBS_ROUTE, key: "clubs" },
+  { label: "წრეების რეგ.", icon: "pi pi-list-check", path: CLUB_BOOKINGS_ROUTE, key: "club_bookings" },
   { label: "ნომრები", icon: "pi pi-ticket", path: EVENTS_ROUTE, key: "events" },
   { label: "საღამოს განრიგი", icon: "pi pi-moon", path: EVENING_SCHEDULE_ROUTE, key: "evening_schedule" },
   { label: "დღის განრიგი", icon: "pi pi-calendar", path: DAY_SCHEDULE_ROUTE, key: "day_schedule" },
@@ -69,12 +71,6 @@ const adminItems = [
   { label: "დღ. პროგრამები", icon: "pi pi-list", path: ADMIN_DAILY_PROGRAMS_ROUTE },
   { label: "მართვა", icon: "pi pi-cog", path: ADMIN_USERS_ROUTE },
 ];
-
-const visibleAdminItems = computed(() =>
-  isTeacher.value
-    ? adminItems.filter((item) => item.path === ADMIN_CLUB_BOOKINGS_ROUTE)
-    : adminItems
-);
 </script>
 
 <template>
@@ -116,9 +112,9 @@ const visibleAdminItems = computed(() =>
         <div class="h-px flex-1 bg-blue-900/20" />
       </div>
 
-      <template v-if="user && (isAdmin || isTeacher)">
+      <template v-if="user && isAdmin">
         <AppButton
-          v-for="item in visibleAdminItems"
+          v-for="item in adminItems"
           :key="item.path"
           variant="plain"
           class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
@@ -162,7 +158,7 @@ const visibleAdminItems = computed(() =>
         </div>
         <div class="min-w-0 flex-1">
           <p class="truncate text-xs font-medium text-slate-300">{{ user.displayName }}</p>
-          <p class="text-[10px] text-slate-600">{{ isAdmin ? 'ადმინი' : isTeacher ? 'მასწავლებელი' : 'მომხმარებელი' }}</p>
+          <p class="text-[10px] text-slate-600">{{ isAdmin ? 'ადმინი' : 'მომხმარებელი' }}</p>
         </div>
         <AppButton
           variant="plain"

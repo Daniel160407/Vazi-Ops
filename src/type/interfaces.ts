@@ -1,6 +1,5 @@
 export const UserRole = {
   ADMIN: "ADMIN",
-  TEACHER: "TEACHER",
   USER: "USER",
 } as const;
 
@@ -18,6 +17,7 @@ export interface Group {
   id: string;
   name: string;
   leader: string;
+  leader_id?: string;
   age: string;
   cottage_num: number;
   gender: string;
@@ -25,14 +25,21 @@ export interface Group {
   music?: string;
 }
 
+export interface ClubSlot {
+  id: string;
+  time: Date;
+  places_quantity: number;
+}
+
 export interface Club {
   id: string;
   name: string;
   teacher: string;
-  places_quantity: number;
   place: string;
-  time: Date;
   additional_info: string;
+  slots: ClubSlot[];
+  places_quantity?: number;
+  time?: Date;
 }
 
 export interface ClubRegistration {
@@ -44,6 +51,8 @@ export interface ClubBooking {
   id: string;
   club_id: string;
   club_name: string;
+  slot_id?: string;
+  slot_time?: Date | null;
   child_first_name: string;
   child_last_name: string;
   leader_name: string;

@@ -6,7 +6,7 @@ import { useAppConfirm } from "../composables/useAppConfirm";
 import DatePicker from "primevue/datepicker";
 import { useGlobalStore } from "../stores/GlobalStore";
 import { useClubsCrud } from "../composables/useClubsCrud";
-import type { Club } from "../type/interfaces";
+import type { Club, ClubSlot } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
 import InfoRow from "../components/UI/InfoRow.vue";
@@ -22,11 +22,24 @@ const confirm = useAppConfirm();
 const sheetVisible = ref(false);
 const isAdding = ref(false);
 
+const newSlot = (): ClubSlot => ({
+  id: crypto.randomUUID(),
+  time: new Date(),
+  places_quantity: 0,
+});
+
 const blankClub = (): Omit<Club, "id"> => ({
-  name: "", teacher: "", places_quantity: 0, place: "", time: new Date(), additional_info: "",
+  name: "", teacher: "", place: "", additional_info: "", slots: [newSlot()],
 });
 
 const form = ref<Club | Omit<Club, "id">>(blankClub());
+
+const addSlot = () => form.value.slots.push(newSlot());
+
+const removeSlot = (id: string) => {
+  if (form.value.slots.length <= 1) return;
+  form.value.slots = form.value.slots.filter((s) => s.id !== id);
+};
 
 const openAdd = () => {
   isAdding.value = true;
@@ -36,7 +49,15 @@ const openAdd = () => {
 
 const openEdit = (club: Club) => {
   isAdding.value = false;
-  form.value = { ...club, time: new Date(club.time) };
+  const slots = (club.slots ?? []).map((s) => ({
+    id: s.id || crypto.randomUUID(),
+    time: s.time ? new Date(s.time) : new Date(),
+    places_quantity: s.places_quantity ?? 0,
+  }));
+  form.value = {
+    ...club,
+    slots: slots.length ? slots : [newSlot()],
+  };
   sheetVisible.value = true;
 };
 
@@ -72,8 +93,11 @@ const filtered = computed(() => {
   );
 });
 
+const slotPlaces = (club: Club) =>
+  (club.slots ?? []).reduce((acc, s) => acc + (s.places_quantity ?? 0), 0);
+
 const totalPlaces = computed(() =>
-  clubs.value.reduce((acc, c) => acc + (c.places_quantity ?? 0), 0),
+  clubs.value.reduce((acc, c) => acc + slotPlaces(c), 0),
 );
 
 const formatTime = (value?: string | Date | null) => {
@@ -141,15 +165,26 @@ const placesBg = (n: number) => {
           >
             <div class="mb-3 flex items-start justify-between gap-2">
               <h3 class="text-base font-bold leading-tight text-white">{{ club.name }}</h3>
-              <span class="shrink-0 rounded-lg border px-2.5 py-1 text-xs font-bold" :class="placesBg(club.places_quantity)">
-                {{ club.places_quantity <= 0 ? "სავსეა" : `${club.places_quantity} ადგილი` }}
+              <span class="shrink-0 rounded-lg border px-2.5 py-1 text-xs font-bold" :class="placesBg(slotPlaces(club))">
+                {{ slotPlaces(club) <= 0 ? "სავსეა" : `${slotPlaces(club)} ადგილი` }}
               </span>
             </div>
 
             <div class="flex flex-col gap-2">
               <InfoRow icon="pi-user"><span class="text-sm text-slate-400">{{ club.teacher || "—" }}</span></InfoRow>
               <InfoRow icon="pi-map-marker"><span class="text-sm text-slate-400">{{ club.place || "—" }}</span></InfoRow>
-              <InfoRow icon="pi-clock"><span class="text-sm text-slate-400">{{ formatTime(club.time) }}</span></InfoRow>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              <span
+                v-for="slot in club.slots"
+                :key="slot.id"
+                class="flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold"
+                :class="placesBg(slot.places_quantity)"
+              >
+                <i class="pi pi-clock text-[10px]" />
+                {{ formatTime(slot.time) }}
+              </span>
             </div>
           </AppButton>
 
@@ -182,21 +217,47 @@ const placesBg = (n: number) => {
           </SheetField>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <SheetField label="ადგილების რაოდენობა">
-            <AppInput v-model="form.places_quantity" type="number" min="0" />
-          </SheetField>
-          <SheetField label="დრო">
-            <DatePicker
-              v-model="(form as Club).time"
-              time-only
-              fluid
-              input-id="clubTime"
-              class="w-full"
-              :pt="{ input: { class: 'rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-200 w-full outline-none' } }"
-            />
-          </SheetField>
-        </div>
+        <SheetField label="დროები და ადგილები">
+          <div class="flex flex-col gap-2.5">
+            <div
+              v-for="slot in form.slots"
+              :key="slot.id"
+              class="flex items-end gap-2 rounded-xl border border-blue-900/20 bg-[#0a1424] p-2.5"
+            >
+              <div class="flex-1">
+                <p class="mb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">დრო</p>
+                <DatePicker
+                  v-model="slot.time"
+                  time-only
+                  fluid
+                  :input-id="`clubTime-${slot.id}`"
+                  class="w-full"
+                  :pt="{ input: { class: 'rounded-xl border border-blue-900/30 bg-[#0d1829] px-3 py-2.5 text-sm text-slate-200 w-full outline-none' } }"
+                />
+              </div>
+              <div class="w-24">
+                <p class="mb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">ადგილები</p>
+                <AppInput v-model="slot.places_quantity" type="number" min="0" />
+              </div>
+              <AppButton
+                variant="icon-delete"
+                icon="pi-trash"
+                :disabled="form.slots.length <= 1"
+                class="mb-1.5"
+                @click="removeSlot(slot.id)"
+              />
+            </div>
+
+            <AppButton
+              variant="plain"
+              class="flex items-center justify-center gap-2 rounded-xl border border-blue-900/30 bg-[#0d1829] py-2.5 text-sm font-semibold text-blue-400 transition-all hover:bg-blue-900/20"
+              @click="addSlot"
+            >
+              <i class="pi pi-plus text-xs" />
+              დროის დამატება
+            </AppButton>
+          </div>
+        </SheetField>
 
         <SheetField label="დამატებითი ინფორმაცია">
           <textarea

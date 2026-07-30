@@ -8,6 +8,7 @@ export const ANNOUNCEMENTS_ROUTE = "/announcements";
 export const ADMIN_GROUPS_ROUTE = "/admin/groups";
 export const ADMIN_CLUBS_ROUTE = "/admin/clubs";
 export const ADMIN_CLUB_BOOKINGS_ROUTE = "/admin/club-bookings";
+export const CLUB_BOOKINGS_ROUTE = "/club-bookings";
 export const ADMIN_DAY_SCHEDULE_ROUTE = "/admin/day-schedule";
 export const ADMIN_EVENING_SCHEDULE_ROUTE = "/admin/evening-schedule";
 export const ADMIN_EVENTS_ROUTE = "/admin/events";
@@ -91,3 +92,5 @@ export const MAX_IMAGE_SIZE_MB = 5;
 export const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
 export const MAX_CLUBS_PER_CHILD = 2;
+
+export const MAX_CHILDREN_PER_REGISTRATION = 3;

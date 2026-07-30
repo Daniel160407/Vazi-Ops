@@ -71,10 +71,19 @@ export function useAuth() {
     return appUsers.value.find((u) => u.email === user.value!.email)?.avatar_url ?? null;
   });
 
+  const currentAppUser = computed(() =>
+    user.value?.email
+      ? appUsers.value.find((u) => u.email === user.value!.email) ?? null
+      : null,
+  );
+
   const userGroupName = computed(() => {
-    if (!user.value?.email) return "";
-    const name = appUsers.value.find((u) => u.email === user.value!.email)?.name ?? "";
-    return groups.value.find((g) => g.leader === name)?.name ?? "";
+    const me = currentAppUser.value;
+    if (!me) return "";
+    return (
+      groups.value.find((g) => g.leader_id === me.id || g.leader === me.name)
+        ?.name ?? ""
+    );
   });
 
   const signInWithGoogle = async () => {
@@ -101,12 +110,9 @@ export function useAuth() {
     role,
     avatarUrl,
     isAdmin: computed(() => role.value === UserRole.ADMIN),
-    isTeacher: computed(() => role.value === UserRole.TEACHER),
     isLoggedIn: computed(() => !!user.value),
-    fullName: computed(() => {
-      if (!user.value?.email) return "";
-      return appUsers.value.find((u) => u.email === user.value!.email)?.name ?? "";
-    }),
+    fullName: computed(() => currentAppUser.value?.name ?? ""),
+    userId: computed(() => currentAppUser.value?.id ?? ""),
     userGroupName,
     profileImg: computed(() => user.value?.photoURL),
     loading,
