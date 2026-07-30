@@ -175,12 +175,39 @@ export const useSchedulesCrud = () => {
     }
   };
 
+  const deleteAllEveningSchedule = async () => {
+    const all = eveningScheduleItems.value.filter((i) => i.id);
+    if (!all.length) return;
+    loading.value = true;
+    try {
+      let batch = writeBatch(db);
+      let ops = 0;
+      for (const item of all) {
+        batch.delete(doc(db, EVENING_SCHEDULE_DB, item.id!));
+        ops++;
+        if (ops === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          ops = 0;
+        }
+      }
+      if (ops > 0) await batch.commit();
+      toast.add({ severity: "info", summary: "ყველა ნომერი წაიშალა", life: 3000 });
+    } catch (err) {
+      console.error(err);
+      toast.add({ severity: "error", summary: "ნომრები ვერ წაიშალა", life: 3000 });
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     saveSchedule,
     addEveningSchedule,
     updateScheduleOrder,
     updateEveningSchedule,
     deleteEveningSchedule,
+    deleteAllEveningSchedule,
 
     loading,
     error,

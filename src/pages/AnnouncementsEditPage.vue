@@ -24,7 +24,7 @@ import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, announcements } = storeToRefs(useGlobalStore());
-const { addAnnouncement, updateAnnouncement, deleteAnnouncement } =
+const { loading, addAnnouncement, updateAnnouncement, deleteAnnouncement, deleteAllAnnouncements } =
   useAnnouncementsCrud();
 const { fullName, profileImg } = useAuth();
 const confirm = useAppConfirm();
@@ -197,6 +197,18 @@ const handleSave = async () => {
   }
 };
 
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა განცხადების წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllAnnouncements();
+    },
+  });
+};
+
 const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ განცხადების წაშლა გინდა?",
@@ -216,13 +228,24 @@ const handleDelete = (id: string) => {
     <LoadingSpinner v-if="loadingStore && announcements.length === 0" />
 
     <div v-else>
-      <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-        <p
-          class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"
+      <div class="mb-5 flex items-center gap-3">
+        <div class="flex-1 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p
+            class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"
+          >
+            განცხადებების რაოდენობა
+          </p>
+          <p class="text-3xl font-bold text-white">{{ announcements.length }}</p>
+        </div>
+        <AppButton
+          v-if="announcements.length"
+          variant="danger"
+          :disabled="loading"
+          icon="pi-trash"
+          @click="handleDeleteAll"
         >
-          განცხადებების რაოდენობა
-        </p>
-        <p class="text-3xl font-bold text-white">{{ announcements.length }}</p>
+          ყველას წაშლა
+        </AppButton>
       </div>
 
       <div v-if="announcements.length === 0" class="py-16 text-center">

@@ -4,6 +4,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { EVENTS_DB, DEADLINE_DB } from "./constants";
@@ -121,6 +122,41 @@ export const useEventsCrud = () => {
     }
   };
 
+  const deleteAllEvents = async () => {
+    const all = events.value.filter((e) => e.id);
+    if (!all.length) return;
+    saving.value = true;
+    try {
+      let batch = writeBatch(db);
+      let ops = 0;
+      for (const e of all) {
+        batch.delete(doc(db, EVENTS_DB, e.id));
+        ops++;
+        if (ops === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          ops = 0;
+        }
+      }
+      if (ops > 0) await batch.commit();
+      toast.add({
+        severity: "success",
+        summary: "ყველა ნომერი წაიშალა",
+        life: 3000,
+      });
+    } catch (err) {
+      console.error("Delete All Events Error:", err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "ნომრები ვერ წაიშალა",
+        life: 3000,
+      });
+    } finally {
+      saving.value = false;
+    }
+  };
+
   return {
     deadline,
     events,
@@ -130,6 +166,7 @@ export const useEventsCrud = () => {
     updateEvent,
     updateEventStatus,
     deleteEvent,
+    deleteAllEvents,
     updateDeadline,
   };
 };

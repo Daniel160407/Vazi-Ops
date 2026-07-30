@@ -16,7 +16,7 @@ import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, clubs, clubRegistration } = storeToRefs(useGlobalStore());
-const { addClub, updateClub, deleteClub, toggleRegistration, loading } = useClubsCrud();
+const { addClub, updateClub, deleteClub, deleteAllClubs, toggleRegistration, loading } = useClubsCrud();
 const confirm = useAppConfirm();
 
 const sheetVisible = ref(false);
@@ -76,6 +76,18 @@ const handleDelete = (id: string) => {
     accept: async () => {
       await deleteClub(id);
       sheetVisible.value = false;
+    },
+  });
+};
+
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა წრის წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllClubs();
     },
   });
 };
@@ -146,7 +158,12 @@ const placesBg = (n: number) => {
         {{ clubRegistration?.open ? "რეგისტრაციის დახურვა" : "რეგისტრაციის გახსნა" }}
       </AppButton>
 
-      <h2 class="mb-3 text-base font-bold text-slate-200">წრეები</h2>
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h2 class="text-base font-bold text-slate-200">წრეები</h2>
+        <AppButton v-if="clubs.length" variant="danger" :disabled="loading" icon="pi-trash" @click="handleDeleteAll">
+          ყველას წაშლა
+        </AppButton>
+      </div>
 
       <p v-if="filtered.length === 0" class="py-10 text-center text-sm text-slate-600">
         წრე ვერ მოიძებნა

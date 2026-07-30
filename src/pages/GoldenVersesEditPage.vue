@@ -15,7 +15,7 @@ import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
 const { loading: loadingStore, goldenVerses } = storeToRefs(useGlobalStore());
-const { loading, addGoldenVerse, updateGoldenVerse, deleteGoldenVerse } = useGoldenVersesCrud();
+const { loading, addGoldenVerse, updateGoldenVerse, deleteGoldenVerse, deleteAllGoldenVerses } = useGoldenVersesCrud();
 const confirm = useAppConfirm();
 
 const sheetVisible = ref(false);
@@ -64,6 +64,18 @@ const handleDelete = (id: string) => {
   });
 };
 
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა მუხლის წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllGoldenVerses();
+    },
+  });
+};
+
 const formatDate = (value?: any) => {
   if (!value) return "—";
   const date = value?.seconds !== undefined ? value.toDate() : new Date(value);
@@ -76,9 +88,14 @@ const formatDate = (value?: any) => {
     <LoadingSpinner v-if="loadingStore && goldenVerses.length === 0" />
 
     <div v-else>
-      <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">მუხლების რაოდენობა</p>
-        <p class="text-3xl font-bold text-white">{{ goldenVerses.length }}</p>
+      <div class="mb-5 flex items-center gap-3">
+        <div class="flex-1 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">მუხლების რაოდენობა</p>
+          <p class="text-3xl font-bold text-white">{{ goldenVerses.length }}</p>
+        </div>
+        <AppButton v-if="goldenVerses.length" variant="danger" :disabled="loading" icon="pi-trash" @click="handleDeleteAll">
+          ყველას წაშლა
+        </AppButton>
       </div>
 
       <div v-if="goldenVerses.length === 0" class="py-16 text-center">

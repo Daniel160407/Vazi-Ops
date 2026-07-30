@@ -7,12 +7,16 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { ANNOUNCEMENTS_DB } from "./constants";
+import { storeToRefs } from "pinia";
+import { useGlobalStore } from "../stores/GlobalStore";
 
 export const useAnnouncementsCrud = () => {
   const toast = useToast();
+  const { announcements } = storeToRefs(useGlobalStore());
 
   const loading = ref(false);
 
@@ -92,9 +96,46 @@ export const useAnnouncementsCrud = () => {
     }
   };
 
+  const deleteAllAnnouncements = async () => {
+    const all = announcements.value.filter((a) => a.id);
+    if (!all.length) return;
+    loading.value = true;
+    try {
+      let batch = writeBatch(db);
+      let ops = 0;
+      for (const a of all) {
+        batch.delete(doc(db, ANNOUNCEMENTS_DB, a.id));
+        ops++;
+        if (ops === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          ops = 0;
+        }
+      }
+      if (ops > 0) await batch.commit();
+      toast.add({
+        severity: "success",
+        summary: "ყველა განცხადება წაიშალა",
+        life: 3000,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "განცხადებები ვერ წაიშალა",
+        life: 3000,
+      });
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
+    loading,
     addAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
+    deleteAllAnnouncements,
   };
 };

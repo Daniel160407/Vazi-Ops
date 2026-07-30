@@ -13,7 +13,7 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
-const { loading, groups, addGroup, updateGroup, deleteGroup } = useGroupsCrud();
+const { loading, groups, addGroup, updateGroup, deleteGroup, deleteAllGroups } = useGroupsCrud();
 const { appUsers } = storeToRefs(useGlobalStore());
 
 const leaderOpen = ref(false);
@@ -88,6 +88,18 @@ const handleDelete = (id: string) => {
   });
 };
 
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა ჯგუფის წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllGroups();
+    },
+  });
+};
+
 const expandedId = ref<string | null>(null);
 const toggle = (id: string) => {
   expandedId.value = expandedId.value === id ? null : id;
@@ -130,7 +142,12 @@ const totalMembers = computed(() =>
         </div>
       </div>
 
-      <h2 class="mb-3 text-base font-bold text-slate-200">ჯგუფები</h2>
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h2 class="text-base font-bold text-slate-200">ჯგუფები</h2>
+        <AppButton v-if="groups.length" variant="danger" :disabled="loading" icon="pi-trash" @click="handleDeleteAll">
+          ყველას წაშლა
+        </AppButton>
+      </div>
 
       <p v-if="filtered.length === 0" class="py-10 text-center text-sm text-slate-600">
         ჯგუფი ვერ მოიძებნა

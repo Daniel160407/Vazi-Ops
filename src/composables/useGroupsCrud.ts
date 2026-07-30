@@ -5,6 +5,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { GROUPS_DB } from "../composables/constants";
@@ -119,6 +120,41 @@ export function useGroupsCrud() {
     }
   };
 
+  const deleteAllGroups = async () => {
+    const all = groups.value.filter((g) => g.id);
+    if (!all.length) return;
+    saving.value = true;
+    try {
+      let batch = writeBatch(db);
+      let ops = 0;
+      for (const g of all) {
+        batch.delete(doc(db, GROUPS_DB, g.id));
+        ops++;
+        if (ops === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          ops = 0;
+        }
+      }
+      if (ops > 0) await batch.commit();
+      toast.add({
+        severity: "success",
+        summary: "ყველა ჯგუფი წაიშალა",
+        life: 3000,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.add({
+        severity: "error",
+        summary: "მოხდა შეცდომა",
+        detail: "ჯგუფები ვერ წაიშალა",
+        life: 3000,
+      });
+    } finally {
+      saving.value = false;
+    }
+  };
+
   return {
     groups,
     loading,
@@ -126,5 +162,6 @@ export function useGroupsCrud() {
     addGroup,
     updateGroup,
     deleteGroup,
+    deleteAllGroups,
   };
 }

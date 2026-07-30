@@ -11,7 +11,7 @@ import BottomSheet from "../components/UI/BottomSheet.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const { loading: loadingStore, dailyPrograms } = storeToRefs(useGlobalStore());
-const { loading: saving, addDailyProgram, updateDailyProgram, deleteDailyProgram } = useDailyProgramsCrud();
+const { loading: saving, addDailyProgram, updateDailyProgram, deleteDailyProgram, deleteAllDailyPrograms } = useDailyProgramsCrud();
 const confirm = useAppConfirm();
 
 const loading = computed(() => saving.value || loadingStore.value);
@@ -59,6 +59,18 @@ const handleSave = async () => {
   }
 };
 
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა პროგრამის წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllDailyPrograms();
+    },
+  });
+};
+
 const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ პროგრამის წაშლა გინდა?",
@@ -78,11 +90,16 @@ const handleDelete = (id: string) => {
     <LoadingSpinner v-if="loading && dailyPrograms.length === 0" />
 
     <div v-else>
-      <div class="mb-5 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
-        <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-          პროგრამების რაოდენობა
-        </p>
-        <p class="text-3xl font-bold text-white">{{ dailyPrograms.length }}</p>
+      <div class="mb-5 flex items-center gap-3">
+        <div class="flex-1 rounded-2xl border border-blue-900/20 bg-[#0d1829] p-4">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            პროგრამების რაოდენობა
+          </p>
+          <p class="text-3xl font-bold text-white">{{ dailyPrograms.length }}</p>
+        </div>
+        <AppButton v-if="dailyPrograms.length" variant="danger" :disabled="loading" icon="pi-trash" @click="handleDeleteAll">
+          ყველას წაშლა
+        </AppButton>
       </div>
 
       <div v-if="dailyPrograms.length === 0" class="py-16 text-center">

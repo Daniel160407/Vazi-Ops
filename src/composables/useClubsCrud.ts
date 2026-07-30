@@ -7,11 +7,14 @@ import {
   doc,
   runTransaction,
   setDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { CLUBS_DB, CLUB_BOOKINGS_DB } from "../composables/constants";
 import type { Club, ClubBooking, ClubRegistration } from "../type/interfaces";
 import { useToast } from "primevue";
+import { storeToRefs } from "pinia";
+import { useGlobalStore } from "../stores/GlobalStore";
 
 const serializeSlots = (club: Partial<Club>) =>
   (club.slots ?? []).map((s) => ({
@@ -29,6 +32,7 @@ const rawSlots = (data: any): any[] => {
 
 export function useClubsCrud() {
   const toast = useToast();
+  const { clubs } = storeToRefs(useGlobalStore());
   const loading = ref(false);
 
   const showToast = (
@@ -108,6 +112,30 @@ export function useClubsCrud() {
       },
       "მოხდა შეცდომა",
       "წრე ვერ წაიშალა"
+    );
+  };
+
+  const deleteAllClubs = async () => {
+    const all = clubs.value.filter((c) => c.id);
+    if (!all.length) return;
+    await handleAsyncOperation(
+      async () => {
+        let batch = writeBatch(db);
+        let ops = 0;
+        for (const c of all) {
+          batch.delete(doc(db, CLUBS_DB, c.id));
+          ops++;
+          if (ops === 500) {
+            await batch.commit();
+            batch = writeBatch(db);
+            ops = 0;
+          }
+        }
+        if (ops > 0) await batch.commit();
+        showToast("success", "ყველა წრე წაიშალა");
+      },
+      "მოხდა შეცდომა",
+      "წრეები ვერ წაიშალა"
     );
   };
 
@@ -289,6 +317,7 @@ export function useClubsCrud() {
     addClub,
     updateClub,
     deleteClub,
+    deleteAllClubs,
     registerInClub,
     changeClubBooking,
     toggleRegistration,

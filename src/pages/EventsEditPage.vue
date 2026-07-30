@@ -19,7 +19,7 @@ import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
 const { loading: loadingStore, deadline, events, appUsers, groups } = storeToRefs(globalStore);
-const { loading, updateEvent, updateEventStatus, deleteEvent, updateDeadline } = useEventsCrud();
+const { loading, updateEvent, updateEventStatus, deleteEvent, deleteAllEvents, updateDeadline } = useEventsCrud();
 const { addEveningSchedule } = useSchedulesCrud();
 const confirm = useAppConfirm();
 const newDeadlineDate = ref<Date | null>(null);
@@ -44,6 +44,18 @@ const handleDelete = (id: string) => {
     acceptLabel: "წაშლა",
     rejectLabel: "გაუქმება",
     accept: async () => { await deleteEvent(id); },
+  });
+};
+
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა ნომრის წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllEvents();
+    },
   });
 };
 
@@ -188,6 +200,12 @@ const formatDate = (dateValue?: any) => {
           @click="activeFilter = f.key"
         >
           {{ f.label }}
+        </AppButton>
+      </div>
+
+      <div v-if="events.length" class="mb-4 flex justify-end">
+        <AppButton variant="danger" :disabled="loading" icon="pi-trash" @click="handleDeleteAll">
+          ყველას წაშლა
         </AppButton>
       </div>
 

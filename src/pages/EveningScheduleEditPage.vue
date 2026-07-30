@@ -20,6 +20,7 @@ const {
   addEveningSchedule,
   updateEveningSchedule,
   deleteEveningSchedule,
+  deleteAllEveningSchedule,
   loading,
 } = useSchedulesCrud();
 const confirm = useAppConfirm();
@@ -190,6 +191,18 @@ const handleSave = async () => {
   sheetVisible.value = false;
 };
 
+const handleDeleteAll = () => {
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა ყველა ნომრის წაშლა?",
+    header: "ყველას წაშლა",
+    acceptLabel: "წაშლა",
+    rejectLabel: "გაუქმება",
+    accept: async () => {
+      await deleteAllEveningSchedule();
+    },
+  });
+};
+
 const handleDelete = (id: string) => {
   confirm.require({
     message: "დარწმუნებული ხარ, რომ ნომრის წაშლა გინდა?",
@@ -230,6 +243,12 @@ const handleDelete = (id: string) => {
           @click="saveOrder"
         >
           შენახვა
+        </AppButton>
+      </div>
+
+      <div v-if="eveningScheduleItems.length" class="mb-5 flex justify-end">
+        <AppButton variant="danger" :disabled="loading" icon="pi-trash" @click="handleDeleteAll">
+          ყველას წაშლა
         </AppButton>
       </div>
 
