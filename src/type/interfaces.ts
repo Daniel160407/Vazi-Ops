@@ -82,6 +82,7 @@ export interface Event {
   scene_name: string;
   performer_full_name: string;
   leader_full_name: string;
+  leader_id: string;
   group_name: string;
   media_url: string;
   additional_info: string;

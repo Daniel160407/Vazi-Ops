@@ -16,7 +16,7 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
-const { loading, deadline, events, createEvent } = useEventsCrud();
+const { loading, deadline, events, createEvent, updateEvent } = useEventsCrud();
 const { fullName, userId, userGroupName, isLoggedIn } = useAuth();
 const { groups, appUsers } = storeToRefs(useGlobalStore());
 const toast = useToast();
@@ -110,15 +110,29 @@ const sheetVisible = ref(false);
 const submitted = ref(false);
 
 const getEmptyForm = (): Omit<AppEvent, "id"> => ({
-  scene_name: "", performer_full_name: "", leader_full_name: fullName.value, group_name: userGroupName.value,
+  scene_name: "", performer_full_name: "", leader_full_name: fullName.value, leader_id: userId.value, group_name: userGroupName.value,
   media_url: "", additional_info: "", request_status: REQUEST_PENDING, created_at: new Date(),
 });
 
 const form = ref(getEmptyForm());
+const editingId = ref<string | null>(null);
+
+const isMine = (event: AppEvent) =>
+  event.leader_id ? event.leader_id === userId.value : event.leader_full_name === fullName.value;
 
 const openSheet = () => {
   form.value = getEmptyForm();
   leaderId.value = userId.value;
+  editingId.value = null;
+  submitted.value = false;
+  sheetVisible.value = true;
+};
+
+const openEditSheet = (event: AppEvent) => {
+  const { id, ...rest } = event;
+  form.value = { ...rest };
+  leaderId.value = event.leader_id || userId.value;
+  editingId.value = id;
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -126,6 +140,7 @@ const openSheet = () => {
 const closeSheet = () => {
   sheetVisible.value = false;
   submitted.value = false;
+  editingId.value = null;
 };
 
 const selectChild = (name: string) => {
@@ -139,7 +154,11 @@ const handleRegister = async () => {
     toast.add({ severity: "warn", summary: "შეავსე ყველა სავალდებულო ველი", life: 3000 });
     return;
   }
-  await createEvent(form.value);
+  if (editingId.value) {
+    await updateEvent({ ...form.value, id: editingId.value });
+  } else {
+    await createEvent(form.value);
+  }
   closeSheet();
 };
 
@@ -244,9 +263,17 @@ onUnmounted(() => {
         >
           <div class="mb-3 flex items-start justify-between gap-2">
             <h3 class="font-bold text-white">{{ event.scene_name }}</h3>
-            <span class="shrink-0 rounded-lg border px-2 py-0.5 text-xs font-semibold" :class="statusMeta(event.request_status).cls">
-              {{ statusMeta(event.request_status).label }}
-            </span>
+            <div class="flex shrink-0 items-center gap-2">
+              <span class="rounded-lg border px-2 py-0.5 text-xs font-semibold" :class="statusMeta(event.request_status).cls">
+                {{ statusMeta(event.request_status).label }}
+              </span>
+              <AppButton
+                v-if="isLoggedIn && isMine(event) && !isDeadlinePassed"
+                variant="icon-edit"
+                icon="pi-pencil"
+                @click="openEditSheet(event)"
+              />
+            </div>
           </div>
 
           <div class="flex flex-col gap-1.5">
@@ -263,7 +290,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <BottomSheet :visible="sheetVisible" title="ნომრის ჩაწერა" @close="closeSheet">
+    <BottomSheet :visible="sheetVisible" :title="editingId ? 'ნომრის რედაქტირება' : 'ნომრის ჩაწერა'" @close="closeSheet">
       <div class="flex flex-col gap-4">
         <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !form.performer_full_name ? 'სავალდებულოა' : ''">
           <div class="relative">
@@ -354,7 +381,7 @@ onUnmounted(() => {
       <div class="mt-5 flex gap-3">
         <AppButton variant="ghost" @click="closeSheet">გაუქმება</AppButton>
         <AppButton variant="primary" :disabled="loading" class="flex-1" icon="pi-check" @click="handleRegister">
-          გაგზავნა
+          {{ editingId ? "შენახვა" : "გაგზავნა" }}
         </AppButton>
       </div>
     </BottomSheet>
