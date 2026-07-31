@@ -166,7 +166,7 @@ const handleRegister = async () => {
     return;
   }
   if (editingId.value) {
-    await updateEvent({ ...form.value, performer_full_name: selectedChildren.value[0], id: editingId.value });
+    await updateEvent({ ...form.value, performer_full_name: selectedChildren.value[0] ?? "", id: editingId.value });
   } else {
     for (const child of selectedChildren.value) {
       await createEvent({ ...form.value, performer_full_name: child });
