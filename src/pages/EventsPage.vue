@@ -24,6 +24,8 @@ const toast = useToast();
 const leaderOpen = ref(false);
 const leaderId = ref("");
 
+const canEditGroupName = computed(() => !userGroupName.value);
+
 const leaderSuggestions = computed(() => {
   const q = (form.value.leader_full_name ?? "").toLowerCase().trim();
   return appUsers.value.filter((u) => u.name.toLowerCase().includes(q));
@@ -358,7 +360,7 @@ onUnmounted(() => {
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ჯგუფის სახელი" :required="true" :error="submitted && !form.group_name ? 'სავალდებულოა' : ''">
-            <AppInput v-model="form.group_name" disabled :error="submitted && !form.group_name" />
+            <AppInput v-model="form.group_name" :disabled="!canEditGroupName" :error="submitted && !form.group_name" />
           </SheetField>
           <SheetField label="ნომრის სახელი" :required="true" :error="submitted && !form.scene_name ? 'სავალდებულოა' : ''">
             <AppInput v-model="form.scene_name" placeholder="სიმღერა, ცეკვა..." :error="submitted && !form.scene_name" />
