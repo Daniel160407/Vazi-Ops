@@ -4,17 +4,42 @@ import { storeToRefs } from "pinia";
 import { format } from "date-fns";
 import { useAuth } from "../composables/useAuth";
 import { useClubBookingsCrud } from "../composables/useClubBookingsCrud";
+import { useClubsCrud } from "../composables/useClubsCrud";
+import { useAppConfirm } from "../composables/useAppConfirm";
 import { useGlobalStore } from "../stores/GlobalStore";
-import type { ClubBooking } from "../type/interfaces";
+import type { Club, ClubBooking, ClubSlot } from "../type/interfaces";
 import LoadingSpinner from "../components/UI/LoadingSpinner.vue";
 import SearchInput from "../components/UI/SearchInput.vue";
+import BottomSheet from "../components/UI/BottomSheet.vue";
+import AppButton from "../components/UI/AppButton.vue";
 
-const { bookings } = useClubBookingsCrud();
+const { bookings, deleteBooking } = useClubBookingsCrud();
+const { changeClubBooking, loading } = useClubsCrud();
 const { loading: loadingStore, clubs } = storeToRefs(useGlobalStore());
-const { fullName, userGroupName } = useAuth();
+const { fullName, userGroupName, isLoggedIn } = useAuth();
+const confirm = useAppConfirm();
 
 const search = ref("");
 const onlyMine = ref(false);
+const onlyOneClub = ref(false);
+
+const isMine = (b: ClubBooking) =>
+  isLoggedIn.value &&
+  (b.group_name.trim() === userGroupName.value.trim() ||
+    b.leader_name.trim() === fullName.value.trim());
+
+const childKey = (b: ClubBooking) =>
+  `${b.child_first_name.trim().toLowerCase()}|${b.child_last_name.trim().toLowerCase()}|${b.group_name.trim().toLowerCase()}`;
+
+const childClubCount = computed(() => {
+  const map = new Map<string, Set<string>>();
+  bookings.value.forEach((b) => {
+    const key = childKey(b);
+    if (!map.has(key)) map.set(key, new Set());
+    map.get(key)!.add(b.club_id || b.club_name);
+  });
+  return map;
+});
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase().trim();
@@ -22,6 +47,9 @@ const filtered = computed(() => {
   const myName = fullName.value.trim();
   return bookings.value.filter((b) => {
     if (onlyMine.value && b.group_name !== myGroup && b.leader_name !== myName) {
+      return false;
+    }
+    if (onlyOneClub.value && (childClubCount.value.get(childKey(b))?.size ?? 0) !== 1) {
       return false;
     }
     if (!q) return true;
@@ -76,6 +104,88 @@ const rowsFor = (key: string, rows: ClubBooking[]) => {
   if (t) return rows.filter((r) => rowTime(r) === t);
   return [...rows].sort((a, b) => rowTime(a).localeCompare(rowTime(b)));
 };
+
+const sheetVisible = ref(false);
+const editingBooking = ref<ClubBooking | null>(null);
+const selectedClub = ref<Club | null>(null);
+const selectedSlotId = ref("");
+
+const editClubs = computed(() =>
+  clubs.value
+    .filter((c) => c.slots.some((s) => s.places_quantity > 0))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+);
+
+const editSlots = computed(() => selectedClub.value?.slots ?? []);
+
+const hasChanges = computed(() => {
+  const booking = editingBooking.value;
+  if (!booking || !selectedClub.value || !selectedSlotId.value) return false;
+  return (
+    booking.club_id !== selectedClub.value.id ||
+    (booking.slot_id ?? "") !== selectedSlotId.value
+  );
+});
+
+const slotDisabled = (slot: ClubSlot) => slot.places_quantity <= 0;
+
+const firstFreeSlotId = (club: Club | null) =>
+  club?.slots.find((s) => s.places_quantity > 0)?.id ?? "";
+
+const openEdit = (booking: ClubBooking) => {
+  editingBooking.value = booking;
+  const club = clubs.value.find((c) => c.id === booking.club_id) ?? null;
+  const freeSlotId = firstFreeSlotId(club);
+  selectedClub.value = freeSlotId ? club : null;
+  selectedSlotId.value = freeSlotId;
+  sheetVisible.value = true;
+};
+
+const closeEdit = () => {
+  sheetVisible.value = false;
+  editingBooking.value = null;
+  selectedClub.value = null;
+  selectedSlotId.value = "";
+};
+
+const selectEditClub = (club: Club) => {
+  selectedClub.value = club;
+  selectedSlotId.value = "";
+};
+
+const selectEditSlot = (slot: ClubSlot) => {
+  if (slotDisabled(slot)) return;
+  selectedSlotId.value = slot.id;
+};
+
+const handleSave = async () => {
+  const booking = editingBooking.value;
+  if (!booking || !selectedClub.value || !selectedSlotId.value) return;
+  if (
+    booking.club_id === selectedClub.value.id &&
+    (booking.slot_id ?? "") === selectedSlotId.value
+  ) {
+    closeEdit();
+    return;
+  }
+  await changeClubBooking(booking, selectedClub.value, selectedSlotId.value);
+  closeEdit();
+};
+
+const handleCancel = () => {
+  const booking = editingBooking.value;
+  if (!booking) return;
+  confirm.require({
+    message: "დარწმუნებული ხარ, რომ გინდა რეგისტრაციის გაუქმება?",
+    header: "გაუქმება",
+    acceptLabel: "გაუქმება",
+    rejectLabel: "დახურვა",
+    accept: async () => {
+      await deleteBooking(booking.id);
+      closeEdit();
+    },
+  });
+};
 </script>
 
 <template>
@@ -106,6 +216,17 @@ const rowsFor = (key: string, rows: ClubBooking[]) => {
             <i v-if="onlyMine" class="pi pi-check text-[10px] text-white" />
           </span>
           <span class="text-sm font-semibold text-slate-300">მხოლოდ ჩემი ბავშვები</span>
+        </label>
+
+        <label class="flex cursor-pointer items-center gap-2.5 rounded-2xl border border-blue-900/20 bg-[#0d1829] px-4 py-2.5">
+          <input v-model="onlyOneClub" type="checkbox" class="sr-only" />
+          <span
+            class="flex h-5 w-5 items-center justify-center rounded-md border transition-all duration-150"
+            :class="onlyOneClub ? 'border-blue-500 bg-blue-600' : 'border-blue-900/50 bg-transparent'"
+          >
+            <i v-if="onlyOneClub" class="pi pi-check text-[10px] text-white" />
+          </span>
+          <span class="text-sm font-semibold text-slate-300">მხოლოდ ერთ წრეზე რეგისტრირებული</span>
         </label>
       </div>
 
@@ -153,6 +274,7 @@ const rowsFor = (key: string, rows: ClubBooking[]) => {
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ლიდერი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">ჯგუფი</th>
                   <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-600">დრო</th>
+                  <th class="px-4 py-2.5" />
                 </tr>
               </thead>
               <tbody>
@@ -170,6 +292,11 @@ const rowsFor = (key: string, rows: ClubBooking[]) => {
                       <i class="pi pi-clock text-[10px]" />{{ rowTime(row) }}
                     </span>
                   </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end">
+                      <AppButton v-if="isMine(row)" variant="icon-edit" icon="pi-pencil" @click="openEdit(row)" />
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -177,5 +304,69 @@ const rowsFor = (key: string, rows: ClubBooking[]) => {
         </div>
       </div>
     </div>
+
+    <BottomSheet :visible="sheetVisible" title="რეგისტრაციის შეცვლა" @close="closeEdit">
+      <div v-if="editingBooking" class="mb-4 flex items-center gap-2 rounded-xl bg-blue-500/10 px-3 py-2.5">
+        <i class="pi pi-user text-sm text-blue-400" />
+        <span class="text-sm font-semibold text-blue-300">
+          {{ editingBooking.child_first_name }} {{ editingBooking.child_last_name }}
+        </span>
+      </div>
+
+      <div class="mb-5">
+        <p class="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">აირჩიე წრე</p>
+        <div class="flex flex-col gap-2">
+          <button
+            v-for="club in editClubs"
+            :key="club.id"
+            type="button"
+            class="flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all duration-150"
+            :class="selectedClub?.id === club.id
+              ? 'border-blue-500/50 bg-blue-500/15'
+              : 'border-blue-900/30 bg-[#0d1829] hover:border-blue-700/40'"
+            @click="selectEditClub(club)"
+          >
+            <span class="text-sm" :class="selectedClub?.id === club.id ? 'font-semibold text-blue-100' : 'text-slate-200'">
+              {{ club.name }}
+            </span>
+            <i v-if="selectedClub?.id === club.id" class="pi pi-check shrink-0 text-[10px] text-blue-400" />
+          </button>
+        </div>
+      </div>
+
+      <div v-if="selectedClub" class="mb-5">
+        <p class="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">აირჩიე დრო</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="slot in editSlots"
+            :key="slot.id"
+            type="button"
+            :disabled="slotDisabled(slot)"
+            class="flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+            :class="selectedSlotId === slot.id
+              ? 'border-blue-500 bg-blue-600 text-white'
+              : 'border-blue-900/30 bg-[#0d1829] text-slate-400 hover:border-blue-700/40'"
+            @click="selectEditSlot(slot)"
+          >
+            <i class="pi pi-clock text-xs" />
+            <span>{{ formatTime(slot.time) || "—" }}</span>
+            <span
+              class="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold"
+              :class="selectedSlotId === slot.id ? 'bg-white/20 text-white' : 'bg-blue-900/40 text-slate-400'"
+            >
+              <i class="pi pi-users text-[9px]" />
+              {{ slot.places_quantity <= 0 ? "სავსეა" : `${slot.places_quantity} ადგილი` }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-5 flex gap-3">
+        <AppButton variant="danger" :disabled="loading" icon="pi-trash" @click="handleCancel">გაუქმება</AppButton>
+        <AppButton variant="primary" :disabled="loading || !hasChanges" icon="pi-check" class="flex-1" @click="handleSave">
+          შენახვა
+        </AppButton>
+      </div>
+    </BottomSheet>
   </div>
 </template>

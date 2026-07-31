@@ -401,7 +401,7 @@ const placesBg = (n: number) => {
           <p v-if="!groupChildren.length" class="rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-500">
             ბავშვები ვერ მოიძებნა
           </p>
-          <div v-else class="flex max-h-64 flex-col gap-2 overflow-y-auto">
+          <div v-else class="flex flex-col gap-2">
             <button
               v-for="child in groupChildren"
               :key="child"
