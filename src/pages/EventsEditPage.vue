@@ -18,7 +18,7 @@ import SheetField from "../components/UI/SheetField.vue";
 import AppButton from "../components/UI/AppButton.vue";
 
 const globalStore = useGlobalStore();
-const { loading: loadingStore, deadline, events, appUsers, groups } = storeToRefs(globalStore);
+const { loading: loadingStore, deadline, events, appUsers, groups, eveningScheduleItems } = storeToRefs(globalStore);
 const { loading, updateEvent, updateEventStatus, deleteEvent, deleteAllEvents, updateDeadline } = useEventsCrud();
 const { addEveningSchedule } = useSchedulesCrud();
 const confirm = useAppConfirm();
@@ -58,6 +58,13 @@ const handleDeleteAll = () => {
     },
   });
 };
+
+const isInEveningSchedule = (event: Event) =>
+  eveningScheduleItems.value.some(
+    (item) =>
+      item.scene_name === event.scene_name &&
+      item.performer_full_name === event.performer_full_name,
+  );
 
 const handleAddToSchedule = async (event: Event) => {
   const item: Omit<EveningScheduleItem, "id"> = {
@@ -259,7 +266,7 @@ const formatDate = (dateValue?: any) => {
                 <i class="pi pi-times text-xs" /> უარყოფა
               </AppButton>
               <AppButton
-                v-if="event.request_status === REQUEST_ACCEPTED"
+                v-if="event.request_status === REQUEST_ACCEPTED && !isInEveningSchedule(event)"
                 variant="plain"
                 :disabled="loading"
                 class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-blue-900/30 bg-blue-500/10 py-2 text-xs font-semibold text-blue-400 transition-all hover:bg-blue-500/20 disabled:opacity-50"
