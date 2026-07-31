@@ -51,6 +51,13 @@ const groupChildren = computed(() => {
   return matchedGroup?.children ?? [];
 });
 
+const manualChild = computed({
+  get: () => selectedChildren.value[0] ?? "",
+  set: (val: string) => {
+    selectedChildren.value = val.trim() ? [val] : [];
+  },
+});
+
 const toggleChild = (name: string) => {
   if (selectedChildren.value.includes(name)) {
     selectedChildren.value = selectedChildren.value.filter((c) => c !== name);
@@ -305,10 +312,8 @@ onUnmounted(() => {
 
     <BottomSheet :visible="sheetVisible" :title="editingId ? 'ნომრის რედაქტირება' : 'ნომრის ჩაწერა'" @close="closeSheet">
       <div class="flex flex-col gap-4">
-        <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !selectedChildren.length ? 'სავალდებულოა' : ''">
-          <p v-if="!groupChildren.length" class="rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-500">
-            ბავშვები ვერ მოიძებნა
-          </p>
+        <SheetField label="ბავშვის სახელი და გვარი" :error="submitted && !selectedChildren.length ? 'სავალდებულოა' : ''">
+          <AppInput v-if="!groupChildren.length" v-model="manualChild" placeholder="სახელი და გვარი" :error="submitted && !selectedChildren.length" />
           <div v-else class="flex max-h-64 flex-col gap-2 overflow-y-auto">
             <button
               v-for="child in groupChildren"
