@@ -37,20 +37,31 @@ const selectLeader = (leader: AppUser) => {
   leaderOpen.value = false;
 };
 
-const childOpen = ref(false);
 const isDeadlinePassed = ref(false);
 const timeLeft = ref<Duration | null>(null);
 let timer: number | null = null;
 
-const childSuggestions = computed(() => {
+const selectedChildren = ref<string[]>([]);
+
+const groupChildren = computed(() => {
   const leader = (form.value.leader_full_name ?? "").trim();
-  const q = (form.value.performer_full_name ?? "").toLowerCase().trim();
   const matchedGroup = groups.value.find(
     (g) => (leaderId.value && g.leader_id === leaderId.value) || g.leader === leader,
   );
-  if (!matchedGroup) return [];
-  return matchedGroup.children.filter((c) => !q || c.toLowerCase().includes(q));
+  return matchedGroup?.children ?? [];
 });
+
+const toggleChild = (name: string) => {
+  if (selectedChildren.value.includes(name)) {
+    selectedChildren.value = selectedChildren.value.filter((c) => c !== name);
+    return;
+  }
+  if (editingId.value) {
+    selectedChildren.value = [name];
+    return;
+  }
+  selectedChildren.value = [...selectedChildren.value, name];
+};
 
 const updateCountdown = () => {
   if (!deadline.value?.time) return;
@@ -126,6 +137,7 @@ const openSheet = () => {
   form.value = getEmptyForm();
   leaderId.value = userId.value;
   editingId.value = null;
+  selectedChildren.value = [];
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -135,6 +147,7 @@ const openEditSheet = (event: AppEvent) => {
   form.value = { ...rest };
   leaderId.value = event.leader_id || userId.value;
   editingId.value = id;
+  selectedChildren.value = event.performer_full_name ? [event.performer_full_name] : [];
   submitted.value = false;
   sheetVisible.value = true;
 };
@@ -143,23 +156,21 @@ const closeSheet = () => {
   sheetVisible.value = false;
   submitted.value = false;
   editingId.value = null;
-};
-
-const selectChild = (name: string) => {
-  form.value.performer_full_name = name;
-  childOpen.value = false;
+  selectedChildren.value = [];
 };
 
 const handleRegister = async () => {
   submitted.value = true;
-  if (!form.value.performer_full_name || !form.value.leader_full_name || !form.value.group_name || !form.value.scene_name) {
+  if (!selectedChildren.value.length || !form.value.leader_full_name || !form.value.group_name || !form.value.scene_name) {
     toast.add({ severity: "warn", summary: "შეავსე ყველა სავალდებულო ველი", life: 3000 });
     return;
   }
   if (editingId.value) {
-    await updateEvent({ ...form.value, id: editingId.value });
+    await updateEvent({ ...form.value, performer_full_name: selectedChildren.value[0], id: editingId.value });
   } else {
-    await createEvent(form.value);
+    for (const child of selectedChildren.value) {
+      await createEvent({ ...form.value, performer_full_name: child });
+    }
   }
   closeSheet();
 };
@@ -294,33 +305,33 @@ onUnmounted(() => {
 
     <BottomSheet :visible="sheetVisible" :title="editingId ? 'ნომრის რედაქტირება' : 'ნომრის ჩაწერა'" @close="closeSheet">
       <div class="flex flex-col gap-4">
-        <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !form.performer_full_name ? 'სავალდებულოა' : ''">
-          <div class="relative">
-            <AppInput v-model="form.performer_full_name" autocomplete="off" :error="submitted && !form.performer_full_name" @focus="childOpen = true" @blur="childOpen = false" />
-            <Transition
-              enter-active-class="transition-all duration-150 ease-out"
-              enter-from-class="opacity-0 -translate-y-1"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition-all duration-100 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-1"
+        <SheetField label="ბავშვის სახელი და გვარი" :required="true" :error="submitted && !selectedChildren.length ? 'სავალდებულოა' : ''">
+          <p v-if="!groupChildren.length" class="rounded-xl border border-blue-900/30 bg-[#0d1829] px-4 py-3 text-sm text-slate-500">
+            ბავშვები ვერ მოიძებნა
+          </p>
+          <div v-else class="flex max-h-64 flex-col gap-2 overflow-y-auto">
+            <button
+              v-for="child in groupChildren"
+              :key="child"
+              type="button"
+              class="flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-all duration-150"
+              :class="selectedChildren.includes(child)
+                ? 'border-blue-500/50 bg-blue-500/15'
+                : 'border-blue-900/30 bg-[#0d1829] hover:border-blue-700/40'"
+              @click="toggleChild(child)"
             >
-              <ul
-                v-if="childOpen && childSuggestions.length"
-                class="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-blue-900/30 bg-[#07101e] py-1 shadow-xl"
-                style="box-shadow: 0 8px 32px 0 rgba(0,6,30,0.8)"
-                @mousedown.prevent
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-150"
+                :class="selectedChildren.includes(child)
+                  ? 'border-blue-500 bg-blue-600'
+                  : 'border-blue-900/50 bg-transparent'"
               >
-                <li
-                  v-for="child in childSuggestions"
-                  :key="child"
-                  class="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-blue-900/20"
-                  @click="selectChild(child)"
-                >
-                  <span class="text-sm text-slate-200">{{ child }}</span>
-                </li>
-              </ul>
-            </Transition>
+                <i v-if="selectedChildren.includes(child)" class="pi pi-check text-[10px] text-white" />
+              </span>
+              <span class="text-sm" :class="selectedChildren.includes(child) ? 'font-semibold text-blue-100' : 'text-slate-200'">
+                {{ child }}
+              </span>
+            </button>
           </div>
         </SheetField>
 
