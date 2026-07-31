@@ -20,7 +20,7 @@ import AppButton from "../components/UI/AppButton.vue";
 const globalStore = useGlobalStore();
 const toast = useToast();
 const { loading: loadingStore, clubs, clubRegistration, groups, clubBookings } = storeToRefs(globalStore);
-const { fullName, userId, userGroupName } = useAuth();
+const { fullName, userId, userGroupName, isLoggedIn } = useAuth();
 const { registerInClub, changeClubBooking, loading } = useClubsCrud();
 const { fetchUserBookings, updateBooking } = useClubBookingsCrud();
 
@@ -346,13 +346,13 @@ const placesBg = (n: number) => {
 
             <AppButton
               variant="plain"
-              :disabled="slotPlaces(club) <= 0 || !clubRegistration?.open || loading"
+              :disabled="!isLoggedIn || slotPlaces(club) <= 0 || !clubRegistration?.open || loading"
               class="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-150"
-              :class="(slotPlaces(club) <= 0 || !clubRegistration?.open) ? 'cursor-not-allowed bg-slate-800/60 text-slate-600' : 'bg-blue-600 text-white hover:bg-blue-500 active:scale-95'"
+              :class="(!isLoggedIn || slotPlaces(club) <= 0 || !clubRegistration?.open) ? 'cursor-not-allowed bg-slate-800/60 text-slate-600' : 'bg-blue-600 text-white hover:bg-blue-500 active:scale-95'"
               @click="openSheet(club)"
             >
-              <i class="pi text-sm" :class="!clubRegistration?.open ? 'pi-lock' : 'pi-check'" />
-              {{ slotPlaces(club) <= 0 ? "ადგილი არ არის" : !clubRegistration?.open ? "რეგისტრაცია დახურულია" : "ჩაეწერე" }}
+              <i class="pi text-sm" :class="(!isLoggedIn || !clubRegistration?.open) ? 'pi-lock' : 'pi-check'" />
+              {{ !isLoggedIn ? "გაიარე ავტორიზაცია" : slotPlaces(club) <= 0 ? "ადგილი არ არის" : !clubRegistration?.open ? "რეგისტრაცია დახურულია" : "ჩაეწერე" }}
             </AppButton>
           </div>
         </div>

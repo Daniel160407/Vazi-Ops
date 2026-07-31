@@ -17,7 +17,7 @@ import AppButton from "../components/UI/AppButton.vue";
 import AppInput from "../components/UI/AppInput.vue";
 
 const { loading, deadline, events, createEvent } = useEventsCrud();
-const { fullName, userId, userGroupName } = useAuth();
+const { fullName, userId, userGroupName, isLoggedIn } = useAuth();
 const { groups, appUsers } = storeToRefs(useGlobalStore());
 const toast = useToast();
 
@@ -194,12 +194,13 @@ onUnmounted(() => {
           <AppButton
             v-if="!isDeadlinePassed"
             variant="primary"
-            icon="pi-plus-circle"
+            :icon="isLoggedIn ? 'pi-plus-circle' : 'pi-lock'"
             rounded="2xl"
+            :disabled="!isLoggedIn"
             class="w-full active:scale-95"
             @click="openSheet"
           >
-            რეგისტრაცია
+            {{ isLoggedIn ? "რეგისტრაცია" : "გაიარე ავტორიზაცია" }}
           </AppButton>
         </div>
       </div>
@@ -296,7 +297,7 @@ onUnmounted(() => {
 
         <SheetField label="ლიდერის სახელი და გვარი" :required="true" :error="submitted && !form.leader_full_name ? 'სავალდებულოა' : ''">
           <div class="relative">
-            <AppInput v-model="form.leader_full_name" autocomplete="off" :error="submitted && !form.leader_full_name" @input="leaderId = ''" @focus="leaderOpen = true" @blur="leaderOpen = false" />
+            <AppInput v-model="form.leader_full_name" autocomplete="off" disabled :error="submitted && !form.leader_full_name" @input="leaderId = ''" @focus="leaderOpen = true" @blur="leaderOpen = false" />
             <Transition
               enter-active-class="transition-all duration-150 ease-out"
               enter-from-class="opacity-0 -translate-y-1"
@@ -330,7 +331,7 @@ onUnmounted(() => {
 
         <div class="grid grid-cols-2 gap-3">
           <SheetField label="ჯგუფის სახელი" :required="true" :error="submitted && !form.group_name ? 'სავალდებულოა' : ''">
-            <AppInput v-model="form.group_name" :error="submitted && !form.group_name" />
+            <AppInput v-model="form.group_name" disabled :error="submitted && !form.group_name" />
           </SheetField>
           <SheetField label="ნომრის სახელი" :required="true" :error="submitted && !form.scene_name ? 'სავალდებულოა' : ''">
             <AppInput v-model="form.scene_name" placeholder="სიმღერა, ცეკვა..." :error="submitted && !form.scene_name" />

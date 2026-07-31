@@ -35,7 +35,7 @@ const classes = computed(() => {
     default:
   }
 
-  return `w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors ${
+  return `w-full rounded-xl border px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
     props.error
       ? "border-red-500/60 bg-red-500/5"
       : "border-blue-900/30 bg-[#0d1829] focus:border-blue-700/60"
