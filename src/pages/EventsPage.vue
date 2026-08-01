@@ -168,16 +168,18 @@ const closeSheet = () => {
 
 const handleRegister = async () => {
   submitted.value = true;
-  if (!selectedChildren.value.length || !form.value.leader_full_name || !form.value.group_name || !form.value.scene_name) {
+  if (!form.value.leader_full_name || !form.value.group_name || !form.value.scene_name) {
     toast.add({ severity: "warn", summary: "შეავსე ყველა სავალდებულო ველი", life: 3000 });
     return;
   }
   if (editingId.value) {
     await updateEvent({ ...form.value, performer_full_name: selectedChildren.value[0] ?? "", id: editingId.value });
-  } else {
+  } else if (selectedChildren.value.length) {
     for (const child of selectedChildren.value) {
       await createEvent({ ...form.value, performer_full_name: child });
     }
+  } else {
+    await createEvent({ ...form.value, performer_full_name: "" });
   }
   closeSheet();
 };
@@ -312,8 +314,8 @@ onUnmounted(() => {
 
     <BottomSheet :visible="sheetVisible" :title="editingId ? 'ნომრის რედაქტირება' : 'ნომრის ჩაწერა'" @close="closeSheet">
       <div class="flex flex-col gap-4">
-        <SheetField label="ბავშვის სახელი და გვარი" :error="submitted && !selectedChildren.length ? 'სავალდებულოა' : ''">
-          <AppInput v-if="!groupChildren.length" v-model="manualChild" placeholder="სახელი და გვარი" :error="submitted && !selectedChildren.length" />
+        <SheetField label="ბავშვის სახელი და გვარი">
+          <AppInput v-if="!groupChildren.length" v-model="manualChild" placeholder="სახელი და გვარი" />
           <div v-else class="flex flex-col gap-2">
             <button
               v-for="child in groupChildren"
