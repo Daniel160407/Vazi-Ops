@@ -314,7 +314,7 @@ onUnmounted(() => {
       <div class="flex flex-col gap-4">
         <SheetField label="ბავშვის სახელი და გვარი" :error="submitted && !selectedChildren.length ? 'სავალდებულოა' : ''">
           <AppInput v-if="!groupChildren.length" v-model="manualChild" placeholder="სახელი და გვარი" :error="submitted && !selectedChildren.length" />
-          <div v-else class="flex max-h-64 flex-col gap-2 overflow-y-auto">
+          <div v-else class="flex flex-col gap-2">
             <button
               v-for="child in groupChildren"
               :key="child"
