@@ -76,9 +76,14 @@ export const useSchedulesCrud = () => {
         return null;
       }
 
+      const maxPosition = eveningScheduleItems.value.reduce(
+        (max, item) => Math.max(max, item.position ?? 0),
+        0
+      );
+
       await addDoc(collection(db, EVENING_SCHEDULE_DB), {
         ...scheduleItem,
-        position: eveningScheduleItems.value.length + 1,
+        position: maxPosition + 1,
         created_at: new Date(),
       });
 
