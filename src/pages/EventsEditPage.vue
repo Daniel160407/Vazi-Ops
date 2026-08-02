@@ -122,12 +122,14 @@ const statusMap: Record<string, string> = {
   pending: REQUEST_PENDING, accepted: REQUEST_ACCEPTED, rejected: REQUEST_REJECTED,
 };
 
+const toMillis = (dateValue?: any) => {
+  if (!dateValue) return 0;
+  const date = dateValue?.seconds ? new Date(dateValue.seconds * 1000) : new Date(dateValue);
+  return isNaN(date.getTime()) ? 0 : date.getTime();
+};
+
 const filteredEvents = computed(() => {
-  const sorted = [...events.value].sort((a, b) => {
-    const ta = a.created_at instanceof Date ? a.created_at.getTime() : new Date(a.created_at).getTime();
-    const tb = b.created_at instanceof Date ? b.created_at.getTime() : new Date(b.created_at).getTime();
-    return tb - ta;
-  });
+  const sorted = [...events.value].sort((a, b) => toMillis(a.created_at) - toMillis(b.created_at));
   if (activeFilter.value === "all") return sorted;
   return sorted.filter((e) => e.request_status === statusMap[activeFilter.value]);
 });

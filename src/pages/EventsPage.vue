@@ -121,9 +121,18 @@ const statusMap: Record<string, string> = {
   pending: REQUEST_PENDING, accepted: REQUEST_ACCEPTED, rejected: REQUEST_REJECTED,
 };
 
+const toMillis = (dateValue?: any) => {
+  if (!dateValue) return 0;
+  const date = dateValue?.seconds ? new Date(dateValue.seconds * 1000) : new Date(dateValue);
+  return isNaN(date.getTime()) ? 0 : date.getTime();
+};
+
 const filteredEvents = computed(() => {
-  if (activeFilter.value === "all") return events.value;
-  return events.value.filter((e) => e.request_status === statusMap[activeFilter.value]);
+  const list =
+    activeFilter.value === "all"
+      ? events.value
+      : events.value.filter((e) => e.request_status === statusMap[activeFilter.value]);
+  return [...list].sort((a, b) => toMillis(a.created_at) - toMillis(b.created_at));
 });
 
 const sheetVisible = ref(false);
